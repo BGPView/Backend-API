@@ -19,4 +19,19 @@ class Rir extends Model {
      * @var array
      */
     protected $hidden = ['id', 'created_at', 'updated_at'];
+
+    public function asnAllocations()
+    {
+        return $this->hasMany('App\Models\RirAsnAllocation');
+    }
+
+    public function ipv4Allocations()
+    {
+        return $this->hasMany('App\Models\RirIPv4Allocation');
+    }
+
+    public function ipv6Allocations()
+    {
+        return $this->hasMany('App\Models\RirIPv6Allocation');
+    }
 }

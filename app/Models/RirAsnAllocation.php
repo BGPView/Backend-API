@@ -21,4 +21,9 @@ class RirAsnAllocation extends Model {
     protected $hidden = ['id', 'rir_id', 'created_at', 'updated_at'];
 
     protected $fillable = ['rir_id', 'asn', 'counrty_code', 'date_allocated'];
+
+    public function rir()
+    {
+        return $this->belongsTo('App\Models\Rir');
+    }
 }
