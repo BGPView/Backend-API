@@ -126,7 +126,7 @@ class UpdateAllocationLists extends Command
                         'rir_id' => $rir->id,
                         'asn' => $data[3],
                         'counrty_code' => $data[1],
-                        'date_allocated' => $data[5],
+                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
                     ]);
 
                 } else if ($resourceType === 'ipv4') {
@@ -140,17 +140,22 @@ class UpdateAllocationLists extends Command
                         'rir_id' => $rir->id,
                         'ip' => $data[3],
                         'cidr' => $ipv4AmountCidrArray[$data[4]],
+                        'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
+                        'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4],
                         'counrty_code' => $data[1],
-                        'date_allocated' => $data[5],
+                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
                     ]);
                 } else if ($resourceType === 'ipv6') {
                     RirIPv6Allocation::create([
                         'rir_id' => $rir->id,
                         'ip' => $data[3],
                         'cidr' => $data[4],
+                        'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
+                        'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4],
                         'counrty_code' => $data[1],
-                        'date_allocated' => $data[5],
+                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
                     ]);
+
                 }
 
                 $bar->advance();

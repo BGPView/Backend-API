@@ -18,7 +18,7 @@ class RirIPv4Allocation extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id', 'rir_id', 'created_at', 'updated_at'];
+    protected $hidden = ['id', 'rir_id', 'ip_dec_start', 'ip_dec_end', 'created_at', 'updated_at'];
 
-    protected $fillable = ['rir_id', 'ip', 'cidr', 'counrty_code', 'date_allocated'];
+    protected $fillable = ['rir_id', 'ip', 'cidr', 'ip_dec_start', 'ip_dec_end', 'counrty_code', 'date_allocated'];
 }
