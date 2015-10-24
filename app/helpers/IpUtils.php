@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
 
@@ -269,25 +270,37 @@ class IPUtils
         return $ip_address;
     }
 
-    public function getIpVersion($ip)
+    public function getInputType($input)
     {
-        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false) {
+        if (!filter_var($input, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false) {
             return 6;
-        } else {
+        } elseif (!filter_var($input, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false) {
             return 4;
         }
+
+        return "asn";
     }
 
-    public function getAllocationEntry($ip)
+    public function getAllocationEntry($input)
     {
-        if ($this->getIpVersion($ip) === 6) {
-            $class = RirIPv6Allocation::class;
-        } else {
-            $class = RirIPv4Allocation::class;
+        $type = $this->getInputType($input);
+
+        // Try to do IP lookups
+        if (is_numeric($type) === true) {
+            if ($type === 6) {
+                $class = RirIPv6Allocation::class;
+            } else {
+                $class = RirIPv4Allocation::class;
+            }
+
+            $ipDec = $this->ip2dec($input);
+            return $class::where('ip_dec_start', '<=', $ipDec)->where('ip_dec_end', '>=',  $ipDec)->first();
         }
 
-        $ipDec = $this->ip2dec($ip);
+        //Not an IP. lets try look up domain
+        $input = str_ireplace("AS", "", $input);
+        return RirAsnAllocation::where('asn', $input)->first();
 
-        return $class::where('ip_dec_start', '<=', $ipDec)->where('ip_dec_end', '>=',  $ipDec)->first();
+
     }
 }
