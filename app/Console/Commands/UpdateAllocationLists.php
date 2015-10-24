@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\helpers\IpUtils;
+use App\Helpers\IpUtils;
 use App\Models\RIR;
 use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
@@ -63,7 +63,7 @@ class UpdateAllocationLists extends Command
             $this->bench->start();
             $this->progressStarted = false;
             $this->cli->br()->comment('===================================================');
-            $this->cli->br()->comment('Downloading ' . $rir->rir_name . ' allocation list');
+            $this->cli->br()->comment('Downloading ' . $rir->name . ' allocation list');
 
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $rir->allocation_list_url);
@@ -107,7 +107,7 @@ class UpdateAllocationLists extends Command
     private function updateDb($rir, $list)
     {
         $lines = explode("\n", $list);
-        $this->cli->br()->comment('Updating DB with the ' . $rir->rir_name . ' allocation list ('.count($lines).' entries)');
+        $this->cli->br()->comment('Updating DB with the ' . $rir->name . ' allocation list ('.count($lines).' entries)');
 
         $bar = $this->output->createProgressBar(count($lines));
 
