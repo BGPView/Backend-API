@@ -16,8 +16,8 @@ class Rirs extends Migration
         Schema::create('rirs', function($table)
         {
             $table->increments('id')->unique();
-            $table->string('rir_name');
-            $table->string('rir_full_name');
+            $table->string('name');
+            $table->string('full_name');
             $table->string('website');
             $table->string('whois_server');
             $table->text('allocation_list_url');

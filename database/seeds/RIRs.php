@@ -22,7 +22,7 @@ class RirSeeder extends Seeder
 
         RIR::create([
             'name' => 'ARIN',
-            '_full_name' => 'American Registry for Internet Numbers',
+            'full_name' => 'American Registry for Internet Numbers',
             'website' => 'arin.net',
             'whois_server' => 'whois.arin.net',
             'allocation_list_url' => 'ftp://ftp.arin.net/pub/stats/arin/delegated-arin-extended-latest',
