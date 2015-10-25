@@ -293,7 +293,7 @@ class IPUtils
                 $class = RirIPv4Allocation::class;
             }
 
-            $ipDec = $this->ip2dec($input);
+            $ipDec = number_format($this->ip2dec($input), 0, '', '');
             return $class::where('ip_dec_start', '<=', $ipDec)->where('ip_dec_end', '>=',  $ipDec)->first();
         }
 
