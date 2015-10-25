@@ -52,6 +52,7 @@ class UpdateAllocationLists extends Command
      */
     public function handle()
     {
+        RirAsnAllocation::truncate();
         RirIPv4Allocation::truncate();
         RirIPv6Allocation::truncate();
 

@@ -45,7 +45,7 @@ class RirSeeder extends Seeder
         ]);
 
         RIR::create([
-            'name' => 'RIPE NCC',
+            'name' => 'RIPE',
             'full_name' => 'Réseaux IP Européens Network Coordination Centre',
             'website' => 'ripe.net',
             'whois_server' => 'whois.ripe.net',
