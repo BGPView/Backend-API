@@ -52,15 +52,9 @@ class UpdateAllocationLists extends Command
      */
     public function handle()
     {
-        RirAsnAllocation::truncate();
-        RirIPv4Allocation::truncate();
-        RirIPv6Allocation::truncate();
-
         $this->cli->br()->comment('Updating the IPv4, IPv6 and ASN RIR allocated resources');
 
-        $rirs = RIR::all();
-
-        foreach ($rirs as $rir) {
+        foreach (RIR::all() as $rir) {
             $this->bench->start();
             $this->progressStarted = false;
             $this->cli->br()->comment('===================================================');
@@ -118,17 +112,24 @@ class UpdateAllocationLists extends Command
             $data = explode('|', $line);
 
             // Only take allocated resources
-            if (isset($data[2]) === true && isset($data[6]) === true && $data[6] === 'allocated') {
+            if (isset($data[2]) === true && isset($data[6]) === true && ($data[6] === 'allocated' || $data[6] === 'assigned')) {
                 $resourceType = $data[2];
+
+                if (empty($data[5])) {
+                    $data[5] = "2000101";
+                }
 
                 if ($resourceType === 'asn') {
 
-                    RirAsnAllocation::create([
-                        'rir_id' => $rir->id,
-                        'asn' => $data[3],
-                        'counrty_code' => $data[1],
-                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
-                    ]);
+                    if (is_null(RirAsnAllocation::where('asn', $data[3])->first()) === true) {
+                        $asn = RirAsnAllocation::create([
+                            'rir_id' => $rir->id,
+                            'asn' => $data[3],
+                            'counrty_code' => $data[1],
+                            'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                        ]);
+                        $this->cli->br()->comment("Entering new ASN: AS" . $asn->asn . " [" . $rir->name . "]");
+                    }
 
                 } else if ($resourceType === 'ipv4') {
 
@@ -137,26 +138,33 @@ class UpdateAllocationLists extends Command
                         continue;
                     }
 
-                    RirIPv4Allocation::create([
-                        'rir_id' => $rir->id,
-                        'ip' => $data[3],
-                        'cidr' => $ipv4AmountCidrArray[$data[4]],
-                        'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                        'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4],
-                        'counrty_code' => $data[1],
-                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
-                    ]);
-                } else if ($resourceType === 'ipv6') {
-                    RirIPv6Allocation::create([
-                        'rir_id' => $rir->id,
-                        'ip' => $data[3],
-                        'cidr' => $data[4],
-                        'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                        'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4],
-                        'counrty_code' => $data[1],
-                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
-                    ]);
+                    if (is_null(RirIPv4Allocation::where('ip', $data[3])->where('cidr', $ipv4AmountCidrArray[$data[4]])->first()) === true) {
+                        $ipv4 = RirIPv4Allocation::create([
+                            'rir_id' => $rir->id,
+                            'ip' => $data[3],
+                            'cidr' => $ipv4AmountCidrArray[$data[4]],
+                            'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
+                            'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4],
+                            'counrty_code' => $data[1],
+                            'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                        ]);
+                        $this->cli->br()->comment("Entering new IPv4 range: " . $ipv4->ip . " [" . $rir->name . "]");
+                    }
 
+                } else if ($resourceType === 'ipv6') {
+
+                    if (is_null(RirIPv6Allocation::where('ip', $data[3])->where('cidr', $data[4])->first()) === true) {
+                        $ipv6 = RirIPv6Allocation::create([
+                            'rir_id' => $rir->id,
+                            'ip' => $data[3],
+                            'cidr' => $data[4],
+                            'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
+                            'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4],
+                            'counrty_code' => $data[1],
+                            'date_allocated' => substr($data[5], 0, 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                        ]);
+                        $this->cli->br()->comment("Entering new IPv4 range: " . $ipv6->ip . " [" . $rir->name . "]");
+                    }
                 }
 
                 $bar->advance();
