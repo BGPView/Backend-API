@@ -55,11 +55,15 @@ if( $fp ) {
 if ($whois_server == 'whois.arin.net') {
     $outParts = explode("# end", $out);
     foreach ($outParts as $key => $part) {
-        if (stristr($part, "arin)") && stristr($part, "0.0.0/8")) {
+        if (
+            (stristr($part, "arin)") && stristr($part, "0.0.0/8")) ||
+            (stristr($part, "arin)") && stristr($part, "allocated to arin"))
+        ) {
             unset($outParts[$key]);
         }
     }
     $out = implode("# end", $outParts);
 }
+
 
 echo $out;
