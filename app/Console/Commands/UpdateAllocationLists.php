@@ -106,7 +106,8 @@ class UpdateAllocationLists extends Command
 
         $bar = $this->output->createProgressBar(count($lines));
 
-        $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount($rverse = true);
+        $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount($reverse = true);
+        $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
 
         foreach ($lines as $line) {
             $data = explode('|', $line);
@@ -153,7 +154,13 @@ class UpdateAllocationLists extends Command
 
                 } else if ($resourceType === 'ipv6') {
 
+                    // If the amount of IP address are unknown, then lets continue...
+                    if (isset($ipv6AmountCidrArray[$data[4]]) !== true) {
+                        continue;
+                    }
+                    
                     if (is_null(RirIPv6Allocation::where('ip', $data[3])->where('cidr', $data[4])->first()) === true) {
+
                         $ipv6 = RirIPv6Allocation::create([
                             'rir_id' => $rir->id,
                             'ip' => $data[3],
