@@ -93,6 +93,12 @@ class Whois
         $finalOrg = trim(strrev(end($orgParts)));
         $data->description = $finalOrg;
 
+        // Get network name
+        if ($this->ipUtils->getInputType($this->input) === 'asn') {
+            $data->name = $this->extractValues('ASName');
+        } else {
+            $data->name = $this->extractValues('NetName');
+        }
 
         return $data;
     }
@@ -130,6 +136,14 @@ class Whois
         // Get description
         $data->description = $this->extractValues('descr');
 
+        // Get network name
+        if ($this->ipUtils->getInputType($this->input) === 'asn') {
+            $data->name = $this->extractValues('as-name');
+        } else {
+            $data->name = $this->extractValues('netname');
+        }
+
+
         return $data;
     }
 
@@ -166,6 +180,12 @@ class Whois
         // Get description
         $data->description = $this->extractValues('descr');
 
+        // Get network name
+        if ($this->ipUtils->getInputType($this->input) === 'asn') {
+            $data->name = $this->extractValues('as-name');
+        } else {
+            $data->name = $this->extractValues('netname');
+        }
 
 
         return $data;
@@ -190,6 +210,13 @@ class Whois
         // Get description
         $data->description = $this->extractValues('descr');
 
+        // Get network name
+        if ($this->ipUtils->getInputType($this->input) === 'asn') {
+            $data->name = $this->extractValues('as-name');
+        } else {
+            $data->name = $this->extractValues('netname');
+        }
+
         return $data;
     }
 
@@ -211,6 +238,10 @@ class Whois
 
         // Get description
         $data->description = $this->extractValues('owner');
+
+        // No name atribute, lets use the desciprtion
+        $data->name = $data->description;
+
 
         return $data;
     }
