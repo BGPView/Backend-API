@@ -93,6 +93,28 @@ if ($whois_server == 'whois.arin.net') {
         }
         $out = implode("% Information related to", $outParts);
     }
+} else if ($whois_server == 'whois.afrinic.net') {
+    // ASN Specific
+    if (stristr($input, "as")) {
+        $outParts = explode("% Information related to", $out);
+        foreach ($outParts as $key => $part) {
+            if (stristr($part, "these AS numbers are further assigned by afrinic")) {
+                unset($outParts[$key]);
+            }
+        }
+        $out = implode("% Information related to", $outParts);
+    }
+} else if ($whois_server == 'whois.ripe.net') {
+    // ASN Specific
+    if (stristr($input, "as")) {
+        $outParts = explode("% Information related to", $out);
+        foreach ($outParts as $key => $part) {
+            if (stristr($part, "these as numbers are assigned to network operators in the ripe")) {
+                unset($outParts[$key]);
+            }
+        }
+        $out = implode("% Information related to", $outParts);
+    }
 }
 
 
