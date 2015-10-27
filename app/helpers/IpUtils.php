@@ -294,12 +294,17 @@ class IPUtils
             }
 
             $ipDec = number_format($this->ip2dec($input), 0, '', '');
-            return $class::where('ip_dec_start', '<=', $ipDec)->where('ip_dec_end', '>=',  $ipDec)->first();
+            return $class::where('ip_dec_start', '<=', $ipDec)
+                ->where('ip_dec_end', '>=',  $ipDec)
+                ->orderBy('date_allocated', 'desc')
+                ->first();
         }
 
         //Not an IP. lets try look up domain
         $input = str_ireplace("AS", "", $input);
-        return RirAsnAllocation::where('asn', $input)->first();
+        return RirAsnAllocation::where('asn', $input)
+            ->orderBy('date_allocated', 'desc')
+            ->first();
 
 
     }
