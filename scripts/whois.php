@@ -52,17 +52,47 @@ if( $fp ) {
     fclose( $fp );
 }
 
+if (strstr($input, ":")) {
+    $minCidr = 48;
+} else {
+    $minCidr = 24;
+}
+
+
+// Here we are making sure only the smallest subnet gets whois's
 if ($whois_server == 'whois.arin.net') {
     $outParts = explode("# end", $out);
+    $currentInt = 0;
+    $currentKey = 0;
     foreach ($outParts as $key => $part) {
-        if (
-            (stristr($part, "arin)") && stristr($part, "0.0.0/8")) ||
-            (stristr($part, "arin)") && stristr($part, "allocated to arin"))
-        ) {
-            unset($outParts[$key]);
+        $rawLines = explode("\n", $part);
+        foreach ($rawLines as $line) {
+            $lineParts = explode(":", $line, 2);
+            if (strtolower($lineParts[0]) == 'cidr') {
+                $nets = explode(",", trim($lineParts[1]));
+                foreach ($nets as $net) {
+                    $netMask = explode("/", trim($net))[1];
+                    if ($netMask > $currentInt && $netMask <= $minCidr) {
+                        $currentKey = $key;
+                        $currentInt = $netMask;
+                    }
+                }
+            }
         }
+
     }
-    $out = implode("# end", $outParts);
+    $out = trim($outParts[$currentKey]);
+} else if ($whois_server == 'whois.apnic.net') {
+    // ASN Specific
+    if (stristr($input, "as")) {
+        $outParts = explode("% Information related to", $out);
+        foreach ($outParts as $key => $part) {
+            if (stristr($part, "these AS numbers are further assigned by apnic")) {
+                unset($outParts[$key]);
+            }
+        }
+        $out = implode("% Information related to", $outParts);
+    }
 }
 
 
