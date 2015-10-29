@@ -100,6 +100,16 @@ class Whois
             $data->name = $this->extractValues('NetName');
         }
 
+        // Get Country
+        $counrty = $this->extractValues('country');
+        if (is_array($counrty) === true) {
+            $data->counrty_code = strtoupper($counrty[0]);
+        } else if (is_null($counrty) === true) {
+            $data->counrty_code = strtoupper($this->rir->counrty_code);
+        } else {
+            $data->counrty_code = strtoupper($counrty);
+        }
+
         return $data;
     }
 
@@ -143,6 +153,15 @@ class Whois
             $data->name = $this->extractValues('netname');
         }
 
+        // Get Country
+        $counrty = $this->extractValues('country');
+        if (is_array($counrty) === true) {
+            $data->counrty_code = strtoupper($counrty[0]);
+        } else if (is_null($counrty) === true) {
+            $data->counrty_code = strtoupper($this->rir->counrty_code);
+        } else {
+            $data->counrty_code = strtoupper($counrty);
+        }
 
         return $data;
     }
@@ -187,6 +206,17 @@ class Whois
             $data->name = $this->extractValues('netname');
         }
 
+        // Get Country
+        $counrty = $this->extractValues('country');
+        if (is_array($counrty) === true) {
+            $data->counrty_code = strtoupper($counrty[0]);
+        } else if (is_null($counrty) === true) {
+            $data->counrty_code = strtoupper($this->rir->counrty_code);
+        } else {
+            $data->counrty_code = strtoupper($counrty);
+        }
+
+
 
         return $data;
     }
@@ -217,6 +247,16 @@ class Whois
             $data->name = $this->extractValues('netname');
         }
 
+        // Get Country
+        $counrty = $this->extractValues('country');
+        if (is_array($counrty) === true) {
+            $data->counrty_code = strtoupper($counrty[0]);
+        } else if (is_null($counrty) === true) {
+            $data->counrty_code = strtoupper($this->rir->counrty_code);
+        } else {
+            $data->counrty_code = strtoupper($counrty);
+        }
+
         return $data;
     }
 
@@ -242,6 +282,15 @@ class Whois
         // No name atribute, lets use the desciprtion
         $data->name = $data->description;
 
+        // Get Country
+        $counrty = $this->extractValues('country');
+        if (is_array($counrty) === true) {
+            $data->counrty_code = strtoupper($counrty[0]);
+        } else if (is_null($counrty) === true) {
+            $data->counrty_code = strtoupper($this->rir->counrty_code);
+        } else {
+            $data->counrty_code = strtoupper($counrty);
+        }
 
         return $data;
     }
