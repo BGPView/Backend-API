@@ -257,6 +257,9 @@ class Whois
             $data->counrty_code = strtoupper($counrty);
         }
 
+        // get the owner address
+        $this->owner_address = $this->getOwnerAddress();
+
         return $data;
     }
 
@@ -359,6 +362,27 @@ class Whois
         }
 
         return null;
+    }
+
+    public function getOwnerAddress()
+    {
+        $finalAddress = [];
+
+        // APNIC specific
+        if ($this->rir->name == "APNIC") {
+            $addressParts = explode("address:", $this->raw(), 2);
+            $addressParts = explode("\n", end($addressParts));
+            foreach($addressParts as $addressPart) {
+                if (strstr($addressPart, ":")) {
+                    break;
+                }
+
+                $finalAddress[] = trim(trim($addressPart));
+            }
+        }
+
+
+        return array_unique($finalAddress);
     }
 
 
