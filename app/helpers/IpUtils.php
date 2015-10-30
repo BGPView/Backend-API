@@ -6,7 +6,7 @@ use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
 
-class IPUtils
+class IpUtils
 {
 
     public function IPv4cidrIpCount($reverse = false)

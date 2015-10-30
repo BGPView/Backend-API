@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Helpers\IPUtils;
+use App\Helpers\IpUtils;
 
 class Whois
 {
@@ -31,7 +31,7 @@ class Whois
 
     public function __construct($input)
     {
-        $this->ipUtils = new IPUtils;
+        $this->ipUtils = new IpUtils;
         $allocation = $this->ipUtils->getAllocationEntry($input);
         $this->input = $input;
 
