@@ -87,7 +87,7 @@ if ($whois_server == 'whois.arin.net') {
     if (stristr($input, "as")) {
         $outParts = explode("% Information related to", $out);
         foreach ($outParts as $key => $part) {
-            if (stristr($part, "these AS numbers are further assigned by apnic")) {
+            if (stristr($part, "as-block:")) {
                 unset($outParts[$key]);
             }
         }
@@ -98,7 +98,8 @@ if ($whois_server == 'whois.arin.net') {
     if (stristr($input, "as")) {
         $outParts = explode("% Information related to", $out);
         foreach ($outParts as $key => $part) {
-            if (stristr($part, "these AS numbers are further assigned by afrinic")) {
+            // Filter out the shitty as blocks
+            if (stristr($part, "as-block:")) {
                 unset($outParts[$key]);
             }
         }
@@ -109,7 +110,7 @@ if ($whois_server == 'whois.arin.net') {
     if (stristr($input, "as")) {
         $outParts = explode("% Information related to", $out);
         foreach ($outParts as $key => $part) {
-            if (stristr($part, "these as numbers are assigned to network operators in the ripe")) {
+            if (stristr($part, "as-block:")) {
                 unset($outParts[$key]);
             }
         }
@@ -119,3 +120,4 @@ if ($whois_server == 'whois.arin.net') {
 
 
 echo $out;
+
