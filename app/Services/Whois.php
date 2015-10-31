@@ -28,6 +28,8 @@ class Whois
 
                 'example.com',
                 'cert.br',
+                'arin.poc',
+                'supplied.unknown',
             ];
 
     public function __construct($input)
@@ -105,6 +107,9 @@ class Whois
         } else {
             $data->name = $this->extractValues('NetName');
         }
+        if (is_array($data->name) === true) {
+            $data->name = $data->name[0];
+        }
 
         // Get Country
         $counrty = $this->extractValues('country');
@@ -119,7 +124,7 @@ class Whois
         // get the owner address
         $data->address = $this->getAddress();
 
-        return $data;
+        return $this->cleanEmptyData($data);
     }
 
     private function ripeExecute()
@@ -173,6 +178,9 @@ class Whois
         } else {
             $data->name = $this->extractValues('netname');
         }
+        if (is_array($data->name) === true) {
+            $data->name = $data->name[0];
+        }
 
         // Get Country
         $counrty = $this->extractValues('country');
@@ -187,7 +195,7 @@ class Whois
         // get the owner address
         $data->address = $this->getAddress();
 
-        return $data;
+        return $this->cleanEmptyData($data);
     }
 
     private function afrinicExecute()
@@ -241,6 +249,9 @@ class Whois
         } else {
             $data->name = $this->extractValues('netname');
         }
+        if (is_array($data->name) === true) {
+            $data->name = $data->name[0];
+        }
 
         // Get Country
         $counrty = $this->extractValues('country');
@@ -255,7 +266,7 @@ class Whois
         // get the owner address
         $data->address = $this->getAddress();
 
-        return $data;
+        return $this->cleanEmptyData($data);
     }
 
     private function apnicExecute()
@@ -295,6 +306,9 @@ class Whois
         } else {
             $data->name = $this->extractValues('netname');
         }
+        if (is_array($data->name) === true) {
+            $data->name = $data->name[0];
+        }
 
         // Get Country
         $counrty = $this->extractValues('country');
@@ -310,7 +324,7 @@ class Whois
         // get the owner address
         $data->address = $this->getAddress();
 
-        return $data;
+        return $this->cleanEmptyData($data);
     }
 
     private function lacnicExecute()
@@ -346,6 +360,9 @@ class Whois
 
         // No name atribute, lets use the desciprtion
         $data->name = $data->description;
+        if (is_array($data->name) === true) {
+            $data->name = $data->name[0];
+        }
 
         // Get Country
         $counrty = $this->extractValues('country');
@@ -360,7 +377,7 @@ class Whois
         // get the owner address
         $data->address = $this->getAddress();
 
-        return $data;
+        return $this->cleanEmptyData($data);
     }
 
 
@@ -429,6 +446,38 @@ class Whois
         return null;
     }
 
+    private function cleanEmptyData($data)
+    {
+        foreach ($data as $key => $value) {
+
+            // Only look at keys that are numbers
+            if (is_numeric($key) !== true) {
+                continue;
+            }
+
+            if (is_array($value) || is_object($value)) {
+                if (is_array($data)) {
+                    $data[$key] = $this->cleanEmptyData($data[$key]);
+                } else {
+                    $data->$key = $this->cleanEmptyData($data->$key);
+                }
+            }
+
+            if (is_array($data)) {
+                if (empty($data[$key])) {
+                    unset($data[$key]);
+                }
+            } else {
+                if (empty($data->$key)) {
+                    unset($data->$key);
+                }
+            }
+
+        }
+
+        return $data;
+    }
+
     private function getAddress()
     {
         $finalAddress = [];
@@ -438,11 +487,13 @@ class Whois
             $addressParts = explode("address:", $this->raw(), 2);
             $addressParts = explode("\n", end($addressParts));
             foreach($addressParts as $addressPart) {
-                if (strstr($addressPart, ":")) {
+                if (strstr($addressPart, ":") && !stristr($addressPart, "address:")) {
                     break;
+                } else if (stristr($addressPart, "address:")) {
+                    $finalAddress[] = trim(explode("address:", $addressPart, 2)[1]);
+                } else {
+                    $finalAddress[] = trim($addressPart);
                 }
-
-                $finalAddress[] = trim(trim($addressPart));
             }
         }
 
@@ -491,7 +542,6 @@ class Whois
 
             }
         }
-
 
         return array_unique($finalAddress);
     }
