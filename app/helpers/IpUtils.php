@@ -281,6 +281,16 @@ class IpUtils
         return "asn";
     }
 
+    public function normalizeInput($input)
+    {
+        $type = $this->getInputType($input);
+
+        if ($type === 'asn') {
+            return "AS" . str_ireplace('as', '', $input);
+        }
+        return $input;
+    }
+
     public function getAllocationEntry($input)
     {
         $type = $this->getInputType($input);
