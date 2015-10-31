@@ -8,6 +8,7 @@ class Whois
 {
     private $whoisUrl = "http://185.42.223.50/whois.php";
     private $rir;
+    private $allocationData;
     private $input;
     private $rawData;
     private $rawLines;
@@ -33,12 +34,12 @@ class Whois
     {
         $this->ipUtils = new IpUtils;
         $allocation = $this->ipUtils->getAllocationEntry($input);
-        $this->input = $input;
+        $this->input = trim($input);
 
         // Lets make sure we found an allocation first
         if (is_null($allocation) !== true) {
             $this->rir = $allocation->rir;
-
+            $this->allocationData = $allocation;
             // Lets fetch the raw whois data
             $this->rawData = $this->getRawWhois();
             $this->rawLines = explode("\n", $this->rawData);
@@ -105,7 +106,7 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper($counrty[0]);
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->rir->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
             $data->counrty_code = strtoupper($counrty);
         }
@@ -158,7 +159,7 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper($counrty[0]);
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->rir->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
             $data->counrty_code = strtoupper($counrty);
         }
@@ -211,12 +212,12 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper($counrty[0]);
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->rir->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
             $data->counrty_code = strtoupper($counrty);
         }
 
-
+        $data->address = $this->getAddress();
 
         return $data;
     }
@@ -252,13 +253,14 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper($counrty[0]);
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->rir->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
             $data->counrty_code = strtoupper($counrty);
         }
 
+
         // get the owner address
-        $this->owner_address = $this->getOwnerAddress();
+        $data->address = $this->getAddress();
 
         return $data;
     }
@@ -290,10 +292,13 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper($counrty[0]);
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->rir->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
             $data->counrty_code = strtoupper($counrty);
         }
+
+        // get the owner address
+        $data->address = $this->getAddress();
 
         return $data;
     }
@@ -364,7 +369,7 @@ class Whois
         return null;
     }
 
-    public function getOwnerAddress()
+    private function getAddress()
     {
         $finalAddress = [];
 
@@ -379,6 +384,23 @@ class Whois
 
                 $finalAddress[] = trim(trim($addressPart));
             }
+        }
+
+        if ($this->rir->name == "Lacnic") {
+            $currentKey = false;
+            foreach ($this->rawLines as $key => $line) {
+                if (stristr($line, "address:")) {
+
+                    if ($currentKey === false) {
+                        $currentKey = $key;
+                        $finalAddress[] = trim(explode("address:", $line)[1]);
+                    } else if (($currentKey + 1) === $key ) {
+                        $finalAddress[] = trim(explode("address:", $line)[1]);
+                        $currentKey = $key;
+                    }
+                }
+            }
+
         }
 
 
