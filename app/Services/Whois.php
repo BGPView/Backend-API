@@ -81,6 +81,11 @@ class Whois
         } else {
             $data->abuse_emails[] = $abuseEmails;
         }
+        foreach ($data->emails as $email) {
+            if (stristr($email, "abuse")) {
+                $data->abuse_emails[] = $email;
+            }
+        }
         $data->abuse_emails = $this->cleanUpEmails($data->abuse_emails);
 
 
@@ -92,7 +97,7 @@ class Whois
         // Remove the ARIN OrgID
         $orgParts = explode("(", strrev($orgs), 2);
         $finalOrg = trim(strrev(end($orgParts)));
-        $data->description = $finalOrg;
+        $data->description = [$finalOrg];
 
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
@@ -104,12 +109,15 @@ class Whois
         // Get Country
         $counrty = $this->extractValues('country');
         if (is_array($counrty) === true) {
-            $data->counrty_code = strtoupper($counrty[0]);
+            $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
             $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
-            $data->counrty_code = strtoupper($counrty);
+            $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
+
+        // get the owner address
+        $data->address = $this->getAddress();
 
         return $data;
     }
@@ -142,10 +150,22 @@ class Whois
             $genericAbuseEmails = array_map('strtolower', $genericAbuseEmails);
             $data->abuse_emails = array_unique(array_merge($genericAbuseEmails));
         }
+        foreach ($data->emails as $email) {
+            if (stristr($email, "abuse")) {
+                $data->abuse_emails[] = $email;
+            }
+        }
         $data->abuse_emails = $this->cleanUpEmails($data->abuse_emails);
 
         // Get description
-        $data->description = $this->extractValues('descr');
+        $description = $this->extractValues('descr');
+        if (empty($description) === true) {
+            $data->description = [];
+        } else if (is_array($description) === true) {
+            $data->description = $description;
+        } else {
+            $data->description = [$description];
+        }
 
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
@@ -157,12 +177,15 @@ class Whois
         // Get Country
         $counrty = $this->extractValues('country');
         if (is_array($counrty) === true) {
-            $data->counrty_code = strtoupper($counrty[0]);
+            $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
             $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
-            $data->counrty_code = strtoupper($counrty);
+            $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
+
+        // get the owner address
+        $data->address = $this->getAddress();
 
         return $data;
     }
@@ -195,10 +218,22 @@ class Whois
             $genericAbuseEmails = array_map('strtolower', $genericAbuseEmails);
             $data->abuse_emails = array_unique(array_merge($genericAbuseEmails));
         }
+        foreach ($data->emails as $email) {
+            if (stristr($email, "abuse")) {
+                $data->abuse_emails[] = $email;
+            }
+        }
         $data->abuse_emails = $this->cleanUpEmails($data->abuse_emails);
 
         // Get description
-        $data->description = $this->extractValues('descr');
+        $description = $this->extractValues('descr');
+        if (empty($description) === true) {
+            $data->description = [];
+        } else if (is_array($description) === true) {
+            $data->description = $description;
+        } else {
+            $data->description = [$description];
+        }
 
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
@@ -210,13 +245,14 @@ class Whois
         // Get Country
         $counrty = $this->extractValues('country');
         if (is_array($counrty) === true) {
-            $data->counrty_code = strtoupper($counrty[0]);
+            $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
             $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
-            $data->counrty_code = strtoupper($counrty);
+            $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
 
+        // get the owner address
         $data->address = $this->getAddress();
 
         return $data;
@@ -236,10 +272,22 @@ class Whois
         } else {
             $data->abuse_emails[] = $abuseEmails;
         }
+        foreach ($data->emails as $email) {
+            if (stristr($email, "abuse")) {
+                $data->abuse_emails[] = $email;
+            }
+        }
         $data->abuse_emails = $this->cleanUpEmails($data->abuse_emails);
 
         // Get description
-        $data->description = $this->extractValues('descr');
+        $description = $this->extractValues('descr');
+        if (empty($description) === true) {
+            $data->description = [];
+        } else if (is_array($description) === true) {
+            $data->description = $description;
+        } else {
+            $data->description = [$description];
+        }
 
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
@@ -251,11 +299,11 @@ class Whois
         // Get Country
         $counrty = $this->extractValues('country');
         if (is_array($counrty) === true) {
-            $data->counrty_code = strtoupper($counrty[0]);
+            $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
             $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
-            $data->counrty_code = strtoupper($counrty);
+            $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
 
 
@@ -279,10 +327,22 @@ class Whois
         } else {
             $data->abuse_emails[] = $abuseEmails;
         }
+        foreach ($data->emails as $email) {
+            if (stristr($email, "abuse")) {
+                $data->abuse_emails[] = $email;
+            }
+        }
         $data->abuse_emails = $this->cleanUpEmails($data->abuse_emails);
 
         // Get description
-        $data->description = $this->extractValues('owner');
+        $description = $this->extractValues('descr');
+        if (empty($description) === true) {
+            $data->description = [];
+        } else if (is_array($description) === true) {
+            $data->description = $description;
+        } else {
+            $data->description = [$description];
+        }
 
         // No name atribute, lets use the desciprtion
         $data->name = $data->description;
@@ -290,11 +350,11 @@ class Whois
         // Get Country
         $counrty = $this->extractValues('country');
         if (is_array($counrty) === true) {
-            $data->counrty_code = strtoupper($counrty[0]);
+            $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
             $data->counrty_code = strtoupper($this->allocationData->counrty_code);
         } else {
-            $data->counrty_code = strtoupper($counrty);
+            $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
 
         // get the owner address
@@ -386,21 +446,50 @@ class Whois
             }
         }
 
-        if ($this->rir->name == "Lacnic") {
+        // ARIN specific
+        if ($this->rir->name == "ARIN") {
+            if ($address = $this->extractValues('Address')) {
+                if (is_array($address) === true) {
+                    $finalAddress = $address;
+                } else {
+                    $finalAddress[] = $address;
+                }
+
+            }
+            if ($address = $this->extractValues('City')) {
+                $finalAddress[] = $address;
+            }
+            if ($address = $this->extractValues('StateProv')) {
+                $finalAddress[] = $address;
+            }
+            if ($address = $this->extractValues('PostalCode')) {
+                $finalAddress[] = $address;
+            }
+            if ($address = $this->extractValues('Country')) {
+                $finalAddress[] = $address;
+            }
+
+        }
+
+        if ($this->rir->name == "Lacnic" || $this->rir->name == "AfriNIC" || $this->rir->name == "RIPE") {
             $currentKey = false;
             foreach ($this->rawLines as $key => $line) {
-                if (stristr($line, "address:")) {
 
-                    if ($currentKey === false) {
+                if (stristr($line, "address:") || !stristr($line, ":")) {
+                    if (stristr($line, "address:") && $currentKey === false) {
                         $currentKey = $key;
                         $finalAddress[] = trim(explode("address:", $line)[1]);
-                    } else if (($currentKey + 1) === $key ) {
-                        $finalAddress[] = trim(explode("address:", $line)[1]);
+                    } else if  (($currentKey + 1) === $key && $currentKey !== false) {
+                        if (stristr($line, "address:")) {
+                            $finalAddress[] = trim(explode("address:", $line)[1]);
+                        } else {
+                            $finalAddress[] = trim($line);
+                        }
                         $currentKey = $key;
                     }
                 }
-            }
 
+            }
         }
 
 
