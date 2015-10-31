@@ -8,6 +8,7 @@
         "php": ">=5.5.9",
         "laravel/framework": "5.1.*",
         "league/climate": "^3.2",
+        "webpatser/laravel-countries": "dev-master",
         "devster/ubench": "1.2.*"
     },
     "require-dev": {
