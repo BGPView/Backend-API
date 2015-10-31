@@ -18,10 +18,11 @@ class CreateAsnInfoTable extends Migration
             $table->integer('rir_id')->unsigned()->index();
             $table->integer('asn')->unique();
             $table->string('name');
-            $table->text('description')->nullable();
+            $table->string('description')->nullable();
+            $table->text('description_full')->nullable();
             $table->string('counrty_code', 2)->index();
-            $table->string('company_name')->nullable();
-            $table->date('date_allocated')->index();
+            $table->text('owner_address')->nullable();
+            $table->text('raw_whois')->nullable();
 
             $table->timestamps();
         });

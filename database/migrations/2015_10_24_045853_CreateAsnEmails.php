@@ -17,6 +17,7 @@ class CreateAsnEmails extends Migration
             $table->increments('id')->unique();
             $table->integer('asn_id')->unsigned()->index();
             $table->string('email_address');
+            $table->boolean('abuse_email')->default(false);
             $table->timestamps();
         });
     }
