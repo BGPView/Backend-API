@@ -6,9 +6,9 @@ use App\Models\ASN;
 use App\Models\ASNEmail;
 use App\Models\RirAsnAllocation;
 use App\Services\Whois;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use League\CLImate\CLImate;
-use Ubench;
 
 class UpdateWhoisInfo extends Command
 {
@@ -103,8 +103,41 @@ class UpdateWhoisInfo extends Command
                 'abuse_emails' => $finalASN->emails()->where('abuse_email', true)->get()->lists('email_address'),
                 'emails' => $finalASN->emails()->lists('email_address'),
             ]);
-
         }
+
+        // Ok, now that we are done with new allocations, lets update the old records
+        $oldAsns = ASN::where('updated_at', '<', Carbon::now()->subMonth())->orderBy('updated_at', 'ASC')->limit(2000)->get();
+        foreach ($oldAsns as $oldAsn) {
+            $oldAsn->emails()->delete();
+
+            $this->cli->br()->comment('Updating: AS' . $oldAsn->asn . ' ['.$oldAsn->rir->name.']');
+            $asnWhois = new Whois($oldAsn->asn);
+            $parsedWhois = $asnWhois->parse();
+
+            $asn->name = $parsedWhois->name;
+            $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
+            $asn->description_full = json_encode($parsedWhois->description);
+
+            $asn->counrty_code = $parsedWhois->counrty_code;
+            $asn->owner_address = json_encode($parsedWhois->address);
+            $asn->raw_whois = $asnWhois->raw();
+            $asn->save();
+
+            // Save ASN Emails
+            foreach ($parsedWhois->emails as $email) {
+                $asnEmail = new ASNEmail;
+                $asnEmail->asn_id = $asn->id;
+                $asnEmail->email_address = $email;
+
+                // Check if its an abuse email
+                if (in_array($email, $parsedWhois->abuse_emails)) {
+                    $asnEmail->abuse_email = true;
+                }
+
+                $asnEmail->save();
+            }
+        }
+
 
     }
 }
