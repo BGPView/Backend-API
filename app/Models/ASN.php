@@ -25,4 +25,9 @@ class ASN extends Model {
     {
         return $this->hasMany('App\Models\ASNEmail', 'asn_id', 'id');
     }
+
+    public function rir()
+    {
+        return $this->belongsTo('App\Models\Rir');
+    }
 }
