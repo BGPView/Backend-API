@@ -535,14 +535,13 @@ class Whois
         if ($this->rir->name == "Lacnic" || $this->rir->name == "AfriNIC" || $this->rir->name == "RIPE") {
             $currentKey = false;
             foreach ($this->rawLines as $key => $line) {
-
-                if (stristr($line, "address:") || !stristr($line, ":")) {
+                if (!stristr($line, "remarks:") && (stristr($line, "address:") || !stristr($line, ":"))) {
                     if (stristr($line, "address:") && $currentKey === false) {
                         $currentKey = $key;
-                        $finalAddress[] = trim(explode("address:", $line)[1]);
+                        $finalAddress[] = trim(explode("address:", $line, 2)[1]);
                     } else if  (($currentKey + 1) === $key && $currentKey !== false) {
                         if (stristr($line, "address:")) {
-                            $finalAddress[] = trim(explode("address:", $line)[1]);
+                            $finalAddress[] = trim(explode("address:", $line, 2)[1]);
                         } else {
                             $finalAddress[] = trim($line);
                         }
