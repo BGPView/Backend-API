@@ -43,7 +43,15 @@ $rand_ip = '[ 2a06:1282:'.rand(1, 499).'::deed]';
 $socket_options = array( 'socket' => array('bindto' => $rand_ip.':0') );
 $socket_context = stream_context_create($socket_options);
 
-$fp = stream_socket_client( 'tcp://'.$whois_server.':'.WHOIS_PORT, $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $socket_context );
+$dns = dns_get_record($whois_server, DNS_AAAA);
+$whois_dns = $dns[array_rand($dns)];
+
+if (isset($whois_dns['ipv6']) === false) {
+    die("Could not reolve any AAA records for whois server");
+}
+$whois_server_ip = "[" . $whois_dns['ipv6'] . "]";
+
+$fp = stream_socket_client( 'tcp://'.$whois_server_ip.':'.WHOIS_PORT, $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $socket_context );
 $out = "";
 if( $fp ) {
     fwrite( $fp, $finalInput.WHOIS_EOL );
