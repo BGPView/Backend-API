@@ -260,6 +260,7 @@ class IpUtils
         }
 
         $network = pack('N4', $parts[1], $parts[2], $parts[3], $parts[4]);
+
         $ip_address = inet_ntop($network);
 
         // Turn IPv6 to IPv4 if it's IPv4
