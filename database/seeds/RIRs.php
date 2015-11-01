@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\RIR;
+use App\Models\Rir;
 use Illuminate\Database\Seeder;
 
 class RirSeeder extends Seeder
@@ -12,7 +12,7 @@ class RirSeeder extends Seeder
      */
     public function run()
     {
-        RIR::create([
+        Rir::create([
             'name' => 'AfriNIC',
             'full_name' => 'African Network Information Center',
             'website' => 'afrinic.net',
@@ -20,7 +20,7 @@ class RirSeeder extends Seeder
             'allocation_list_url' => 'ftp://ftp.afrinic.net/stats/afrinic/delegated-afrinic-extended-latest',
         ]);
 
-        RIR::create([
+        Rir::create([
             'name' => 'ARIN',
             'full_name' => 'American Registry for Internet Numbers',
             'website' => 'arin.net',
@@ -28,7 +28,7 @@ class RirSeeder extends Seeder
             'allocation_list_url' => 'ftp://ftp.arin.net/pub/stats/arin/delegated-arin-extended-latest',
         ]);
 
-        RIR::create([
+        Rir::create([
             'name' => 'APNIC',
             'full_name' => 'Asia-Pacific Network Information Centre',
             'website' => 'apnic.net',
@@ -36,7 +36,7 @@ class RirSeeder extends Seeder
             'allocation_list_url' => 'ftp://ftp.apnic.net/pub/stats/apnic/delegated-apnic-extended-latest',
         ]);
 
-        RIR::create([
+        Rir::create([
             'name' => 'Lacnic',
             'full_name' => 'Latin America and Caribbean Network Information Centre',
             'website' => 'lacnic.net',
@@ -44,7 +44,7 @@ class RirSeeder extends Seeder
             'allocation_list_url' => 'ftp://ftp.lacnic.net/pub/stats/lacnic/delegated-lacnic-extended-latest',
         ]);
 
-        RIR::create([
+        Rir::create([
             'name' => 'RIPE',
             'full_name' => 'Réseaux IP Européens Network Coordination Centre',
             'website' => 'ripe.net',
