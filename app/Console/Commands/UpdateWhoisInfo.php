@@ -61,6 +61,11 @@ class UpdateWhoisInfo extends Command
             $asnWhois = new Whois($allocatedAsn->asn);
             $parsedWhois = $asnWhois->parse();
 
+            // Dont save things without names
+            if (empty($parsedWhois->name) === true) {
+                continue;
+            }
+
             $asn = new ASN;
             $asn->rir_id = $allocatedAsn->rir->id;
             $asn->asn = $allocatedAsn->asn;
