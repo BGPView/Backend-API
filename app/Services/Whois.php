@@ -92,14 +92,23 @@ class Whois
 
 
         // Get description (Organization)
-        $orgs = $this->extractValues('Organization');
-        if (is_array($orgs) === true) {
-            $orgs = end($orgs);
+        if ($this->ipUtils->getInputType($this->input) === 'asn') {
+            $orgs = $this->extractValues('OrgName');
+            if (is_array($orgs) === true) {
+                $orgs = end($orgs);
+            }
+            $data->description = [$orgs];
+        } else {
+            $orgs = $this->extractValues('Organization');
+            if (is_array($orgs) === true) {
+                $orgs = end($orgs);
+            }
+            // Remove the ARIN OrgID
+            $orgParts = explode("(", strrev($orgs), 2);
+            $finalOrg = trim(strrev(end($orgParts)));
+            $data->description = [$finalOrg];
         }
-        // Remove the ARIN OrgID
-        $orgParts = explode("(", strrev($orgs), 2);
-        $finalOrg = trim(strrev(end($orgParts)));
-        $data->description = [$finalOrg];
+
 
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
