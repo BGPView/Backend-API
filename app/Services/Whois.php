@@ -175,6 +175,9 @@ class Whois
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
             $data->name = $this->extractValues('as-name');
+            if (is_null($data->name) === true) {
+                $data->name = $data->description[0];
+            }
         } else {
             $data->name = $this->extractValues('netname');
         }
@@ -246,6 +249,9 @@ class Whois
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
             $data->name = $this->extractValues('as-name');
+            if (is_null($data->name) === true) {
+                $data->name = $data->description[0];
+            }
         } else {
             $data->name = $this->extractValues('netname');
         }
@@ -303,6 +309,9 @@ class Whois
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
             $data->name = $this->extractValues('as-name');
+            if (is_null($data->name) === true) {
+                $data->name = $data->description[0];
+            }
         } else {
             $data->name = $this->extractValues('netname');
         }
@@ -362,7 +371,6 @@ class Whois
         // No name attribute, lets use the description
         $data->name = $data->description;
         if (is_array($data->name) === true) {
-            dump($data->name);
             $data->name = $data->name[0];
         }
 

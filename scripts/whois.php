@@ -87,34 +87,49 @@ if ($whois_server == 'whois.arin.net') {
     if (stristr($input, "as")) {
         $outParts = explode("% Information related to", $out);
         foreach ($outParts as $key => $part) {
-            if (stristr($part, "as-block:")) {
+            // If there is 'aut-num' AND 'as-block' lets remove the AS-BLOCK whois block
+            if (stristr($part, "as-block:") && stristr($out, 'aut-num')) {
                 unset($outParts[$key]);
             }
         }
         $out = implode("% Information related to", $outParts);
+        if (substr_count($out, 'as-block:')) {
+            $outParts = explode("% Information related to", $out);
+            $out = "% Information related to" . end($outParts);
+        }
     }
 } else if ($whois_server == 'whois.afrinic.net') {
     // ASN Specific
     if (stristr($input, "as")) {
         $outParts = explode("% Information related to", $out);
         foreach ($outParts as $key => $part) {
-            // Filter out the shitty as blocks
-            if (stristr($part, "as-block:")) {
+            // If there is 'aut-num' AND 'as-block' lets remove the AS-BLOCK whois block
+            if (stristr($part, "as-block:") && stristr($out, 'aut-num')) {
                 unset($outParts[$key]);
             }
         }
         $out = implode("% Information related to", $outParts);
+        if (substr_count($out, 'as-block:')) {
+            $outParts = explode("% Information related to", $out);
+            $out = "% Information related to" . end($outParts);
+        }
     }
 } else if ($whois_server == 'whois.ripe.net') {
     // ASN Specific
     if (stristr($input, "as")) {
         $outParts = explode("% Information related to", $out);
         foreach ($outParts as $key => $part) {
-            if (stristr($part, "as-block:")) {
+            // If there is 'aut-num' AND 'as-block' lets remove the AS-BLOCK whois block
+            if (stristr($part, "as-block:") && stristr($out, 'aut-num:')) {
                 unset($outParts[$key]);
             }
         }
         $out = implode("% Information related to", $outParts);
+        if (substr_count($out, 'as-block:')) {
+            $outParts = explode("% Information related to", $out);
+            $out = "% Information related to" . end($outParts);
+        }
+
     }
 }
 
