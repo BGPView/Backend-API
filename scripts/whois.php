@@ -39,7 +39,7 @@ switch (strtolower($whois_server)) {
         break;
 }
 
-$rand_ip = '[ 2a06:1282:'.rand(1, 499).'::deed]';
+$rand_ip = '[2a06:1282:' . rand(1, 499) . ':f001:e141:f435:1010:deed]';
 $socket_options = array( 'socket' => array('bindto' => $rand_ip.':0') );
 $socket_context = stream_context_create($socket_options);
 
