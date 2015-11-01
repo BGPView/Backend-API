@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\IpUtils;
-use App\Models\RIR;
+use App\Models\Rir;
 use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
@@ -54,7 +54,7 @@ class UpdateAllocationLists extends Command
     {
         $this->cli->br()->comment('Updating the IPv4, IPv6 and ASN RIR allocated resources');
 
-        foreach (RIR::all() as $rir) {
+        foreach (Rir::all() as $rir) {
             $this->bench->start();
             $this->progressStarted = false;
             $this->cli->br()->comment('===================================================');
