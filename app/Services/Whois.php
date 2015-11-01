@@ -349,7 +349,7 @@ class Whois
         $data->abuse_emails = $this->cleanUpEmails($data->abuse_emails);
 
         // Get description
-        $description = $this->extractValues('descr');
+        $description = $this->extractValues('owner');
         if (empty($description) === true) {
             $data->description = [];
         } else if (is_array($description) === true) {
@@ -357,10 +357,12 @@ class Whois
         } else {
             $data->description = [$description];
         }
+        $data->description = array_map('utf8_encode', $data->description);
 
-        // No name atribute, lets use the desciprtion
+        // No name attribute, lets use the description
         $data->name = $data->description;
         if (is_array($data->name) === true) {
+            dump($data->name);
             $data->name = $data->name[0];
         }
 
