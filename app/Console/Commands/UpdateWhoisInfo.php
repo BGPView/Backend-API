@@ -58,6 +58,7 @@ class UpdateWhoisInfo extends Command
         foreach ($allocatedAsns as $allocatedAsn)
         if (ASN::where('asn', $allocatedAsn->asn)->first() === null) {
             $this->cli->br()->comment('Looking up and adding: AS' . $allocatedAsn->asn . ' ['.$allocatedAsn->rir->name.']');
+            sleep(1.5);
             $asnWhois = new Whois($allocatedAsn->asn);
             $parsedWhois = $asnWhois->parse();
 
