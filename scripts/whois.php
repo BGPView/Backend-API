@@ -39,7 +39,7 @@ switch (strtolower($whois_server)) {
         break;
 }
 
-$rand_ip = '[2a06:1282:' . rand(1, 499) . ':f001:e141:f435:1010:deed]';
+$rand_ip = '[2a06:1282:'.rand(1, 9999).':f001:e141:f435:1010:deed]';
 $socket_options = array( 'socket' => array('bindto' => $rand_ip.':0') );
 $socket_context = stream_context_create($socket_options);
 
@@ -50,6 +50,7 @@ if (isset($whois_dns['ipv6']) === false) {
     die("Could not reolve any AAA records for whois server");
 }
 $whois_server_ip = "[" . $whois_dns['ipv6'] . "]";
+echo "Source: ".$rand_ip.PHP_EOL;
 
 $fp = stream_socket_client( 'tcp://'.$whois_server_ip.':'.WHOIS_PORT, $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $socket_context );
 $out = "";
@@ -143,4 +144,3 @@ if ($whois_server == 'whois.arin.net') {
 
 
 echo $out;
-
