@@ -175,7 +175,7 @@ class Whois
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
             $data->name = $this->extractValues('as-name');
-            if (is_null($data->name) === true) {
+            if (is_null($data->name) === true && isset($data->description[0]) === true) {
                 $data->name = $data->description[0];
             }
         } else {
@@ -249,7 +249,7 @@ class Whois
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
             $data->name = $this->extractValues('as-name');
-            if (is_null($data->name) === true) {
+            if (is_null($data->name) === true && isset($data->description[0]) === true) {
                 $data->name = $data->description[0];
             }
         } else {
@@ -309,7 +309,7 @@ class Whois
         // Get network name
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
             $data->name = $this->extractValues('as-name');
-            if (is_null($data->name) === true) {
+            if (is_null($data->name) === true && isset($data->description[0]) === true) {
                 $data->name = $data->description[0];
             }
         } else {
