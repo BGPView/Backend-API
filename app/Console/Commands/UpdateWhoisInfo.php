@@ -54,56 +54,59 @@ class UpdateWhoisInfo extends Command
         $this->cli->br()->comment('Adding newly allocated ASNs')->br();
         $allocatedAsns = RirAsnAllocation::all();
 
-        // Lets check if the ASN has already been looked at in the past
-        foreach ($allocatedAsns as $allocatedAsn)
-        if (ASN::where('asn', $allocatedAsn->asn)->first() === null) {
-            $this->cli->br()->comment('Looking up and adding: AS' . $allocatedAsn->asn . ' ['.$allocatedAsn->rir->name.']');
 
-            $asnWhois = new Whois($allocatedAsn->asn);
-            $parsedWhois = $asnWhois->parse();
+        foreach ($allocatedAsns as $allocatedAsn) {
+            // Lets check if the ASN has already been looked at in the past
+            if (ASN::where('asn', $allocatedAsn->asn)->first() === null) {
+                $this->cli->br()->comment('Looking up and adding: AS' . $allocatedAsn->asn . ' ['.$allocatedAsn->rir->name.']');
 
-            // Dont save things without names
-            if (empty($parsedWhois->name) === true) {
-                continue;
-            }
+                $asnWhois = new Whois($allocatedAsn->asn);
+                $parsedWhois = $asnWhois->parse();
 
-            $asn = new ASN;
-            $asn->rir_id = $allocatedAsn->rir->id;
-            $asn->asn = $allocatedAsn->asn;
-            $asn->name = $parsedWhois->name;
-            $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-            $asn->description_full = json_encode($parsedWhois->description);
-
-            $asn->counrty_code = $parsedWhois->counrty_code;
-            $asn->owner_address = json_encode($parsedWhois->address);
-            $asn->raw_whois = $asnWhois->raw();
-            $asn->save();
-
-            // Save ASN Emails
-            foreach ($parsedWhois->emails as $email) {
-                $asnEmail = new ASNEmail;
-                $asnEmail->asn_id = $asn->id;
-                $asnEmail->email_address = $email;
-
-                // Check if its an abuse email
-                if (in_array($email, $parsedWhois->abuse_emails)) {
-                    $asnEmail->abuse_email = true;
+                // Dont save things without names
+                if (empty($parsedWhois->name) === true) {
+                    continue;
                 }
 
-                $asnEmail->save();
-            }
+                $asn = new ASN;
+                $asn->rir_id = $allocatedAsn->rir->id;
+                $asn->asn = $allocatedAsn->asn;
+                $asn->name = $parsedWhois->name;
+                $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
+                $asn->description_full = json_encode($parsedWhois->description);
 
-            $finalASN = ASN::where('id', $asn->id)->first();
-            dump([
-                'name' => $finalASN->name,
-                'description' => $finalASN->description,
-                'description_full' => json_decode($finalASN->description_full, true),
-                'counrty_code' => $finalASN->counrty_code,
-                'owner_address' => json_decode($finalASN->owner_address, true),
-                'abuse_emails' => $finalASN->emails()->where('abuse_email', true)->get()->lists('email_address'),
-                'emails' => $finalASN->emails()->lists('email_address'),
-            ]);
+                $asn->counrty_code = $parsedWhois->counrty_code;
+                $asn->owner_address = json_encode($parsedWhois->address);
+                $asn->raw_whois = $asnWhois->raw();
+                $asn->save();
+
+                // Save ASN Emails
+                foreach ($parsedWhois->emails as $email) {
+                    $asnEmail = new ASNEmail;
+                    $asnEmail->asn_id = $asn->id;
+                    $asnEmail->email_address = $email;
+
+                    // Check if its an abuse email
+                    if (in_array($email, $parsedWhois->abuse_emails)) {
+                        $asnEmail->abuse_email = true;
+                    }
+
+                    $asnEmail->save();
+                }
+
+                $finalASN = ASN::where('id', $asn->id)->first();
+                dump([
+                    'name' => $finalASN->name,
+                    'description' => $finalASN->description,
+                    'description_full' => json_decode($finalASN->description_full, true),
+                    'counrty_code' => $finalASN->counrty_code,
+                    'owner_address' => json_decode($finalASN->owner_address, true),
+                    'abuse_emails' => $finalASN->emails()->where('abuse_email', true)->get()->lists('email_address'),
+                    'emails' => $finalASN->emails()->lists('email_address'),
+                ]);
+            }
         }
+
 
         // Ok, now that we are done with new allocations, lets update the old records
         $oldAsns = ASN::where('updated_at', '<', Carbon::now()->subMonth())->orderBy('updated_at', 'ASC')->limit(2000)->get();
