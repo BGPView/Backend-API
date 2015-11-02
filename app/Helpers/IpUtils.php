@@ -273,6 +273,7 @@ class IpUtils
 
     public function getInputType($input)
     {
+        $input = explode('/', $input, 2)[0];
         if (!filter_var($input, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false) {
             return 6;
         } elseif (!filter_var($input, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false) {
@@ -289,7 +290,8 @@ class IpUtils
         if ($type === 'asn') {
             return "AS" . str_ireplace('as', '', $input);
         }
-        return $input;
+
+        return explode('/', $input, 2)[0];
     }
 
     public function getAllocationEntry($input)
