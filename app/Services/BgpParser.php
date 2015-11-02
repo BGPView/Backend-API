@@ -11,22 +11,17 @@ class BgpParser
         $path =  explode('as-path', $input, 2)[1];
         $path = trim(explode(':', $path, 2)[1]);
         $path = explode(' ', $path);
+        $prefixParts = explode('/', $bgpParts[0], 2);
 
-        $prefix = $bgpParts[0];
-        $prefixParts = explode('/', $prefix, 2);
-        $ip = $prefixParts[0];
-        $cidr = $prefixParts[1];
-        $source = $bgpParts[1];
-        $asn = $bgpParts[3];
+        $bgpPrefixData = new \stdClass();
+        $bgpPrefixData->prefix = $bgpParts[0];
+        $bgpPrefixData->ip = $prefixParts[0];
+        $bgpPrefixData->cidr = $prefixParts[1];
+        $bgpPrefixData->source = $bgpParts[1];
+        $bgpPrefixData->asn = $bgpParts[3];
+        $bgpPrefixData->path = $path;
 
-        return [
-            'prefix' => $prefix,
-            'ip' => $ip,
-            'cidr' => $cidr,
-            'asn' => $asn,
-            'source' => $source,
-            'as_path' => $path,
-        ];
+        return $bgpPrefixData;
     }
 
 }
