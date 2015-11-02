@@ -35,8 +35,8 @@ class Whois
     public function __construct($input)
     {
         $this->ipUtils = new IpUtils;
-        $allocation = $this->ipUtils->getAllocationEntry($input);
         $this->input = $this->ipUtils->normalizeInput(trim($input));
+        $allocation = $this->ipUtils->getAllocationEntry($this->input);
 
         // Lets make sure we found an allocation first
         if (is_null($allocation) !== true) {
