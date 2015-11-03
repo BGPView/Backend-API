@@ -26,7 +26,8 @@ class CreateIpv4InfoTable extends Migration
             $table->string('counrty_code', 2)->index();
             $table->text('owner_address')->nullable();
             $table->text('raw_whois')->nullable();
-
+            $table->dateTime('seen_at');
+            $table->dateTime('scraped_at');
             $table->timestamps();
         });
     }
