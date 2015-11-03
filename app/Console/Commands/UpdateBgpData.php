@@ -191,7 +191,7 @@ class UpdateBgpData extends Command
                 ]);
 
                 // Remove all prefixes that are older than 1 day post udpating
-                IPv6Prefix::where('last_seen', '<', Carbon::yesterday())->delete();
+                IPv6Prefix::where('seen_at', '<', Carbon::yesterday())->delete();
             }
             fclose($fp);
 
@@ -338,7 +338,7 @@ class UpdateBgpData extends Command
                 ]);
 
                 // Remove all prefixes that are older than 1 day post udpating
-                IPv4Prefix::where('last_seen', '<', Carbon::yesterday())->delete();
+                IPv4Prefix::where('seen_at', '<', Carbon::yesterday())->delete();
             }
             fclose($fp);
 
