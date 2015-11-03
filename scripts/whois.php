@@ -108,7 +108,12 @@ if ($whois_server == 'whois.arin.net') {
         }
     } else if (stristr($out, 'inetnum:') || stristr($out, 'inet6num:')) {
         $outParts = explode("% Information related to", $out);
-        $out = "% Information related to" . end($outParts);
+        foreach ($outParts as $outPart) {
+            if (stristr($outPart, 'inetnum:') || stristr($outPart, 'inet6num:')) {
+                $out = "% Information related to" . $outPart;
+            }
+        }
+
     }
 } else if ($whois_server == 'whois.afrinic.net') {
     // ASN Specific
