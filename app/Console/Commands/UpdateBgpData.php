@@ -84,6 +84,9 @@ class UpdateBgpData extends Command
         $fp = fopen($filePath, 'r');
         if ($fp) {
             while (($line = fgets($fp)) !== false) {
+
+                $this->cli->br()->comment($line);
+
                 $parsedLine = $this->bgpParser->parse($line);
 
                 // Before making any DB queries lets check if its a repeated BGP line
