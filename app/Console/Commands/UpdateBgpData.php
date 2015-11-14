@@ -334,13 +334,11 @@ class UpdateBgpData extends Command
                     'abuse_emails' => $ipv4Prefix->emails()->where('abuse_email', true)->get()->lists('email_address'),
                     'emails' => $ipv4Prefix->emails()->lists('email_address'),
                 ]);
-
-                // Remove all prefixes that are older than 1 day post udpating
-                IPv4Prefix::where('seen_at', '<', Carbon::yesterday())->delete();
             }
             fclose($fp);
 
-            //
+            // Remove all prefixes that are older than 1 day post udpating
+            IPv4Prefix::where('seen_at', '<', Carbon::yesterday())->delete();
         }
 
         $this->output->newLine(1);
