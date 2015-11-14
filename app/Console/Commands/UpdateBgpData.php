@@ -64,147 +64,7 @@ class UpdateBgpData extends Command
 
     private function updateIPv6Prefixes()
     {
-        $this->bench->start();
-        $this->progressStarted = false;
-        $this->cli->br()->comment('===================================================');
-        $filePath = sys_get_temp_dir() . '/ipv6_rib.txt';
-
-        $this->downloadRIBs($filePath, 6);
-
-        $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
-
-        // Lets read through the file
-        $fp = fopen($filePath, 'r');
-        if ($fp) {
-            while (($line = fgets($fp)) !== false) {
-                $parsedLine = $this->bgpParser->parse($line);
-                $ipAllocation = $this->ipUtils->getAllocationEntry($parsedLine->ip);
-
-                // Skip non allocated
-                if (is_null($ipAllocation) === true) {
-                    continue;
-                }
-
-                // Skip of already in DB
-                $prefixTest = IPv6Prefix::where('ip', $parsedLine->ip)->where('cidr', $parsedLine->cidr)->first();
-                if (is_null($prefixTest) === false) {
-
-                    $prefixTest->seen_at = Carbon::now();
-
-                    // If the last time the prefix was scraped is older than 7 days, update it
-                    if (strtotime($prefixTest->scraped_at) < Carbon::now()->subWeek()->timestamp) {
-                        $this->cli->br()->comment('===================================================');
-                        $this->cli->br()->comment('Updating older prefix whois info - ' . $prefixTest->ip . '/' . $prefixTest->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
-
-                        $ipWhois = new Whois($prefixTest->ip);
-                        $parsedWhois = $ipWhois->parse();
-
-                        $prefixTest->name = $parsedWhois->name;
-                        $prefixTest->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-                        $prefixTest->description_full = json_encode($parsedWhois->description);
-                        $prefixTest->counrty_code = $parsedWhois->counrty_code;
-                        $prefixTest->owner_address = json_encode($parsedWhois->address);
-                        $prefixTest->raw_whois = $ipWhois->raw();
-                        $prefixTest->seen_at = Carbon::now();
-                        $prefixTest->scraped_at = Carbon::now();
-
-                        // Lets remove old emails for this prefix
-                        $prefixTest->emails()->delete();
-
-                        // Save new emails
-                        foreach ($parsedWhois->emails as $email) {
-                            $prefixEmail = new IPv6PrefixEmail;
-                            $prefixEmail->ipv6_prefix_id = $prefixTest->id;
-                            $prefixEmail->email_address = $email;
-
-                            // Check if its an abuse email
-                            if (in_array($email, $parsedWhois->abuse_emails)) {
-                                $prefixEmail->abuse_email = true;
-                            }
-
-                            $prefixEmail->save();
-                        }
-
-                        dump([
-                            'name' => $prefixTest->name,
-                            'description' => $prefixTest->description,
-                            'description_full' => json_decode($prefixTest->description_full, true),
-                            'counrty_code' => $prefixTest->counrty_code,
-                            'owner_address' => json_decode($prefixTest->owner_address, true),
-                            'abuse_emails' => $prefixTest->emails()->where('abuse_email', true)->get()->lists('email_address'),
-                            'emails' => $prefixTest->emails()->lists('email_address'),
-                        ]);
-
-                        unset($ipWhois);
-                        unset($parsedWhois);
-                    }
-
-                    // Update the prefix
-                    $prefixTest->save();
-                    continue;
-                }
-
-                $this->cli->br()->comment('===================================================');
-                $this->cli->br()->comment('Adding new prefix whois info - ' . $parsedLine->ip . '/' . $parsedLine->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
-
-                $ipWhois = new Whois($parsedLine->ip);
-                $parsedWhois = $ipWhois->parse();
-
-                $ipv6Prefix = new IPv6Prefix;
-                $ipv6Prefix->rir_id = $ipAllocation->rir->id;
-                $ipv6Prefix->ip = $parsedLine->ip;
-                $ipv6Prefix->cidr = $parsedLine->cidr;
-                $ipv6Prefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
-                $ipv6Prefix->ip_dec_end = ($this->ipUtils->ip2dec($parsedLine->ip) + $ipv6AmountCidrArray[$parsedLine->cidr]);
-                $ipv6Prefix->name = $parsedWhois->name;
-                $ipv6Prefix->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-                $ipv6Prefix->description_full = json_encode($parsedWhois->description);
-                $ipv6Prefix->counrty_code = $parsedWhois->counrty_code;
-                $ipv6Prefix->owner_address = json_encode($parsedWhois->address);
-                $ipv6Prefix->raw_whois = $ipWhois->raw();
-                $ipv6Prefix->seen_at = Carbon::now();
-                $ipv6Prefix->scraped_at = Carbon::now();
-                $ipv6Prefix->save();
-
-                // Save Prefix Emails
-                foreach ($parsedWhois->emails as $email) {
-                    $prefixEmail = new IPv6PrefixEmail;
-                    $prefixEmail->ipv6_prefix_id = $ipv6Prefix->id;
-                    $prefixEmail->email_address = $email;
-
-                    // Check if its an abuse email
-                    if (in_array($email, $parsedWhois->abuse_emails)) {
-                        $prefixEmail->abuse_email = true;
-                    }
-
-                    $prefixEmail->save();
-                }
-
-                dump([
-                    'name' => $ipv6Prefix->name,
-                    'description' => $ipv6Prefix->description,
-                    'description_full' => json_decode($ipv6Prefix->description_full, true),
-                    'counrty_code' => $ipv6Prefix->counrty_code,
-                    'owner_address' => json_decode($ipv6Prefix->owner_address, true),
-                    'abuse_emails' => $ipv6Prefix->emails()->where('abuse_email', true)->get()->lists('email_address'),
-                    'emails' => $ipv6Prefix->emails()->lists('email_address'),
-                ]);
-            }
-            fclose($fp);
-
-            // Remove all prefixes that are older than 1 day post udpating
-            IPv6Prefix::where('seen_at', '<', Carbon::yesterday())->delete();
-        }
-
-        $this->output->newLine(1);
-        $this->bench->end();
-        $this->cli->info(sprintf(
-            'Time: %s, Memory: %s',
-            $this->bench->getTime(),
-            $this->bench->getMemoryPeak()
-        ))->br();
-
-        File::delete($filePath);
+        // TO DO
     }
 
     private function updateIPv4Prefixes()
@@ -218,11 +78,20 @@ class UpdateBgpData extends Command
 
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
 
+        $oldParsedLine = null;
+
         // Lets read through the file
         $fp = fopen($filePath, 'r');
         if ($fp) {
             while (($line = fgets($fp)) !== false) {
                 $parsedLine = $this->bgpParser->parse($line);
+
+                // Before making any DB queries lets check if its a repeated BGP line
+                if (is_null($oldParsedLine) === false && $oldParsedLine->ip === $parsedLine->ip && $oldParsedLine->cidr === $parsedLine->cidr) {
+                    continue;
+                }
+
+                $oldParsedLine = $parsedLine;
                 $ipAllocation = $this->ipUtils->getAllocationEntry($parsedLine->ip);
 
                 // Skip non allocated
