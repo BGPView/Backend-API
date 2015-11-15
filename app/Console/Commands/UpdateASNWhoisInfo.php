@@ -78,7 +78,7 @@ class UpdateASNWhoisInfo extends Command
             if ($data->asn === $asn) {
                 foreach ($data as $key => $value) {
                     if (empty($value) === true) {
-                        $array[$key] = null;
+                        $data->$key = null;
                     }
                 }
 
