@@ -10,24 +10,28 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use League\CLImate\CLImate;
 
-class UpdateWhoisInfo extends Command
+class UpdateASNWhoisInfo extends Command
 {
 
     private $cli;
+
+    // For docs: https://beta.peeringdb.com/apidocs/
+    private $peeringdb_url = 'https://beta.peeringdb.com/api/asn';
+    private $peeringDBData;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'zIPLookup:update-whois-info';
+    protected $signature = 'zIPLookup:update-asn-whois';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Updates all old Whois info about ASN, IPv4 and IPv6 resources';
+    protected $description = 'Updates all old Whois info about ASN resources';
 
     /**
      * Create a new command instance.
@@ -45,7 +49,44 @@ class UpdateWhoisInfo extends Command
      */
     public function handle()
     {
+        $this->loadPeeringDB();
         $this->updateASN();
+    }
+
+    private function loadPeeringDB()
+    {
+        $this->cli->br()->comment('Downloading the Peeringhub DB...')->br();
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->peeringdb_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_NOPROGRESS, false);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_ENCODING , "gzip");
+        $peeringDB = curl_exec($ch);
+        curl_close($ch);
+
+        $this->peeringDBData = json_decode($peeringDB)->data;
+    }
+
+    private function getPeeringDbInfo($asn)
+    {
+        foreach ($this->peeringDBData as $data) {
+            if ($data->asn === $asn) {
+                foreach ($data as $key => $value) {
+                    if (empty($value) === true) {
+                        $array[$key] = null;
+                    }
+                }
+
+                return $data;
+            }
+        }
+
+        return null;
     }
 
     private function updateASN()
@@ -75,6 +116,14 @@ class UpdateWhoisInfo extends Command
                 $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
                 $asn->description_full = json_encode($parsedWhois->description);
 
+                // Insert PeerDB Info if we get any
+                if ($peerDb = $this->getPeeringDbInfo($asn->asn)) {
+                    $asn->website = $peerDb->website;
+                    $asn->looking_glass = $peerDb->looking_glass;
+                    $asn->traffic_estimation = $peerDb->info_traffic;
+                    $asn->traffic_ratio = $peerDb->info_ratio;
+                }
+
                 $asn->counrty_code = $parsedWhois->counrty_code;
                 $asn->owner_address = json_encode($parsedWhois->address);
                 $asn->raw_whois = $asnWhois->raw();
@@ -97,6 +146,10 @@ class UpdateWhoisInfo extends Command
                 $finalASN = ASN::where('id', $asn->id)->first();
                 dump([
                     'name' => $finalASN->name,
+                    'website' => $asn->website,
+                    'looking_glass' => $asn->looking_glass,
+                    'traffic_estimation' => $asn->traffic_estimation,
+                    'traffic_ratio' => $asn->traffic_ratio,
                     'description' => $finalASN->description,
                     'description_full' => json_decode($finalASN->description_full, true),
                     'counrty_code' => $finalASN->counrty_code,
@@ -120,6 +173,14 @@ class UpdateWhoisInfo extends Command
             $asn->name = $parsedWhois->name;
             $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
             $asn->description_full = json_encode($parsedWhois->description);
+
+            // If we have the PeerDB info lets update it.
+            if ($peerDb = $this->getPeeringDbInfo($asn->asn)) {
+                $asn->website = $peerDb->website;
+                $asn->looking_glass = $peerDb->looking_glass;
+                $asn->traffic_estimation = $peerDb->info_traffic;
+                $asn->traffic_ratio = $peerDb->info_ratio;
+            }
 
             $asn->counrty_code = $parsedWhois->counrty_code;
             $asn->owner_address = json_encode($parsedWhois->address);

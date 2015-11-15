@@ -14,7 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \App\Console\Commands\UpdateAllocationLists::class,
-        \App\Console\Commands\UpdateWhoisInfo::class,
+        \App\Console\Commands\UpdateASNWhoisInfo::class,
         \App\Console\Commands\UpdateBgpData::class,
     ];
 
