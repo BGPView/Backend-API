@@ -294,7 +294,7 @@ class IpUtils
         return explode('/', $input, 2)[0];
     }
 
-    public function getAllocationEntry($input)
+    public function getAllocationEntry($input, $cidr = null)
     {
         $type = $this->getInputType($input);
 
@@ -307,10 +307,34 @@ class IpUtils
             }
 
             $ipDec = number_format($this->ip2dec($input), 0, '', '');
-            return $class::where('ip_dec_start', '<=', $ipDec)
+
+            $allocations = $class::where('ip_dec_start', '<=', $ipDec)
                 ->where('ip_dec_end', '>=',  $ipDec)
-                ->orderBy('date_allocated', 'desc')
-                ->first();
+                ->orderBy('date_allocated', 'asc')
+                ->get();
+
+            if ($allocations->count() === 1) {
+                return $allocations[0];
+            }
+
+            if ($allocations->count() > 1) {
+                if ($cidr === null) {
+                    return null;
+                }
+
+                // Since we have multiple allocation matchs for the one prefix
+                // We will need to try find the matching input cidr else go to the default alloc
+                foreach ($allocations as $allocation) {
+                    if ($allocation->cidr == $cidr) {
+                        return $allocation;
+                    }
+                }
+
+                // Return the older allocation
+                return $allocations[0];
+            }
+
+            return null;
         }
 
         //Not an IP. lets try look up domain

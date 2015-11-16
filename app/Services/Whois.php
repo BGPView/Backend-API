@@ -32,11 +32,11 @@ class Whois
                 'supplied.unknown',
             ];
 
-    public function __construct($input)
+    public function __construct($input, $cidr = null)
     {
         $this->ipUtils = new IpUtils;
         $this->input = $this->ipUtils->normalizeInput(trim($input));
-        $allocation = $this->ipUtils->getAllocationEntry($this->input);
+        $allocation = $this->ipUtils->getAllocationEntry($this->input, $cidr);
 
         // Lets make sure we found an allocation first
         if (is_null($allocation) !== true) {
