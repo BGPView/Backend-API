@@ -114,7 +114,7 @@ class UpdateBgpData extends Command
                     $prefixTest->seen_at = Carbon::now();
 
                     // If the last time the prefix was scraped is older than 7 days, update it
-                    if (strtotime($prefixTest->scraped_at) < Carbon::now()->subWeek()->timestamp) {
+                    if (strtotime($prefixTest->scraped_at) < Carbon::now()->subWeeks(3)->timestamp) {
                         $this->cli->br()->comment('===================================================');
                         $this->cli->br()->comment('Updating older prefix whois info - ' . $prefixTest->ip . '/' . $prefixTest->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
 
