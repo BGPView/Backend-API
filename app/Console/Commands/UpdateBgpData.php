@@ -118,7 +118,7 @@ class UpdateBgpData extends Command
                         $this->cli->br()->comment('===================================================');
                         $this->cli->br()->comment('Updating older prefix whois info - ' . $prefixTest->ip . '/' . $prefixTest->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
 
-                        $ipWhois = new Whois($prefixTest->ip);
+                        $ipWhois = new Whois($prefixTest->ip, $prefixTest->cidr);
                         $parsedWhois = $ipWhois->parse();
 
                         $prefixTest->name = $parsedWhois->name;
@@ -169,7 +169,7 @@ class UpdateBgpData extends Command
                 $this->cli->br()->comment('===================================================');
                 $this->cli->br()->comment('Adding new prefix whois info - ' . $parsedLine->ip . '/' . $parsedLine->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
 
-                $ipWhois = new Whois($parsedLine->ip);
+                $ipWhois = new Whois($parsedLine->ip, $parsedLine->cidr);
                 $parsedWhois = $ipWhois->parse();
 
                 $ipv4Prefix = new IPv4Prefix;
