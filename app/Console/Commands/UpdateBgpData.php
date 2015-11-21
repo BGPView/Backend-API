@@ -94,6 +94,11 @@ class UpdateBgpData extends Command
                     continue;
                 }
 
+                // Lets make sure that v4 is min /24
+                if ($parsedLine->cidr > 24) {
+                    continue;
+                }
+
                 $oldParsedLine = $parsedLine;
                 $ipAllocation = $this->ipUtils->getAllocationEntry($parsedLine->ip);
 
