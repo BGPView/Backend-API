@@ -22,7 +22,6 @@ class UpdateBgpData extends Command
     private $ipv6RibDownloadUrl = "http://185.42.223.50/rib_ipv6.txt";
     private $cli;
     private $bench;
-    private $progressStarted = false;
     private $bgpParser;
 
     /**
@@ -70,7 +69,6 @@ class UpdateBgpData extends Command
     private function updateIPv4Prefixes()
     {
         $this->bench->start();
-        $this->progressStarted = false;
         $this->cli->br()->comment('===================================================');
         $filePath = sys_get_temp_dir() . '/ipv4_rib.txt';
 
@@ -100,12 +98,6 @@ class UpdateBgpData extends Command
                 }
 
                 $oldParsedLine = $parsedLine;
-                $ipAllocation = $this->ipUtils->getAllocationEntry($parsedLine->ip);
-
-                // Skip non allocated
-                if (is_null($ipAllocation) === true) {
-                    continue;
-                }
 
                 // Skip of already in DB
                 $prefixTest = IPv4Prefix::where('ip', $parsedLine->ip)->where('cidr', $parsedLine->cidr)->first();
@@ -166,6 +158,13 @@ class UpdateBgpData extends Command
                     continue;
                 }
 
+                $ipAllocation = $this->ipUtils->getAllocationEntry($parsedLine->ip);
+
+                // Skip non allocated
+                if (is_null($ipAllocation) === true) {
+                    continue;
+                }
+
                 $this->cli->br()->comment('===================================================');
                 $this->cli->br()->comment('Adding new prefix whois info - ' . $parsedLine->ip . '/' . $parsedLine->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
 
@@ -173,7 +172,7 @@ class UpdateBgpData extends Command
                 $parsedWhois = $ipWhois->parse();
 
                 $ipv4Prefix = new IPv4Prefix;
-                $ipv4Prefix->rir_id = $ipAllocation->rir->id;
+                $ipv4Prefix->rir_id = $ipAllocation->rir_id;
                 $ipv4Prefix->ip = $parsedLine->ip;
                 $ipv4Prefix->cidr = $parsedLine->cidr;
                 $ipv4Prefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
