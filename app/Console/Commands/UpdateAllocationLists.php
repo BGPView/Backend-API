@@ -80,24 +80,11 @@ class UpdateAllocationLists extends Command
 
     }
 
-    private function downloadProgress($resource, $download_size, $downloaded, $upload_size, $uploaded)
-    {
-
-        if ($this->progressStarted === false) {
-            $this->progressBar = $this->output->createProgressBar($download_size);
-            $this->progressStarted = true;
-        }
-
-        if($download_size > 0 && isset($this->progressBar) ===true) {
-            $this->progressBar->setProgress($downloaded);
-        }
-    }
-
     private function updateDb($rir, $list)
     {
         $lines = explode("\n", $list);
         $this->cli->br()->comment('Updating DB with the ' . $rir->name . ' allocation list ('.count($lines).' entries)');
-        
+
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount($reverse = true);
         $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
 
@@ -141,7 +128,7 @@ class UpdateAllocationLists extends Command
                             'counrty_code' => $data[1],
                             'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
                         ]);
-                        $this->cli->br()->comment("Entering new IPv4 range: " . $ipv4->ip . " [" . $rir->name . "]");
+                        $this->cli->br()->comment("Entering new IPv4 range: " . $ipv4->ip . "/".$ipv4->cidr." [" . $rir->name . "]");
                     }
 
                 } else if ($resourceType === 'ipv6') {
@@ -162,7 +149,7 @@ class UpdateAllocationLists extends Command
                             'counrty_code' => $data[1],
                             'date_allocated' => substr($data[5], 0, 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
                         ]);
-                        $this->cli->br()->comment("Entering new IPv4 range: " . $ipv6->ip . " [" . $rir->name . "]");
+                        $this->cli->br()->comment("Entering new IPv4 range: " . $ipv6->ip . "/".$ipv6->cidr."  [" . $rir->name . "]");
                     }
                 }
             }
