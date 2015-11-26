@@ -75,6 +75,7 @@ class UpdateBgpData extends Command
         $this->downloadRIBs($filePath, 4);
 
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
+        $time = Carbon::now();
 
         $oldParsedLine = null;
 
@@ -103,10 +104,10 @@ class UpdateBgpData extends Command
                 $prefixTest = IPv4Prefix::where('ip', $parsedLine->ip)->where('cidr', $parsedLine->cidr)->first();
                 if (is_null($prefixTest) === false) {
 
-                    $prefixTest->seen_at = Carbon::now();
+                    $prefixTest->seen_at = $time;
 
                     // If the last time the prefix was scraped is older than 7 days, update it
-                    if (strtotime($prefixTest->scraped_at) < Carbon::now()->subWeeks(3)->timestamp) {
+                    if (strtotime($prefixTest->scraped_at) < $time->subWeeks(3)->timestamp) {
                         $this->cli->br()->comment('===================================================');
                         $this->cli->br()->comment('Updating older prefix whois info - ' . $prefixTest->ip . '/' . $prefixTest->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
 
@@ -119,8 +120,8 @@ class UpdateBgpData extends Command
                         $prefixTest->counrty_code = $parsedWhois->counrty_code;
                         $prefixTest->owner_address = json_encode($parsedWhois->address);
                         $prefixTest->raw_whois = $ipWhois->raw();
-                        $prefixTest->seen_at = Carbon::now();
-                        $prefixTest->scraped_at = Carbon::now();
+                        $prefixTest->seen_at = $time;
+                        $prefixTest->scraped_at = $time;
 
                         // Lets remove old emails for this prefix
                         $prefixTest->emails()->delete();
@@ -183,8 +184,8 @@ class UpdateBgpData extends Command
                 $ipv4Prefix->counrty_code = $parsedWhois->counrty_code;
                 $ipv4Prefix->owner_address = json_encode($parsedWhois->address);
                 $ipv4Prefix->raw_whois = $ipWhois->raw();
-                $ipv4Prefix->seen_at = Carbon::now();
-                $ipv4Prefix->scraped_at = Carbon::now();
+                $ipv4Prefix->seen_at = $time;
+                $ipv4Prefix->scraped_at = $time;
                 $ipv4Prefix->save();
 
                 // Save Prefix Emails
