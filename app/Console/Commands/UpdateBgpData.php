@@ -76,6 +76,7 @@ class UpdateBgpData extends Command
 
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
         $time = Carbon::now();
+        $threeWeeksAgo = $time->subWeeks(3)->timestamp;
 
         $oldParsedLine = null;
 
@@ -107,9 +108,9 @@ class UpdateBgpData extends Command
                     $prefixTest->seen_at = $time;
 
                     // If the last time the prefix was scraped is older than 7 days, update it
-                    if (strtotime($prefixTest->scraped_at) < $time->subWeeks(3)->timestamp) {
+                    if (strtotime($prefixTest->scraped_at) < $threeWeeksAgo) {
                         $this->cli->br()->comment('===================================================');
-                        $this->cli->br()->comment('Updating older prefix whois info - ' . $prefixTest->ip . '/' . $prefixTest->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
+                        $this->cli->br()->comment('Updating older prefix whois info - ' . $prefixTest->ip . '/' . $prefixTest->cidr)->br();
 
                         $ipWhois = new Whois($prefixTest->ip, $prefixTest->cidr);
                         $parsedWhois = $ipWhois->parse();
