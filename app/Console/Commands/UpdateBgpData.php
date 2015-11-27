@@ -65,45 +65,49 @@ class UpdateBgpData extends Command
 
     private function updateIPv4Prefixes()
     {
-        $this->bench->start();
+
         $this->cli->br()->comment('===================================================');
+
         $filePath = sys_get_temp_dir() . '/ipv4_rib.txt';
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
+        $seenPrefixes = [];
 
         $this->downloadRIBs($filePath, 4);
 
+        $this->bench->start();
+
         // Cleaning up old temp table
+        $this->cli->br()->comment('Drop old TEMP table');
         DB::statement('DROP TABLE IF EXISTS ipv4_bgp_prefixes_temp');
 
         // Creating a new temp table to store our new BGP data
+        $this->cli->br()->comment('Cloning ipv4_bgp_prefixes table schema');
         DB::statement('CREATE TABLE ipv4_bgp_prefixes_temp LIKE ipv4_bgp_prefixes');
 
-        $oldParsedLine = null;
+        $this->cli->br()->comment('===================================================');
+        $this->cli->br()->comment('Processing BGP entries');
+        $this->cli->br()->comment('Go grab a drink, this will take 10-30 mins');
 
         // Lets read through the file
         $fp = fopen($filePath, 'r');
         if ($fp) {
             while (($line = fgets($fp)) !== false) {
 
-                $this->cli->br()->comment($line);
-
                 $parsedLine = $this->bgpParser->parse($line);
-
-                // Before making any DB queries lets check if its a repeated BGP line
-                if (is_null($oldParsedLine) === false && $oldParsedLine->ip === $parsedLine->ip && $oldParsedLine->cidr === $parsedLine->cidr) {
-                    continue;
-                }
 
                 // Lets make sure that v4 is min /24
                 if ($parsedLine->cidr > 24) {
                     continue;
                 }
 
-                $oldParsedLine = $parsedLine;
+                // Skip any prefix we have already seen
+                if (in_array($parsedLine->prefix, $seenPrefixes)) {
+                    continue;
+                }
 
                 // Skip of already in new temp table
                 $prefixTest = IPv4BgpPrefix::where('ip', $parsedLine->ip)->where('cidr', $parsedLine->cidr)->first();
-                if (is_null($prefixTest) === false) {
+                if (is_null($prefixTest) !== true) {
                     continue;
                 }
 
@@ -115,9 +119,6 @@ class UpdateBgpData extends Command
                     continue;
                 }
 
-                $this->cli->br()->comment('===================================================');
-                $this->cli->br()->comment('Adding new BGP prefix - ' . $parsedLine->ip . '/' . $parsedLine->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
-
                 $ipv4Prefix = new IPv4BgpPrefix;
                 $ipv4Prefix->setTable('ipv4_bgp_prefixes_temp');
                 $ipv4Prefix->rir_id = $ipAllocation->rir_id;
@@ -127,7 +128,8 @@ class UpdateBgpData extends Command
                 $ipv4Prefix->ip_dec_end = ($this->ipUtils->ip2dec($parsedLine->ip) + $ipv4AmountCidrArray[$parsedLine->cidr]);
                 $ipv4Prefix->save();
 
-                dump($ipv4Prefix);
+                // Lets make note of the prefix we have seen
+                $seenPrefixes[] = $parsedLine->prefix;
             }
             fclose($fp);
 
@@ -142,13 +144,24 @@ class UpdateBgpData extends Command
         ))->br();
 
         // Rename temp table to take over
+        $this->cli->br()->comment('===================================================');
+        $this->cli->br()->comment('Swapping TEMP table with production table');
         DB::statement('RENAME TABLE ipv4_bgp_prefixes TO backup_ipv4_bgp_prefixes, ipv4_bgp_prefixes_temp TO ipv4_bgp_prefixes;');
 
         // Delete old table
+        $this->cli->br()->comment('===================================================');
+        $this->cli->br()->comment('Removing old production prefix table');
         DB::statement('DROP TABLE backup_ipv4_bgp_prefixes');
 
         // Remove RIB file
+        $this->cli->br()->comment('===================================================');
+        $this->cli->br()->comment('Deleting RIB file');
         File::delete($filePath);
+
+        $this->cli->br()->comment('===================================================');
+        $this->cli->br()->comment('DONE!!!');
+        $this->cli->br()->comment('===================================================');
+
     }
 
     private function downloadRIBs($filePath, $ipVersion = 4)
