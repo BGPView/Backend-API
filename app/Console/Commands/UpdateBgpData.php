@@ -103,7 +103,7 @@ class UpdateBgpData extends Command
 
                 // Skip of already in new temp table
                 $prefixTest = IPv4BgpPrefix::where('ip', $parsedLine->ip)->where('cidr', $parsedLine->cidr)->first();
-                if (is_null($prefixTest) === true) {
+                if (is_null($prefixTest) === fasle) {
                     continue;
                 }
 
