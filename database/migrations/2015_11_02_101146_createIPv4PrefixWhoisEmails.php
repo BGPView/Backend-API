@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePrefixWhoisEmails extends Migration
+class CreateIPv4PrefixWhoisEmails extends Migration
 {
     /**
      * Run the migrations.
@@ -12,7 +12,7 @@ class CreatePrefixWhoisEmails extends Migration
      */
     public function up()
     {
-        Schema::create('prefix_whois_emails', function($table)
+        Schema::create('ipv4_prefix_whois_emails', function($table)
         {
             $table->increments('id')->unique();
             $table->integer('prefix_whois_id')->unsigned()->index();
@@ -29,6 +29,6 @@ class CreatePrefixWhoisEmails extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ipv4_prefix_emails');
+        Schema::dropIfExists('ipv4_prefix_whois_emails');
     }
 }

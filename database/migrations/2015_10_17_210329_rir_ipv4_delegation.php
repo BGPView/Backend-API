@@ -34,6 +34,6 @@ class RirIpv4Delegation extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rir_ipv4_allocation');
+        Schema::dropIfExists('rir_ipv4_allocations');
     }
 }

@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePrefixWhoisTable extends Migration
+class CreateIPv6PrefixWhoisTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,7 +12,7 @@ class CreatePrefixWhoisTable extends Migration
      */
     public function up()
     {
-        Schema::create('prefix_whois', function($table)
+        Schema::create('ipv6_prefix_whois', function($table)
         {
             $table->increments('id')->unique();
             $table->integer('bgp_prefix_id')->unsigned()->index();
@@ -33,6 +33,6 @@ class CreatePrefixWhoisTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('prefix_whois');
+        Schema::dropIfExists('ipv6_prefix_whois');
     }
 }
