@@ -3,14 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Helpers\IpUtils;
-use App\Models\IPv4PrefixEmail;
-use App\Models\IPv4Prefix;
-use App\Models\IPv6PrefixEmail;
-use App\Models\IPv6Prefix;
+use App\Models\IPv4BgpPrefix;
+use App\Models\IPv6BgpPrefix;
 use App\Services\BgpParser;
-use App\Services\Whois;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use League\CLImate\CLImate;
 use Ubench;
@@ -71,12 +68,15 @@ class UpdateBgpData extends Command
         $this->bench->start();
         $this->cli->br()->comment('===================================================');
         $filePath = sys_get_temp_dir() . '/ipv4_rib.txt';
+        $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
 
         $this->downloadRIBs($filePath, 4);
 
-        $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
-        $time = Carbon::now();
-        $threeWeeksAgo = $time->subWeeks(3)->timestamp;
+        // Cleaning up old temp table
+        DB::statement('DROP TABLE IF EXISTS ipv4_bgp_prefixes_temp');
+
+        // Creating a new temp table to store our new BGP data
+        DB::statement('CREATE TABLE ipv4_bgp_prefixes_temp LIKE ipv4_bgp_prefixes');
 
         $oldParsedLine = null;
 
@@ -101,122 +101,36 @@ class UpdateBgpData extends Command
 
                 $oldParsedLine = $parsedLine;
 
-                // Skip of already in DB
+                // Skip of already in new temp table
                 $prefixTest = IPv4Prefix::where('ip', $parsedLine->ip)->where('cidr', $parsedLine->cidr)->first();
-                if (is_null($prefixTest) === false) {
-
-                    $prefixTest->seen_at = $time;
-
-                    // If the last time the prefix was scraped is older than 7 days, update it
-                    if (strtotime($prefixTest->scraped_at) < $threeWeeksAgo) {
-                        $this->cli->br()->comment('===================================================');
-                        $this->cli->br()->comment('Updating older prefix whois info - ' . $prefixTest->ip . '/' . $prefixTest->cidr)->br();
-
-                        $ipWhois = new Whois($prefixTest->ip, $prefixTest->cidr);
-                        $parsedWhois = $ipWhois->parse();
-
-                        $prefixTest->name = $parsedWhois->name;
-                        $prefixTest->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-                        $prefixTest->description_full = json_encode($parsedWhois->description);
-                        $prefixTest->counrty_code = $parsedWhois->counrty_code;
-                        $prefixTest->owner_address = json_encode($parsedWhois->address);
-                        $prefixTest->raw_whois = $ipWhois->raw();
-                        $prefixTest->seen_at = $time;
-                        $prefixTest->scraped_at = $time;
-
-                        // Lets remove old emails for this prefix
-                        $prefixTest->emails()->delete();
-
-                        // Save new emails
-                        foreach ($parsedWhois->emails as $email) {
-                            $prefixEmail = new IPv4PrefixEmail;
-                            $prefixEmail->ipv4_prefix_id = $prefixTest->id;
-                            $prefixEmail->email_address = $email;
-
-                            // Check if its an abuse email
-                            if (in_array($email, $parsedWhois->abuse_emails)) {
-                                $prefixEmail->abuse_email = true;
-                            }
-
-                            $prefixEmail->save();
-                        }
-
-                        dump([
-                            'name' => $prefixTest->name,
-                            'description' => $prefixTest->description,
-                            'description_full' => json_decode($prefixTest->description_full, true),
-                            'counrty_code' => $prefixTest->counrty_code,
-                            'owner_address' => json_decode($prefixTest->owner_address, true),
-                            'abuse_emails' => $prefixTest->emails()->where('abuse_email', true)->get()->lists('email_address'),
-                            'emails' => $prefixTest->emails()->lists('email_address'),
-                        ]);
-
-                        unset($ipWhois);
-                        unset($parsedWhois);
-                    }
-
-                    // Update the prefix
-                    $prefixTest->save();
+                if (is_null($prefixTest) === true) {
                     continue;
                 }
 
+                // Get the RIR Allocation info for the prefix
                 $ipAllocation = $this->ipUtils->getAllocationEntry($parsedLine->ip);
 
-                // Skip non allocated
+                // Skip not allocated
                 if (is_null($ipAllocation) === true) {
                     continue;
                 }
 
                 $this->cli->br()->comment('===================================================');
-                $this->cli->br()->comment('Adding new prefix whois info - ' . $parsedLine->ip . '/' . $parsedLine->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
+                $this->cli->br()->comment('Adding new BGP prefix - ' . $parsedLine->ip . '/' . $parsedLine->cidr . ' [' . $ipAllocation->rir->name . ']')->br();
 
-                $ipWhois = new Whois($parsedLine->ip, $parsedLine->cidr);
-                $parsedWhois = $ipWhois->parse();
-
-                $ipv4Prefix = new IPv4Prefix;
+                $ipv4Prefix = new IPv4BgpPrefix;
+                $ipv4Prefix->setTable('ipv4_bgp_prefixes_temp');
                 $ipv4Prefix->rir_id = $ipAllocation->rir_id;
                 $ipv4Prefix->ip = $parsedLine->ip;
                 $ipv4Prefix->cidr = $parsedLine->cidr;
                 $ipv4Prefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
                 $ipv4Prefix->ip_dec_end = ($this->ipUtils->ip2dec($parsedLine->ip) + $ipv4AmountCidrArray[$parsedLine->cidr]);
-                $ipv4Prefix->name = $parsedWhois->name;
-                $ipv4Prefix->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-                $ipv4Prefix->description_full = json_encode($parsedWhois->description);
-                $ipv4Prefix->counrty_code = $parsedWhois->counrty_code;
-                $ipv4Prefix->owner_address = json_encode($parsedWhois->address);
-                $ipv4Prefix->raw_whois = $ipWhois->raw();
-                $ipv4Prefix->seen_at = $time;
-                $ipv4Prefix->scraped_at = $time;
                 $ipv4Prefix->save();
 
-                // Save Prefix Emails
-                foreach ($parsedWhois->emails as $email) {
-                    $prefixEmail = new IPv4PrefixEmail;
-                    $prefixEmail->ipv4_prefix_id = $ipv4Prefix->id;
-                    $prefixEmail->email_address = $email;
-
-                    // Check if its an abuse email
-                    if (in_array($email, $parsedWhois->abuse_emails)) {
-                        $prefixEmail->abuse_email = true;
-                    }
-
-                    $prefixEmail->save();
-                }
-
-                dump([
-                    'name' => $ipv4Prefix->name,
-                    'description' => $ipv4Prefix->description,
-                    'description_full' => json_decode($ipv4Prefix->description_full, true),
-                    'counrty_code' => $ipv4Prefix->counrty_code,
-                    'owner_address' => json_decode($ipv4Prefix->owner_address, true),
-                    'abuse_emails' => $ipv4Prefix->emails()->where('abuse_email', true)->get()->lists('email_address'),
-                    'emails' => $ipv4Prefix->emails()->lists('email_address'),
-                ]);
+                dump($ipv4Prefix);
             }
             fclose($fp);
 
-            // Remove all prefixes that are older than 1 day post udpating
-            IPv4Prefix::where('seen_at', '<', Carbon::yesterday())->delete();
         }
 
         $this->output->newLine(1);
@@ -227,6 +141,13 @@ class UpdateBgpData extends Command
             $this->bench->getMemoryPeak()
         ))->br();
 
+        // Rename temp table to take over
+        DB::statement('RENAME TABLE ipv4_bgp_prefixes TO backup_ipv4_bgp_prefixes, ipv4_bgp_prefixes_temp TO ipv4_bgp_prefixes;');
+
+        // Delete old table
+        DB::statement('DROP TABLE backup_ipv4_bgp_prefixes');
+
+        // Remove RIB file
         File::delete($filePath);
     }
 
