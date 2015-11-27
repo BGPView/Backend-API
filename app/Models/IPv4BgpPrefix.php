@@ -4,25 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class IPv6PrefixEmail extends Model {
+class IPv4BgpPrefix extends Model {
 
     /**
      * The database table used by the model.
      *
      * @var string
      */
-    protected $table = 'ipv6_prefix_emails';
+    protected $table = 'ipv4_bgp_prefixes';
 
     /**
      * The attributes excluded from the model's JSON form.
      *
      * @var array
      */
-    protected $hidden = ['id', 'ipv6_prefix_id', 'created_at', 'updated_at'];
+    protected $hidden = ['id', 'rir_id', 'created_at', 'updated_at'];
 
-
-    public function prefix()
+    public function rir()
     {
-        return $this->belongsTo('App\Models\IPv6Prefix');
+        return $this->belongsTo('App\Models\Rir');
     }
 }

@@ -11,18 +11,18 @@ class IPv4PrefixEmail extends Model {
      *
      * @var string
      */
-    protected $table = 'ipv4_prefix_emails';
+    protected $table = 'ipv4_prefix_whois_emails';
 
     /**
      * The attributes excluded from the model's JSON form.
      *
      * @var array
      */
-    protected $hidden = ['id', 'ipv4_prefix_id', 'created_at', 'updated_at'];
+    protected $hidden = ['id', 'prefix_whois_id', 'created_at', 'updated_at'];
 
 
-    public function prefix()
+    public function prefixWhois()
     {
-        return $this->belongsTo('App\Models\IPv4Prefix');
+        return $this->belongsTo('App\Models\IPv4PrefixWhois', 'id', 'prefix_whois_id');
     }
 }
