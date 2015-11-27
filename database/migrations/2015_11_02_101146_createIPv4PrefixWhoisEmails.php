@@ -16,7 +16,7 @@ class CreateIPv4PrefixWhoisEmails extends Migration
         {
             $table->increments('id')->unique();
             $table->integer('prefix_whois_id')->unsigned()->index();
-            $table->string('email_address');
+            $table->string('email_address')->index();
             $table->boolean('abuse_email')->default(false);
             $table->timestamps();
         });
