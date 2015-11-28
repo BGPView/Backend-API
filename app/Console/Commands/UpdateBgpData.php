@@ -96,7 +96,7 @@ class UpdateBgpData extends Command
                 $parsedLine = $this->bgpParser->parse($line);
 
                 // Lets make sure that v4 is min /24
-                if ($parsedLine->cidr > 24) {
+                if ($parsedLine->cidr > 24 || $parsedLine->cidr < 1) {
                     continue;
                 }
 
@@ -105,23 +105,9 @@ class UpdateBgpData extends Command
                     continue;
                 }
 
-                // Skip of already in new temp table
-                $prefixTest = IPv4BgpPrefix::where('ip', $parsedLine->ip)->where('cidr', $parsedLine->cidr)->first();
-                if (is_null($prefixTest) !== true) {
-                    continue;
-                }
-
-                // Get the RIR Allocation info for the prefix
-                $ipAllocation = $this->ipUtils->getAllocationEntry($parsedLine->ip);
-
-                // Skip not allocated
-                if (is_null($ipAllocation) === true) {
-                    continue;
-                }
-
+                // Save the BGP entry in the database
                 $ipv4Prefix = new IPv4BgpPrefix;
                 $ipv4Prefix->setTable('ipv4_bgp_prefixes_temp');
-                $ipv4Prefix->rir_id = $ipAllocation->rir_id;
                 $ipv4Prefix->ip = $parsedLine->ip;
                 $ipv4Prefix->cidr = $parsedLine->cidr;
                 $ipv4Prefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
@@ -132,7 +118,6 @@ class UpdateBgpData extends Command
                 $seenPrefixes[] = $parsedLine->prefix;
             }
             fclose($fp);
-
         }
 
         $this->output->newLine(1);
