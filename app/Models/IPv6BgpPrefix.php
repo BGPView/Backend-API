@@ -18,10 +18,5 @@ class IPv6BgpPrefix extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id', 'rir_id', 'created_at', 'updated_at'];
-
-    public function rir()
-    {
-        return $this->belongsTo('App\Models\Rir');
-    }
+    protected $hidden = ['id', 'created_at', 'updated_at'];
 }

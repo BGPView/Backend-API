@@ -15,7 +15,6 @@ class CreateIpv6BgpPrefixTable extends Migration
         Schema::create('ipv6_bgp_prefixes', function($table)
         {
             $table->increments('id')->unique();
-            $table->integer('rir_id')->unsigned()->index();
             $table->string('ip', 40)->index();
             $table->integer('cidr')->unsigned()->index();
             $table->decimal('ip_dec_start', 39, 0)->unsigned()->index();
