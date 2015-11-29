@@ -90,6 +90,7 @@ class UpdateBgpData extends Command
         DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_cidr_index`');
         DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_dec_start_index`');
         DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_dec_end_index`');
+        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_asn_index`');
 
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Processing BGP entries');
@@ -120,6 +121,8 @@ class UpdateBgpData extends Command
                 $ipv4Prefix->cidr = $parsedLine->cidr;
                 $ipv4Prefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
                 $ipv4Prefix->ip_dec_end = ($this->ipUtils->ip2dec($parsedLine->ip) + $ipv4AmountCidrArray[$parsedLine->cidr]);
+                $ipv4Prefix->asn = $parsedLine->asn;
+                $ipv4Prefix->asn_path = $parsedLine->path;
                 $ipv4Prefix->save();
 
                 // Lets make note of the prefix we have seen
@@ -146,6 +149,7 @@ class UpdateBgpData extends Command
         DB::statement('CREATE INDEX `ipv4_bgp_prefixes_cidr_index` ON `ipv4_bgp_prefixes_temp` (`cidr`)');
         DB::statement('CREATE INDEX `ipv4_bgp_prefixes_ip_dec_start_index` ON `ipv4_bgp_prefixes_temp` (`ip_dec_start`)');
         DB::statement('CREATE INDEX `ipv4_bgp_prefixes_ip_dec_end_index` ON `ipv4_bgp_prefixes_temp` (`ip_dec_end`)');
+        DB::statement('CREATE INDEX `ipv4_bgp_prefixes_asn_index` ON `ipv4_bgp_prefixes_temp` (`asn`)');
 
         // Rename temp table to take over
         $this->cli->br()->comment('===================================================');
