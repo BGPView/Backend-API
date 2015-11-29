@@ -101,7 +101,8 @@ class UpdateBgpData extends Command
                 }
 
                 // Skip any prefix we have already seen
-                if (in_array($parsedLine->prefix, $seenPrefixes)) {
+                // isset() is MUCH faster than using in_array()
+                if (isset($seenPrefixes[$parsedLine->prefix]) === true) {
                     continue;
                 }
 
@@ -115,7 +116,8 @@ class UpdateBgpData extends Command
                 $ipv4Prefix->save();
 
                 // Lets make note of the prefix we have seen
-                $seenPrefixes[] = $parsedLine->prefix;
+                // We are setting key here so above we can do a isset() check instead of in_array()
+                $seenPrefixes[$parsedLine->prefix] = "";
             }
             fclose($fp);
         }
