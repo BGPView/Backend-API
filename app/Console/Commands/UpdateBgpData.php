@@ -122,7 +122,7 @@ class UpdateBgpData extends Command
                 $ipv4Prefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
                 $ipv4Prefix->ip_dec_end = ($this->ipUtils->ip2dec($parsedLine->ip) + $ipv4AmountCidrArray[$parsedLine->cidr]);
                 $ipv4Prefix->asn = $parsedLine->asn;
-                $ipv4Prefix->asn_path = $parsedLine->path;
+                $ipv4Prefix->asn_path = trim(implode(" ", $parsedLine->path));
                 $ipv4Prefix->save();
 
                 // Lets make note of the prefix we have seen
