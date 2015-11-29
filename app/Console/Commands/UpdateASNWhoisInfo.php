@@ -81,11 +81,9 @@ class UpdateASNWhoisInfo extends Command
                         $data->$key = null;
                     }
                 }
-
                 return $data;
             }
         }
-
         return null;
     }
 
@@ -99,7 +97,7 @@ class UpdateASNWhoisInfo extends Command
         foreach ($allocatedAsns as $allocatedAsn) {
             // Lets check if the ASN has already been looked at in the past
             if (ASN::where('asn', $allocatedAsn->asn)->first() === null) {
-                $this->cli->br()->comment('Looking up and adding: AS' . $allocatedAsn->asn . ' ['.$allocatedAsn->rir->name.']');
+                $this->cli->br()->comment('Looking up and adding: AS' . $allocatedAsn->asn);
 
                 $asnWhois = new Whois($allocatedAsn->asn);
                 $parsedWhois = $asnWhois->parse();
@@ -110,7 +108,7 @@ class UpdateASNWhoisInfo extends Command
                 }
 
                 $asn = new ASN;
-                $asn->rir_id = $allocatedAsn->rir->id;
+                $asn->rir_id = $allocatedAsn->rir_id;
                 $asn->asn = $allocatedAsn->asn;
                 $asn->name = $parsedWhois->name;
                 $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
@@ -166,7 +164,7 @@ class UpdateASNWhoisInfo extends Command
         foreach ($oldAsns as $oldAsn) {
             $oldAsn->emails()->delete();
 
-            $this->cli->br()->comment('Updating: AS' . $oldAsn->asn . ' ['.$oldAsn->rir->name.']');
+            $this->cli->br()->comment('Updating: AS' . $oldAsn->asn);
             $asnWhois = new Whois($oldAsn->asn);
             $parsedWhois = $asnWhois->parse();
 
