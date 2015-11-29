@@ -74,13 +74,6 @@ class UpdateBgpData extends Command
 
         $this->downloadRIBs($filePath, 4);
 
-        // Remoing the indexes for faster DB inserts
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_id_unique`');
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_index`');
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_cidr_index`');
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_dec_start_index`');
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_dec_end_index`');
-
         $this->bench->start();
 
         // Cleaning up old temp table
@@ -90,6 +83,13 @@ class UpdateBgpData extends Command
         // Creating a new temp table to store our new BGP data
         $this->cli->br()->comment('Cloning ipv4_bgp_prefixes table schema');
         DB::statement('CREATE TABLE ipv4_bgp_prefixes_temp LIKE ipv4_bgp_prefixes');
+
+        // Removing the indexes for faster DB inserts
+        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_id_unique`');
+        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_index`');
+        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_cidr_index`');
+        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_dec_start_index`');
+        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_dec_end_index`');
 
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Processing BGP entries');
