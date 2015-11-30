@@ -19,4 +19,9 @@ class IPv4BgpPrefix extends Model {
      * @var array
      */
     protected $hidden = ['id', 'created_at', 'updated_at'];
+
+    public function whois()
+    {
+        return $this->hasOne('App\Models\IPv4PrefixWhois', 'bgp_prefix_id', 'id');
+    }
 }

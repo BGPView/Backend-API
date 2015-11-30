@@ -28,6 +28,6 @@ class IPv4PrefixWhois extends Model {
 
     public function bgpPrefix()
     {
-        return $this->belongsTo('App\Models\IPv4BgpPrefix', 'id', 'bgp_prefix_id');
+        return $this->belongsTo('App\Models\IPv4BgpPrefix', 'bgp_prefix_id', 'id');
     }
 }
