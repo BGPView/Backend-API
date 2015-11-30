@@ -110,7 +110,7 @@ class UpdateBgpData extends Command
 
                 // Skip any prefix we have already seen
                 // isset() is MUCH faster than using in_array()
-                if (isset($seenPrefixes[$parsedLine->prefix]) === true) {
+                if (isset($seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn]) === true) {
                     continue;
                 }
 
@@ -122,12 +122,11 @@ class UpdateBgpData extends Command
                 $ipv4Prefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
                 $ipv4Prefix->ip_dec_end = ($this->ipUtils->ip2dec($parsedLine->ip) + $ipv4AmountCidrArray[$parsedLine->cidr]);
                 $ipv4Prefix->asn = $parsedLine->asn;
-                $ipv4Prefix->asn_path = trim(implode(" ", $parsedLine->path));
                 $ipv4Prefix->save();
 
                 // Lets make note of the prefix we have seen
                 // We are setting key here so above we can do a isset() check instead of in_array()
-                $seenPrefixes[$parsedLine->prefix] = "";
+                $seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn] = "";
             }
             fclose($fp);
         }
