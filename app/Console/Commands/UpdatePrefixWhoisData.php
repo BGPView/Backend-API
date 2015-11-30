@@ -71,7 +71,7 @@ class UpdatePrefixWhoisData extends Command
         $ipv4Prefixes = IPv4BgpPrefix::all();
 
         foreach ($ipv4Prefixes as $ipv4Prefix) {
-            $prefixTest = IPv4PrefixWhois::where('ip', $ipv4Prefix->ip)->where('cidr', $ipv4Prefix->cidr)->first();
+            $prefixTest = IPv4PrefixWhois::where('bgp_prefix_id', $ipv4Prefix->id)->first();
 
             // Lets check if we have seen the prefix already
             if (is_null($prefixTest) !== true) {
