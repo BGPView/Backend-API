@@ -139,10 +139,6 @@ class UpdatePrefixWhoisData extends Command
 
             $newPrefixWhois = new IPv4PrefixWhois;
             $newPrefixWhois->bgp_prefix_id = $ipv4Prefix->id;
-            $newPrefixWhois->ip = $ipv4Prefix->ip;
-            $newPrefixWhois->cidr = $ipv4Prefix->cidr;
-            $newPrefixWhois->ip_dec_start = $this->ipUtils->ip2dec($ipv4Prefix->ip);
-            $newPrefixWhois->ip_dec_end = ($this->ipUtils->ip2dec($ipv4Prefix->ip) + $ipv4AmountCidrArray[$ipv4Prefix->cidr]);
             $newPrefixWhois->name = $parsedWhois->name;
             $newPrefixWhois->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
             $newPrefixWhois->description_full = json_encode($parsedWhois->description);
