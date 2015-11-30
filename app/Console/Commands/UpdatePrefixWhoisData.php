@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\IpUtils;
-use App\Models\IPv4PrefixEmail;
+use App\Models\IPv4PrefixWhoisEmail;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv4PrefixWhois;
 use App\Services\BgpParser;
@@ -95,7 +95,7 @@ class UpdatePrefixWhoisData extends Command
 
                     // Save new emails
                     foreach ($parsedWhois->emails as $email) {
-                        $prefixEmail = new IPv4PrefixEmail;
+                        $prefixEmail = new IPv4PrefixWhoisEmail;
                         $prefixEmail->ipv4_prefix_id = $prefixTest->id;
                         $prefixEmail->email_address = $email;
 
@@ -149,7 +149,7 @@ class UpdatePrefixWhoisData extends Command
 
             // Save Prefix Emails
             foreach ($parsedWhois->emails as $email) {
-                $prefixEmail = new IPv4PrefixEmail;
+                $prefixEmail = new IPv4PrefixWhoisEmail;
                 $prefixEmail->prefix_whois_id = $newPrefixWhois->id;
                 $prefixEmail->email_address = $email;
 
