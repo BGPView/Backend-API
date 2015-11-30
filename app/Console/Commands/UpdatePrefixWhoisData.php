@@ -67,11 +67,11 @@ class UpdatePrefixWhoisData extends Command
         $threeWeeksAgo = Carbon::now()->subWeeks(3)->timestamp;
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
 
-
+        $this->cli->br()->comment('Getting all the prefixes from the BGP table');
         $ipv4Prefixes = IPv4BgpPrefix::all();
 
         foreach ($ipv4Prefixes as $ipv4Prefix) {
-            $prefixTest = IPv4PrefixWhois::where('ip', $ipv4Prefixes->ip)->where('cidr', $ipv4Prefixes->cidr)->first();
+            $prefixTest = IPv4PrefixWhois::where('ip', $ipv4Prefix->ip)->where('cidr', $ipv4Prefix->cidr)->first();
 
             // Lets check if we have seen the prefix already
             if (is_null($prefixTest) !== true) {
