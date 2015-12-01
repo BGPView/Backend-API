@@ -118,8 +118,9 @@ class UpdatePrefixWhoisData extends Command
                     ]);
 
                     $prefixTest->save();
-                    continue;
                 }
+
+                continue;
             }
 
             // Since we dont have the prefix in DB lets create it.
