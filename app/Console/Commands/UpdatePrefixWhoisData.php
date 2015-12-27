@@ -71,6 +71,13 @@ class UpdatePrefixWhoisData extends Command
         $ipv4Prefixes = IPv4BgpPrefix::all();
 
         foreach ($ipv4Prefixes as $ipv4Prefix) {
+
+            // Lets skip if its a bogon address
+            if ($this->ipUtils->isBogonAddress($ipv4Prefix->ip)) {
+                $this->cli->br()->comment('Skipping Bogon Address - '.$ipv4Prefix->ip.'/'.$ipv4Prefix->cidr);
+                continue;
+            }
+
             $prefixTest = IPv4PrefixWhois::where('bgp_prefix_id', $ipv4Prefix->id)->first();
 
             // Lets check if we have seen the prefix already

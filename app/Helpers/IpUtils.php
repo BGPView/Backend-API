@@ -9,6 +9,40 @@ use App\Models\RirIPv6Allocation;
 class IpUtils
 {
 
+    public function isBogonAddress($ipAddress)
+    {
+        $bogons = [
+            '0.0.0.0/8',
+            '10.0.0.0/8',
+            '100.64.0.0/10',
+            '127.0.0.0/8',
+            '169.254.0.0/16',
+            '172.16.0.0/12',
+            '192.0.0.0/24',
+            '192.0.2.0/24',
+            '192.168.0.0/16',
+            '198.18.0.0/15',
+            '198.51.100.0/24',
+            '203.0.113.0/24',
+            '224.0.0.0/3',
+        ];
+
+        foreach ($bogons as $bogonPrefix) {
+            list ($subnet, $bits) = explode('/', $bogonPrefix);
+            $ip = ip2long($ipAddress);
+            $subnet = ip2long($subnet);
+            $mask = -1 << (32 - $bits);
+            $subnet &= $mask; # nb: in case the supplied subnet wasn't correctly aligned
+
+            if (($ip & $mask) == $subnet) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
     public function IPv4cidrIpCount($reverse = false)
     {
         // 'cidr' => 'IP count'
