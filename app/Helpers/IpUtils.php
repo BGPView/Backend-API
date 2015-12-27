@@ -371,8 +371,14 @@ class IpUtils
                     if (is_null($smallestAllocation) === true) {
                         $smallestAllocation = $allocation;
                     } else {
-                        if ($allocation->cidr < $smallestAllocation->cidr) {
+                        // Take the smaller prefixes
+                        if ($allocation->cidr > $smallestAllocation->cidr) {
                             $smallestAllocation = $allocation;
+                        } elseif ($allocation->cidr === $smallestAllocation->cidr) {
+                            // If both Prefixes are the same lets take the order one
+                            if (strtotime($allocation->date_allocated) < strtotime($smallestAllocation->date_allocated)) {
+                                $smallestAllocation = $allocation;
+                            }
                         }
                     }
                 }
