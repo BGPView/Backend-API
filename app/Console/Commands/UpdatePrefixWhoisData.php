@@ -78,9 +78,9 @@ class UpdatePrefixWhoisData extends Command
                 // If the last time the prefix was scraped is older than 3 weeks, update it
                 if (strtotime($prefixTest->updated_at) < $threeWeeksAgo) {
                     $this->cli->br()->comment('===================================================');
-                    $this->cli->br()->comment('Updating older prefix whois info - ' . $prefixTest->ip . '/' . $prefixTest->cidr)->br();
+                    $this->cli->br()->comment('Updating older prefix whois info - ' . $ipv4Prefix->ip . '/' . $ipv4Prefix->cidr)->br();
 
-                    $ipWhois = new Whois($prefixTest->ip, $prefixTest->cidr);
+                    $ipWhois = new Whois($ipv4Prefix->ip, $ipv4Prefix->cidr);
                     $parsedWhois = $ipWhois->parse();
 
                     $prefixTest->name = $parsedWhois->name;
