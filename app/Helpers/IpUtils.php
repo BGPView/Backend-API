@@ -364,8 +364,20 @@ class IpUtils
                     }
                 }
 
-                // Return the older allocation
-                return $allocations[0];
+                // Now we did not find a direct macth on our BGP CIDR size
+                // Instead we will take the smaller of the two allocation size
+                $smallestAllocation = null;
+                foreach ($allocations as $allocation) {
+                    if (is_null($smallestAllocation) === true) {
+                        $smallestAllocation = $allocation;
+                    } else {
+                        if ($allocation->cidr < $smallestAllocation->cidr) {
+                            $smallestAllocation = $allocation;
+                        }
+                    }
+                }
+
+                return $smallestAllocation;
             }
 
             return null;
