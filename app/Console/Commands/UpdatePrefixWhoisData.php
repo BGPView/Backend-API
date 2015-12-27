@@ -90,6 +90,11 @@ class UpdatePrefixWhoisData extends Command
                     $ipWhois = new Whois($ipv4Prefix->ip, $ipv4Prefix->cidr);
                     $parsedWhois = $ipWhois->parse();
 
+                    // Skip null results
+                    if (is_null($parsedWhois) === true) {
+                        continue;
+                    }
+
                     $prefixTest->name = $parsedWhois->name;
                     $prefixTest->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
                     $prefixTest->description_full = json_encode($parsedWhois->description);
@@ -145,6 +150,11 @@ class UpdatePrefixWhoisData extends Command
             $ipWhois = new Whois($ipv4Prefix->ip, $ipv4Prefix->cidr);
             $parsedWhois = $ipWhois->parse();
 
+            // Skip null results
+            if (is_null($parsedWhois) === true) {
+                continue;
+            }
+            
             $newPrefixWhois = new IPv4PrefixWhois;
             $newPrefixWhois->bgp_prefix_id = $ipv4Prefix->id;
             $newPrefixWhois->name = $parsedWhois->name;

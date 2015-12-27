@@ -60,6 +60,10 @@ class Whois
 
     public function parse()
     {
+        if (is_null($this->rawData) === true) {
+            return null;
+        }
+
         $functionName = strtolower($this->rir->name) . "Execute";
         return $this->$functionName();
     }

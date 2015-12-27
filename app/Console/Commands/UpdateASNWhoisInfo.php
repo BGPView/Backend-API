@@ -102,6 +102,11 @@ class UpdateASNWhoisInfo extends Command
                 $asnWhois = new Whois($allocatedAsn->asn);
                 $parsedWhois = $asnWhois->parse();
 
+                // Skip null results
+                if (is_null($parsedWhois) === true) {
+                    continue;
+                }
+
                 // Dont save things without names
                 if (empty($parsedWhois->name) === true) {
                     continue;
@@ -167,6 +172,11 @@ class UpdateASNWhoisInfo extends Command
             $this->cli->br()->comment('Updating: AS' . $oldAsn->asn);
             $asnWhois = new Whois($oldAsn->asn);
             $parsedWhois = $asnWhois->parse();
+
+            // Skip null results
+            if (is_null($parsedWhois) === true) {
+                continue;
+            }
 
             $asn->name = $parsedWhois->name;
             $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
