@@ -96,7 +96,7 @@ class UpdatePrefixWhoisData extends Command
                     // Save new emails
                     foreach ($parsedWhois->emails as $email) {
                         $prefixEmail = new IPv4PrefixWhoisEmail;
-                        $prefixEmail->ipv4_prefix_id = $prefixTest->id;
+                        $prefixEmail->prefix_whois_id = $prefixTest->id;
                         $prefixEmail->email_address = $email;
 
                         // Check if its an abuse email
