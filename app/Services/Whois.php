@@ -152,7 +152,11 @@ class Whois
         foreach ($this->rawLines as $line) {
             if (strstr($line, "% Abuse contact for")) {
                 $parts = explode(' ', $line);
-                $data->abuse_emails[] = strtolower(trim(end($parts), '\''));
+                foreach ($parts as $part) {
+                    if (strpos($part, '@') !== false && strpos($part, '.') !== false) {
+                        $data->abuse_emails[] = strtolower($part);
+                    }
+                }
                 unset($parts);
             }
         }
@@ -226,7 +230,11 @@ class Whois
         foreach ($this->rawLines as $line) {
             if (strstr($line, "% Abuse contact for")) {
                 $parts = explode(' ', $line);
-                $data->abuse_emails[] = strtolower(trim(end($parts), '\''));
+                foreach ($parts as $part) {
+                    if (strpos($part, '@') !== false && strpos($part, '.') !== false) {
+                        $data->abuse_emails[] = strtolower($part);
+                    }
+                }
                 unset($parts);
             }
         }
