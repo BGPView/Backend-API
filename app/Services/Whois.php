@@ -64,6 +64,11 @@ class Whois
             return null;
         }
 
+        // Check if there is the unallocated words in whois returned data
+        if (strpos($this->rawData, 'Unallocated and unassigned') !== false) {
+            return null;
+        }
+
         $functionName = strtolower($this->rir->name) . "Execute";
         return $this->$functionName();
     }
