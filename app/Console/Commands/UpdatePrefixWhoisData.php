@@ -70,6 +70,9 @@ class UpdatePrefixWhoisData extends Command
         $this->cli->br()->comment('Getting all the prefixes from the BGP table');
         $ipv4Prefixes = IPv4BgpPrefix::all();
 
+        $this->cli->br()->comment('Shuffling the prefixes order');
+        $ipv4Prefixes = $ipv4Prefixes->shuffle();
+
         foreach ($ipv4Prefixes as $ipv4Prefix) {
 
             // Lets skip if its a bogon address

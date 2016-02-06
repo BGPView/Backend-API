@@ -92,7 +92,7 @@ class UpdateASNWhoisInfo extends Command
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Adding newly allocated ASNs')->br();
         $allocatedAsns = RirAsnAllocation::all();
-
+        $allocatedAsns = $allocatedAsns->shuffle();
 
         foreach ($allocatedAsns as $allocatedAsn) {
             // Lets check if the ASN has already been looked at in the past
