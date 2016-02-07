@@ -46,7 +46,7 @@ class RirSeeder extends Seeder
 
         Rir::create([
             'name' => 'RIPE',
-            'full_name' => 'Réseaux IP Européens Network Coordination Centre',
+            'full_name' => 'Reseaux IP EuropÃ©ens Network Coordination Centre',
             'website' => 'ripe.net',
             'whois_server' => 'whois.ripe.net',
             'allocation_list_url' => 'ftp://ftp.ripe.net/ripe/stats/delegated-ripencc-extended-latest',
