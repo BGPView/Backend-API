@@ -54,46 +54,41 @@ class UpdateBgpData extends Command
      */
     public function handle()
     {
-        $this->updateIPv4Prefixes();
-        $this->updateIPv6Prefixes();
+        $this->updatePrefixes($ipVersion = 6);
+        $this->updatePrefixes($ipVersion = 4);
     }
 
-    private function updateIPv6Prefixes()
+    private function updatePrefixes($ipVersion)
     {
-        // TO DO
-    }
-
-    private function updateIPv4Prefixes()
-    {
-
         $this->cli->br()->comment('===================================================');
 
-        $filePath = sys_get_temp_dir() . '/ipv4_rib.txt';
-        $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
+        $filePath = sys_get_temp_dir() . '/ipv' . $ipVersion . '_rib.txt';
+        $funcName = 'IPv' . $ipVersion . 'cidrIpCount';
+        $ipvAmountCidrArray = $this->ipUtils->$funcName();
         $seenPrefixes = [];
 
-        $this->downloadRIBs($filePath, 4);
+        $this->downloadRIBs($filePath, $ipVersion);
 
         $this->bench->start();
 
         // Cleaning up old temp table
         $this->cli->br()->comment('Drop old TEMP table');
-        DB::statement('DROP TABLE IF EXISTS ipv4_bgp_prefixes_temp');
+        DB::statement('DROP TABLE IF EXISTS ipv' . $ipVersion . '_bgp_prefixes_temp');
 
         // Creating a new temp table to store our new BGP data
-        $this->cli->br()->comment('Cloning ipv4_bgp_prefixes table schema');
-        DB::statement('CREATE TABLE ipv4_bgp_prefixes_temp LIKE ipv4_bgp_prefixes');
+        $this->cli->br()->comment('Cloning ipv' . $ipVersion . '_bgp_prefixes table schema');
+        DB::statement('CREATE TABLE ipv' . $ipVersion . '_bgp_prefixes_temp LIKE ipv' . $ipVersion . '_bgp_prefixes');
 
         // Removing the indexes for faster DB inserts
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_id_unique`');
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_index`');
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_cidr_index`');
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_dec_start_index`');
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_ip_dec_end_index`');
-        DB::statement('ALTER TABLE  `ipv4_bgp_prefixes_temp` DROP INDEX  `ipv4_bgp_prefixes_asn_index`');
+        DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_id_unique`');
+        DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_ip_index`');
+        DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_cidr_index`');
+        DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_ip_dec_start_index`');
+        DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_ip_dec_end_index`');
+        DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_asn_index`');
 
         $this->cli->br()->comment('===================================================');
-        $this->cli->br()->comment('Processing BGP entries');
+        $this->cli->br()->comment('Processing BGP IPv' . $ipVersion . ' entries');
         $this->cli->br()->comment('Go grab a drink, this will take 10-30 mins');
 
         // Lets read through the file
@@ -103,8 +98,9 @@ class UpdateBgpData extends Command
 
                 $parsedLine = $this->bgpParser->parse($line);
 
+                $minCidrSize = $ipVersion == 4 ? 24 : 48;
                 // Lets make sure that v4 is min /24
-                if ($parsedLine->cidr > 24 || $parsedLine->cidr < 1) {
+                if ($parsedLine->cidr > $minCidrSize || $parsedLine->cidr < 1) {
                     continue;
                 }
 
@@ -115,14 +111,15 @@ class UpdateBgpData extends Command
                 }
 
                 // Save the BGP entry in the database
-                $ipv4Prefix = new IPv4BgpPrefix;
-                $ipv4Prefix->setTable('ipv4_bgp_prefixes_temp');
-                $ipv4Prefix->ip = $parsedLine->ip;
-                $ipv4Prefix->cidr = $parsedLine->cidr;
-                $ipv4Prefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
-                $ipv4Prefix->ip_dec_end = ($this->ipUtils->ip2dec($parsedLine->ip) + $ipv4AmountCidrArray[$parsedLine->cidr]);
-                $ipv4Prefix->asn = $parsedLine->asn;
-                $ipv4Prefix->save();
+                $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
+                $ipPrefix = new $className;
+                $ipPrefix->setTable('ipv' . $ipVersion . '_bgp_prefixes_temp');
+                $ipPrefix->ip = $parsedLine->ip;
+                $ipPrefix->cidr = $parsedLine->cidr;
+                $ipPrefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
+                $ipPrefix->ip_dec_end = ($this->ipUtils->ip2dec($parsedLine->ip) + $ipvAmountCidrArray[$parsedLine->cidr]);
+                $ipPrefix->asn = $parsedLine->asn;
+                $ipPrefix->save();
 
                 // Lets make note of the prefix we have seen
                 // We are setting key here so above we can do a isset() check instead of in_array()
@@ -143,22 +140,22 @@ class UpdateBgpData extends Command
         // Adding indexes back
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Adding indexes back to the new temp table');
-        DB::statement('CREATE UNIQUE INDEX `ipv4_bgp_prefixes_id_unique` ON `ipv4_bgp_prefixes_temp` (`id`)');
-        DB::statement('CREATE INDEX `ipv4_bgp_prefixes_ip_index` ON `ipv4_bgp_prefixes_temp` (`ip`)');
-        DB::statement('CREATE INDEX `ipv4_bgp_prefixes_cidr_index` ON `ipv4_bgp_prefixes_temp` (`cidr`)');
-        DB::statement('CREATE INDEX `ipv4_bgp_prefixes_ip_dec_start_index` ON `ipv4_bgp_prefixes_temp` (`ip_dec_start`)');
-        DB::statement('CREATE INDEX `ipv4_bgp_prefixes_ip_dec_end_index` ON `ipv4_bgp_prefixes_temp` (`ip_dec_end`)');
-        DB::statement('CREATE INDEX `ipv4_bgp_prefixes_asn_index` ON `ipv4_bgp_prefixes_temp` (`asn`)');
+        DB::statement('CREATE UNIQUE INDEX `ipv' . $ipVersion . '_bgp_prefixes_id_unique` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`id`)');
+        DB::statement('CREATE INDEX `ipv' . $ipVersion . '_bgp_prefixes_ip_index` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`ip`)');
+        DB::statement('CREATE INDEX `ipv' . $ipVersion . '_bgp_prefixes_cidr_index` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`cidr`)');
+        DB::statement('CREATE INDEX `ipv' . $ipVersion . '_bgp_prefixes_ip_dec_start_index` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`ip_dec_start`)');
+        DB::statement('CREATE INDEX `ipv' . $ipVersion . '_bgp_prefixes_ip_dec_end_index` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`ip_dec_end`)');
+        DB::statement('CREATE INDEX `ipv' . $ipVersion . '_bgp_prefixes_asn_index` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`asn`)');
 
         // Rename temp table to take over
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Swapping TEMP table with production table');
-        DB::statement('RENAME TABLE ipv4_bgp_prefixes TO backup_ipv4_bgp_prefixes, ipv4_bgp_prefixes_temp TO ipv4_bgp_prefixes;');
+        DB::statement('RENAME TABLE ipv' . $ipVersion . '_bgp_prefixes TO backup_ipv' . $ipVersion . '_bgp_prefixes, ipv' . $ipVersion . '_bgp_prefixes_temp TO ipv' . $ipVersion . '_bgp_prefixes;');
 
         // Delete old table
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Removing old production prefix table');
-        DB::statement('DROP TABLE backup_ipv4_bgp_prefixes');
+        DB::statement('DROP TABLE backup_ipv' . $ipVersion . '_bgp_prefixes');
 
         // Remove RIB file
         $this->cli->br()->comment('===================================================');
@@ -168,7 +165,6 @@ class UpdateBgpData extends Command
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('DONE!!!');
         $this->cli->br()->comment('===================================================');
-
     }
 
     private function downloadRIBs($filePath, $ipVersion = 4)
