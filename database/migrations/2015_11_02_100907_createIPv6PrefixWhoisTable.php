@@ -15,7 +15,8 @@ class CreateIPv6PrefixWhoisTable extends Migration
         Schema::create('ipv6_prefix_whois', function($table)
         {
             $table->increments('id')->unique();
-            $table->integer('bgp_prefix_id')->unsigned()->index();
+            $table->string('ip', 40)->index();
+            $table->integer('cidr')->unsigned()->index();
             $table->string('name');
             $table->string('description')->nullable();
             $table->text('description_full')->nullable();

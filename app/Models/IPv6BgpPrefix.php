@@ -20,8 +20,18 @@ class IPv6BgpPrefix extends Model {
      */
     protected $hidden = ['id', 'created_at', 'updated_at'];
 
+    public function getWhoisAttribute()
+    {
+        return $this->whois();
+    }
+
     public function whois()
     {
-        return $this->hasOne('App\Models\IPv6PrefixWhois', 'bgp_prefix_id', 'id');
+        return IPv6PrefixWhois::where('ip', $this->ip)->where('cidr', $this->cidr)->first();
+    }
+
+    public function asn()
+    {
+        return $this->belongsTo('App\Models\ASN', 'asn', 'asn');
     }
 }

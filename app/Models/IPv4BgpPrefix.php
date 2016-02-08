@@ -20,8 +20,17 @@ class IPv4BgpPrefix extends Model {
      */
     protected $hidden = ['id', 'created_at', 'updated_at'];
 
+    public function getWhoisAttribute()
+    {
+        return $this->whois();
+    }
+
     public function whois()
     {
-        return $this->hasOne('App\Models\IPv4PrefixWhois', 'bgp_prefix_id', 'id');
+        return IPv4PrefixWhois::where('ip', $this->ip)->where('cidr', $this->cidr)->first();
+    }
+    public function asn_info()
+    {
+        return $this->belongsTo('App\Models\ASN', 'asn', 'asn');
     }
 }

@@ -30,4 +30,14 @@ class ASN extends Model {
     {
         return $this->belongsTo('App\Models\Rir');
     }
+
+    public function ipv4_prefixes()
+    {
+        return $this->hasMany('App\Models\IPv4BgpPrefix', 'asn', 'asn');
+    }
+
+    public function ipv6_prefixes()
+    {
+        return $this->hasMany('App\Models\IPv6BgpPrefix', 'asn', 'asn');
+    }
 }
