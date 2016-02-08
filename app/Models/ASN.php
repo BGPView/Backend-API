@@ -40,4 +40,22 @@ class ASN extends Model {
     {
         return $this->hasMany('App\Models\IPv6BgpPrefix', 'asn', 'asn');
     }
+
+    public function getDescriptionFullAttribute($value)
+    {
+        return json_decode($value);
+    }
+
+    public function getOwnerAddressAttribute($value)
+    {
+        return json_decode($value);
+    }
+
+    public function getRawWhoisAttribute($value)
+    {
+        // Remove the "source" entry
+        $parts = explode("\n", $value);
+        unset($parts[0]);
+        return implode($parts, "\n");
+    }
 }
