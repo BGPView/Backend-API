@@ -6,6 +6,9 @@ use App\Helpers\IpUtils;
 use App\Models\IPv4PrefixWhoisEmail;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv4PrefixWhois;
+use App\Models\IPv6PrefixWhoisEmail;
+use App\Models\IPv6BgpPrefix;
+use App\Models\IPv6PrefixWhois;
 use App\Services\BgpParser;
 use App\Services\Whois;
 use Carbon\Carbon;
@@ -51,46 +54,43 @@ class UpdatePrefixWhoisData extends Command
      */
     public function handle()
     {
-        $this->updateIPv4Prefixes();
-        $this->updateIPv6Prefixes();
+        $this->updatePrefixes(6);
+        $this->updatePrefixes(4);
     }
 
-    private function updateIPv6Prefixes()
+    private function updatePrefixes($ipVersion)
     {
-        // TO DO
-    }
-
-    private function updateIPv4Prefixes()
-    {
+        $ipVersion = (string) $ipVersion;
         $this->bench->start();
         $this->cli->br()->comment('===================================================');
         $threeWeeksAgo = Carbon::now()->subWeeks(3)->timestamp;
-        $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
 
-        $this->cli->br()->comment('Getting all the prefixes from the BGP table');
-        $ipv4Prefixes = IPv4BgpPrefix::all();
+        $this->cli->br()->comment('Getting all the IPv' . $ipVersion . 'prefixes from the BGP table');
+        $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
+        $ipPrefixes = $className::all();
 
         $this->cli->br()->comment('Shuffling the prefixes order');
-        $ipv4Prefixes = $ipv4Prefixes->shuffle();
+        $ipPrefixes = $ipPrefixes->shuffle();
 
-        foreach ($ipv4Prefixes as $ipv4Prefix) {
+        foreach ($ipPrefixes as $ipPrefix) {
 
             // Lets skip if its a bogon address
-            if ($this->ipUtils->isBogonAddress($ipv4Prefix->ip)) {
-                $this->cli->br()->comment('Skipping Bogon Address - '.$ipv4Prefix->ip.'/'.$ipv4Prefix->cidr);
+            if ($ipVersion == 4 && $this->ipUtils->isBogonAddress($ipPrefix->ip)) {
+                $this->cli->br()->comment('Skipping Bogon Address - '.$ipPrefix->ip.'/'.$ipPrefix->cidr);
                 continue;
             }
 
-            $prefixTest = IPv4PrefixWhois::where('bgp_prefix_id', $ipv4Prefix->id)->first();
+            $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhois';
+            $prefixTest = $className::where('ip', $ipPrefix->ip)->where('cidr', $ipPrefix->cidr)->first();
 
             // Lets check if we have seen the prefix already
             if (is_null($prefixTest) !== true) {
                 // If the last time the prefix was scraped is older than 3 weeks, update it
                 if (strtotime($prefixTest->updated_at) < $threeWeeksAgo) {
                     $this->cli->br()->comment('===================================================');
-                    $this->cli->br()->comment('Updating older prefix whois info - ' . $ipv4Prefix->ip . '/' . $ipv4Prefix->cidr)->br();
+                    $this->cli->br()->comment('Updating older prefix whois info - ' . $ipPrefix->ip . '/' . $ipPrefix->cidr)->br();
 
-                    $ipWhois = new Whois($ipv4Prefix->ip, $ipv4Prefix->cidr);
+                    $ipWhois = new Whois($ipPrefix->ip, $ipPrefix->cidr);
                     $parsedWhois = $ipWhois->parse();
 
                     // Skip null results
@@ -140,7 +140,7 @@ class UpdatePrefixWhoisData extends Command
 
             // Since we dont have the prefix in DB lets create it.
 
-            $ipAllocation = $this->ipUtils->getAllocationEntry($ipv4Prefix->ip);
+            $ipAllocation = $this->ipUtils->getAllocationEntry($ipPrefix->ip);
 
             // Skip non allocated
             if (is_null($ipAllocation) === true) {
@@ -148,18 +148,20 @@ class UpdatePrefixWhoisData extends Command
             }
 
             $this->cli->br()->comment('===================================================');
-            $this->cli->br()->comment('Adding new prefix whois info - ' . $ipv4Prefix->ip . '/' . $ipv4Prefix->cidr)->br();
+            $this->cli->br()->comment('Adding new prefix whois info - ' . $ipPrefix->ip . '/' . $ipPrefix->cidr)->br();
 
-            $ipWhois = new Whois($ipv4Prefix->ip, $ipv4Prefix->cidr);
+            $ipWhois = new Whois($ipPrefix->ip, $ipPrefix->cidr);
             $parsedWhois = $ipWhois->parse();
 
             // Skip null results
             if (is_null($parsedWhois) === true) {
                 continue;
             }
-            
-            $newPrefixWhois = new IPv4PrefixWhois;
-            $newPrefixWhois->bgp_prefix_id = $ipv4Prefix->id;
+
+            $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhois';
+            $newPrefixWhois = new $className;
+            $newPrefixWhois->ip = $ipPrefix->ip;
+            $newPrefixWhois->cidr = $ipPrefix->cidr;
             $newPrefixWhois->name = $parsedWhois->name;
             $newPrefixWhois->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
             $newPrefixWhois->description_full = json_encode($parsedWhois->description);
