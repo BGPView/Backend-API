@@ -27,5 +27,5 @@ Route::get('/', function () {
 */
 
 Route::group(['middleware' => ['api']], function () {
-    //
+    Route::get('/asn/{as_number}', ['uses' => 'ApiV1Controller@asn']);
 });
