@@ -27,5 +27,11 @@ Route::get('/', function () {
 */
 
 Route::group(['middleware' => ['api']], function () {
+
     Route::get('/asn/{as_number}', ['uses' => 'ApiV1Controller@asn']);
+    Route::get('/asn/{as_number}/prefixes', ['uses' => 'ApiV1Controller@asnPrefixes']);
+    // #### TO DO ####
+    //  /asn/{as_number}/peers
+    //  /asn/{as_number}/ix
+
 });
