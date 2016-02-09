@@ -124,7 +124,7 @@ class UpdateAllocationLists extends Command
                             'ip' => $data[3],
                             'cidr' => $ipv4AmountCidrArray[$data[4]],
                             'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                            'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4],
+                            'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4] - 1,
                             'counrty_code' => $data[1],
                             'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
                         ]);
@@ -145,7 +145,7 @@ class UpdateAllocationLists extends Command
                             'ip' => $data[3],
                             'cidr' => $data[4],
                             'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                            'ip_dec_end' => ($this->ipUtils->ip2dec($data[3]) + $ipv6AmountCidrArray[$data[4]]),
+                            'ip_dec_end' => ($this->ipUtils->ip2dec($data[3]) + $ipv6AmountCidrArray[$data[4]] - 1),
                             'counrty_code' => $data[1],
                             'date_allocated' => substr($data[5], 0, 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
                         ]);
