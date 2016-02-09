@@ -154,9 +154,9 @@ class UpdateASNWhoisInfo extends Command
                     'traffic_estimation' => $asn->traffic_estimation,
                     'traffic_ratio' => $asn->traffic_ratio,
                     'description' => $finalASN->description,
-                    'description_full' => json_decode($finalASN->description_full, true),
+                    'description_full' => $finalASN->description_full,
                     'counrty_code' => $finalASN->counrty_code,
-                    'owner_address' => json_decode($finalASN->owner_address, true),
+                    'owner_address' => $finalASN->owner_address,
                     'abuse_emails' => $finalASN->emails()->where('abuse_email', true)->get()->lists('email_address'),
                     'emails' => $finalASN->emails()->lists('email_address'),
                 ]);
