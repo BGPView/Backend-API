@@ -115,6 +115,23 @@ if ($whois_server == 'whois.arin.net') {
         }
 
     }
+
+    // remove the "route"
+    $outParts = explode("\n", $out);
+    foreach ($outParts as $outPart) {
+        if (stristr($outPart, "% Information related to '") && strstr($outPart, "AS") ) {
+            $newParts = explode($outPart, $out);
+            foreach ($newParts as $key => $val) {
+                $val = trim($val);
+                if (strrpos($val, "route", -strlen($val)) !== false) {
+                    unset($newParts[$key]);
+                }
+            }
+            $out = implode($outPart, $newParts);
+            break;
+        }
+    }
+
 } else if ($whois_server == 'whois.afrinic.net') {
     // ASN Specific
     if (stristr($input, "as")) {
@@ -129,6 +146,22 @@ if ($whois_server == 'whois.arin.net') {
         if (substr_count($out, 'as-block:')) {
             $outParts = explode("% Information related to", $out);
             $out = "% Information related to" . end($outParts);
+        }
+    }
+
+    // remove the "route"
+    $outParts = explode("\n", $out);
+    foreach ($outParts as $outPart) {
+        if (stristr($outPart, "% Information related to '") && strstr($outPart, "AS") ) {
+            $newParts = explode($outPart, $out);
+            foreach ($newParts as $key => $val) {
+                $val = trim($val);
+                if (strrpos($val, "route", -strlen($val)) !== false) {
+                    unset($newParts[$key]);
+                }
+            }
+            $out = implode($outPart, $newParts);
+            break;
         }
     }
 } else if ($whois_server == 'whois.ripe.net') {
@@ -146,7 +179,22 @@ if ($whois_server == 'whois.arin.net') {
             $outParts = explode("% Information related to", $out);
             $out = "% Information related to" . end($outParts);
         }
+    }
 
+    // remove the "route"
+    $outParts = explode("\n", $out);
+    foreach ($outParts as $outPart) {
+        if (stristr($outPart, "% Information related to '") && strstr($outPart, "AS") ) {
+            $newParts = explode($outPart, $out);
+            foreach ($newParts as $key => $val) {
+                $val = trim($val);
+                if (strrpos($val, "route", -strlen($val)) !== false) {
+                    unset($newParts[$key]);
+                }
+            }
+            $out = implode($outPart, $newParts);
+            break;
+        }
     }
 }
 
