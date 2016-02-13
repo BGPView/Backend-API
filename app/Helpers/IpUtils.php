@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
+use GeoIp2\Database\Reader;
 
 class IpUtils
 {
@@ -394,7 +395,14 @@ class IpUtils
         return RirAsnAllocation::where('asn', $input)
             ->orderBy('date_allocated', 'desc')
             ->first();
+    }
 
+    public function geoip($ip)
+    {
+        $ip = explode('/', $ip, 2)[0];
+        $reader = new Reader(database_path() . '/GeoLite2-City.mmdb');
+        $record = $reader->city($ip);
 
+        return $record;
     }
 }

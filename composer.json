@@ -9,7 +9,9 @@
         "laravel/framework": "5.2.*",
         "webpatser/laravel-countries": "dev-master",
         "league/climate": "^3.2",
-        "devster/ubench": "1.2.*"
+        "devster/ubench": "1.2.*",
+        "barryvdh/laravel-debugbar": "^2.1",
+        "geoip2/geoip2": "~2.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
