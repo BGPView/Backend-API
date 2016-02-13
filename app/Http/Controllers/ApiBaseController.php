@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\IpUtils;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -11,9 +12,11 @@ use Illuminate\Support\Facades\Config;
 class ApiBaseController extends Controller
 {
     private $_startTime = 0;
+    public $ipUtils;
 
-    public function __construct()
+    public function __construct(IpUtils $ipUtils)
     {
+        $this->ipUtils = $ipUtils;
         $this->_startTime = microtime(true) * 1000;
     }
     //returns load time in MiliSeconds
