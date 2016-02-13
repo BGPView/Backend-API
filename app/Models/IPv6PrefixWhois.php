@@ -30,4 +30,42 @@ class IPv6PrefixWhois extends Model {
     {
         return $this->belongsTo('App\Models\IPv6BgpPrefix', 'bgp_prefix_id', 'id');
     }
+
+    public function getDescriptionFullAttribute($value)
+    {
+        return json_decode($value);
+    }
+
+    public function getOwnerAddressAttribute($value)
+    {
+        return json_decode($value);
+    }
+
+    public function getRawWhoisAttribute($value)
+    {
+        // Remove the "source" entry
+        $parts = explode("\n", $value);
+        unset($parts[0]);
+        return implode($parts, "\n");
+    }
+
+    public function getEmailContactsAttribute()
+    {
+        $email_contacts = [];
+        foreach ($this->emails as $email) {
+            $email_contacts[] = $email->email_address;
+        }
+        return $email_contacts;
+    }
+
+    public function getAbuseContactsAttribute()
+    {
+        $abuse_contacts = [];
+        foreach ($this->emails as $email) {
+            if ($email->abuse_email) {
+                $abuse_contacts[] = $email->email_address;
+            }
+        }
+        return $abuse_contacts;
+    }
 }

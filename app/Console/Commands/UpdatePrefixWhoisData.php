@@ -110,7 +110,8 @@ class UpdatePrefixWhoisData extends Command
 
                     // Save new emails
                     foreach ($parsedWhois->emails as $email) {
-                        $prefixEmail = new IPv4PrefixWhoisEmail;
+                        $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhoisEmail';
+                        $prefixEmail = new $className;
                         $prefixEmail->prefix_whois_id = $prefixTest->id;
                         $prefixEmail->email_address = $email;
 
@@ -125,9 +126,9 @@ class UpdatePrefixWhoisData extends Command
                     dump([
                         'name' => $prefixTest->name,
                         'description' => $prefixTest->description,
-                        'description_full' => json_decode($prefixTest->description_full, true),
+                        'description_full' => $prefixTest->description_full,
                         'counrty_code' => $prefixTest->counrty_code,
-                        'owner_address' => json_decode($prefixTest->owner_address, true),
+                        'owner_address' => $prefixTest->owner_address,
                         'abuse_emails' => $prefixTest->emails()->where('abuse_email', true)->get()->lists('email_address'),
                         'emails' => $prefixTest->emails()->lists('email_address'),
                     ]);
@@ -172,7 +173,8 @@ class UpdatePrefixWhoisData extends Command
 
             // Save Prefix Emails
             foreach ($parsedWhois->emails as $email) {
-                $prefixEmail = new IPv4PrefixWhoisEmail;
+                $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhoisEmail';
+                $prefixEmail = new $className;
                 $prefixEmail->prefix_whois_id = $newPrefixWhois->id;
                 $prefixEmail->email_address = $email;
 
@@ -187,9 +189,9 @@ class UpdatePrefixWhoisData extends Command
             dump([
                 'name' => $newPrefixWhois->name,
                 'description' => $newPrefixWhois->description,
-                'description_full' => json_decode($newPrefixWhois->description_full, true),
+                'description_full' => $newPrefixWhois->description_full,
                 'counrty_code' => $newPrefixWhois->counrty_code,
-                'owner_address' => json_decode($newPrefixWhois->owner_address, true),
+                'owner_address' => $newPrefixWhois->owner_address,
                 'abuse_emails' => $newPrefixWhois->emails()->where('abuse_email', true)->get()->lists('email_address'),
                 'emails' => $newPrefixWhois->emails()->lists('email_address'),
             ]);
