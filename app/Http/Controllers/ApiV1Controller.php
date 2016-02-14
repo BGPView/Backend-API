@@ -142,7 +142,9 @@ class ApiV1Controller extends ApiBaseController
 
         $output['rir_allocation']['rir_name']           = $allocation->rir->name;
         $output['rir_allocation']['country_code']       = $allocation->counrty_code;
-        $output['rir_allocation']['allocated_prefix']   = $allocation->ip . '/' . $allocation->cidr;
+        $output['rir_allocation']['ip']                 = $allocation->ip;
+        $output['rir_allocation']['cidr']               = $allocation->cidr;
+        $output['rir_allocation']['prefix']             = $allocation->ip . '/' . $allocation->cidr;
         $output['rir_allocation']['date_allocated']     = $allocation->date_allocated . ' 00:00:00';
 
         $output['maxmind']['country_code']  = $geoip->country->isoCode ?: null;
@@ -152,9 +154,45 @@ class ApiV1Controller extends ApiBaseController
             $output['raw_whois'] = $prefixWhois ? $prefixWhois->raw_whois : null;
         }
 
-        $output['date_updated']   = $prefixWhois ? (string) $prefixWhois->updated_at : $prefix->updated_at;
+        $output['date_updated']   = (string) ($prefixWhois ? $prefixWhois->updated_at : $prefix->updated_at);
 
         return $this->sendData($output);
+    }
 
+    /*
+     * URI: /ip/{ip}
+     */
+    public function ip($ip)
+    {
+        $prefixes = $this->ipUtils->getBgpPrefixes($ip);
+        $geoip = $this->ipUtils->geoip($ip);
+        $allocation = $this->ipUtils->getAllocationEntry($ip);
+
+        $output['prefixes'] = [];
+        foreach ($prefixes as $prefix) {
+            $prefixWhois = $prefix->whois;
+
+            $prefixOutput['prefix']         = $prefix->ip . '/' . $prefix->cidr;
+            $prefixOutput['ip']             = $prefix->ip;
+            $prefixOutput['cidr']           = $prefix->cidr;
+            $prefixOutput['asn']            = $prefix->asn;
+            $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
+            $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
+            $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
+
+            $output['prefixes'][]  = $prefixOutput;
+        }
+
+        $output['rir_allocation']['rir_name']           = $allocation->rir->name;
+        $output['rir_allocation']['country_code']       = $allocation->counrty_code;
+        $output['rir_allocation']['ip']                 = $allocation->ip;
+        $output['rir_allocation']['cidr']               = $allocation->cidr;
+        $output['rir_allocation']['prefix']             = $allocation->ip . '/' . $allocation->cidr;
+        $output['rir_allocation']['date_allocated']     = $allocation->date_allocated . ' 00:00:00';
+
+        $output['maxmind']['country_code']  = $geoip->country->isoCode ?: null;
+        $output['maxmind']['city']          = $geoip->city->name ?: null;
+
+        return $this->sendData($output);
     }
 }
