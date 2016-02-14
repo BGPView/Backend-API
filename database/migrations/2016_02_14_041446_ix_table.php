@@ -19,6 +19,10 @@ class IxTable extends Migration
             $table->string('name')->index();
             $table->string('name_full');
             $table->string('website')->nullable();
+            $table->string('tech_email')->nullable();
+            $table->string('tech_phone')->nullable();
+            $table->string('policy_email')->nullable();
+            $table->string('policy_phone')->nullable();
             $table->string('city')->nullable();
             $table->string('counrty_code', 2)->index();
             $table->string('url_stats')->nullable();
