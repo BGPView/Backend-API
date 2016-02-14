@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ASN;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv6BgpPrefix;
+use App\Models\IXMember;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -40,6 +41,22 @@ class ApiV1Controller extends ApiBaseController
         $output['traffic_estimation']   = $asnData->traffic_estimation;
         $output['traffic_ratio']        = $asnData->traffic_ratio;
         $output['owner_address']        = $asnData->owner_address;
+
+        $ixs = [];
+        foreach (IXMember::where('asn', $asnData->asn)->get() as $ixMember) {
+            $ixInfo = $ixMember->ix;
+
+            $ix_data['ix_id']           = $ixInfo->id;
+            $ix_data['name']            = $ixInfo->name;
+            $ix_data['name_full']       = $ixInfo->name_full;
+            $ix_data['counrty_code']    = $ixInfo->counrty_code;
+            $ix_data['ipv4_address']    = $ixMember->ipv4_address;
+            $ix_data['ipv6_address']    = $ixMember->ipv6_address;
+            $ix_data['speed']           = $ixMember->speed;
+
+            $ixs[] = $ix_data;
+        }
+        $output['internet_exchanges']        = $ixs;
 
         if ($request->has('with_raw_whois') === true) {
             $output['raw_whois'] = $asnData->raw_whois;
