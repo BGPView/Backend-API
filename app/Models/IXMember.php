@@ -24,4 +24,9 @@ class IXMember extends Model {
     {
         return $this->belongsTo('App\Models\IX', 'ix_peeringdb_id', 'peeringdb_id');
     }
+
+    public function asn_info()
+    {
+        return $this->belongsTo('App\Models\ASN', 'asn', 'asn');
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ASN;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv6BgpPrefix;
+use App\Models\IX;
 use App\Models\IXMember;
 use Illuminate\Http\Request;
 
@@ -209,6 +210,50 @@ class ApiV1Controller extends ApiBaseController
 
         $output['maxmind']['country_code']  = $geoip->country->isoCode ?: null;
         $output['maxmind']['city']          = $geoip->city->name ?: null;
+
+        return $this->sendData($output);
+    }
+
+    /*
+     * URI: /ix/{ix_id}
+     */
+    public function ix($ix_id)
+    {
+        $ix = IX::find($ix_id);
+
+        if (is_null($ix) === true) {
+            $data = $this->makeStatus('Could not find IX', false);
+            return $this->respond($data);
+        }
+
+        $output['name']         = $ix->name;
+        $output['name_full']    = $ix->name_full;
+        $output['website']      = $ix->website;
+        $output['tech_email']   = $ix->tech_email;
+        $output['tech_phone']   = $ix->tech_phone;
+        $output['policy_email'] = $ix->policy_email;
+        $output['policy_phone'] = $ix->policy_phone;
+        $output['city']         = $ix->city;
+        $output['counrty_code'] = $ix->counrty_code;
+        $output['url_stats']    = $ix->url_stats;
+
+        $members = [];
+        foreach ($ix->members as $member) {
+            $asnInfo = $member->asn_info;
+
+            $memberInfo['asn']          = $asnInfo ? $asnInfo->asn : null;
+            $memberInfo['name']         = $asnInfo ? $asnInfo->name: null;
+            $memberInfo['description']  = $asnInfo ? $asnInfo->description : null;
+            $memberInfo['counrty_code'] = $asnInfo ? $asnInfo->counrty_code : null;
+            $memberInfo['ipv4_address'] = $member->ipv4_address;
+            $memberInfo['ipv6_address'] = $member->ipv6_address;
+            $memberInfo['speed']        = $member->speed;
+            
+            $members[] = $memberInfo;
+        }
+
+        $output['members_count'] = count($members);
+        $output['members'] = $members;
 
         return $this->sendData($output);
     }
