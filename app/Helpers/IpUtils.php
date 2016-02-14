@@ -232,6 +232,10 @@ class IpUtils
      */
     public function ip2dec($ip_address)
     {
+        if (is_null($ip_address) === true) {
+            return null;
+        }
+
         // IPv4 address
         if (strpos($ip_address, ':') === false && strpos($ip_address, '.') !== false) {
             $ip_address = '::' . $ip_address;
