@@ -20,7 +20,7 @@ class ApiV1Controller extends ApiBaseController
      */
     public function asn(Request $request, $as_number)
     {
-        // lets only use the AS number
+        // lets only use the AS number.
         $as_number = str_ireplace('as', '', $as_number);
 
         $asnData = ASN::with('emails')->where('asn', $as_number)->first();
@@ -248,7 +248,7 @@ class ApiV1Controller extends ApiBaseController
             $memberInfo['ipv4_address'] = $member->ipv4_address;
             $memberInfo['ipv6_address'] = $member->ipv6_address;
             $memberInfo['speed']        = $member->speed;
-            
+
             $members[] = $memberInfo;
         }
 
