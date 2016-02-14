@@ -72,6 +72,12 @@ class Whois
             return null;
         }
 
+        // Check if there the usual issues with the 'high volume' error
+        if (strpos($this->rawData, 'Unable to service request due to high volume') !== false) {
+            Log::warning("High volume whois server error on: " . $this->input . "(" . $this->rir->whois_server . ")");
+            return null;
+        }
+
         $functionName = strtolower($this->rir->name) . "Execute";
         try {
             $results = $this->$functionName();
