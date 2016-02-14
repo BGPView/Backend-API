@@ -20,4 +20,8 @@ class IXMember extends Model {
      */
     protected $hidden = ['id', 'ix_peeringdb_id', 'ipv4_dec', 'ipv6_dec', 'created_at', 'updated_at'];
 
+    public function ix()
+    {
+        return $this->belongsTo('App\Models\IX', 'ix_peeringdb_id', 'peeringdb_id');
+    }
 }

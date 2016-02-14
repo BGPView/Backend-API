@@ -20,9 +20,9 @@ class IX extends Model {
      */
     protected $hidden = ['id', 'peeringdb_id', 'created_at', 'updated_at'];
 
-    public function emails()
+    public function members()
     {
-        return $this->hasMany('App\Models\IXEmail', 'ix_id', 'id');
+        return $this->hasMany('App\Models\IXMember', 'ix_peeringdb_id', 'peeringdb_id');
     }
 
 }
