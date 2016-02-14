@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\IPv4BgpPrefix;
 use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
@@ -396,6 +397,29 @@ class IpUtils
             ->orderBy('date_allocated', 'desc')
             ->first();
     }
+
+    public function getBgpPrefixes($input)
+    {
+        $type = $this->getInputType($input);
+
+        if ($type === 4) {
+            $class = IPv4BgpPrefix::class;
+        } elseif ($type === 6) {
+            $class = IPv6BgpPrefix::class;
+        } else {
+            return null;
+        }
+
+        $ipDec = number_format($this->ip2dec($input), 0, '', '');
+
+        $prefixes = $class::where('ip_dec_start', '<=', $ipDec)
+            ->where('ip_dec_end', '>=',  $ipDec)
+            ->orderBy('cidr', 'asc')
+            ->get();
+
+        return $prefixes;
+    }
+
 
     public function geoip($ip)
     {

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\IpUtils;
+use Illuminate\Support\Facades\Log;
 
 class Whois
 {
@@ -61,16 +62,25 @@ class Whois
     public function parse()
     {
         if (is_null($this->rawData) === true) {
+            Log::warning("No raw whois data returned for: " . $this->input . "(" . $this->rir->whois_server . ")");
             return null;
         }
 
         // Check if there is the unallocated words in whois returned data
         if (strpos($this->rawData, 'Unallocated and unassigned') !== false) {
+            Log::warning("Unassigned/Unallocated prefix on: " . $this->input . "(" . $this->rir->whois_server . ")");
             return null;
         }
 
         $functionName = strtolower($this->rir->name) . "Execute";
-        return $this->$functionName();
+        try {
+            $results = $this->$functionName();
+        } catch(\Exception $e) {
+            Log::warning("Something went wrong on: " . $this->input . "(" . $this->rir->whois_server . ")", $e->getMessage());
+            return null;
+        }
+
+        return $results;
     }
 
     public function raw()
