@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\UpdateASNWhoisInfo::class,
         \App\Console\Commands\UpdateBgpData::class,
         \App\Console\Commands\UpdatePrefixWhoisData::class,
+        \App\Console\Commands\UpdateIXs::class,
     ];
 
     /**

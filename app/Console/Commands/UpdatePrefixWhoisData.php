@@ -20,7 +20,8 @@ class UpdatePrefixWhoisData extends Command
 {
     private $cli;
     private $bench;
-
+    private $bgpParser;
+    private $ipUtils;
     /**
      * The name and signature of the console command.
      *
