@@ -86,6 +86,7 @@ class UpdateBgpData extends Command
         DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_ip_dec_start_index`');
         DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_ip_dec_end_index`');
         DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_asn_index`');
+        DB::statement('ALTER TABLE  `ipv' . $ipVersion . '_bgp_prefixes_temp` DROP INDEX  `ipv' . $ipVersion . '_bgp_prefixes_upstream_asn_index`');
 
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Processing BGP IPv' . $ipVersion . ' entries');
@@ -98,6 +99,11 @@ class UpdateBgpData extends Command
 
                 $parsedLine = $this->bgpParser->parse($line);
 
+                // Lets make sure we have a proper upstream (and not direct peering)
+                if (is_null($parsedLine->upstream_asn) === true) {
+                    continue;
+                }
+
                 $minCidrSize = $ipVersion == 4 ? 24 : 48;
                 // Lets make sure that v4 is min /24
                 if ($parsedLine->cidr > $minCidrSize || $parsedLine->cidr < 1) {
@@ -106,7 +112,7 @@ class UpdateBgpData extends Command
 
                 // Skip any prefix we have already seen
                 // isset() is MUCH faster than using in_array()
-                if (isset($seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn]) === true) {
+                if (isset($seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->path_string]) === true) {
                     continue;
                 }
 
@@ -119,11 +125,13 @@ class UpdateBgpData extends Command
                 $ipPrefix->ip_dec_start = $this->ipUtils->ip2dec($parsedLine->ip);
                 $ipPrefix->ip_dec_end = ($this->ipUtils->ip2dec($parsedLine->ip) + $ipvAmountCidrArray[$parsedLine->cidr]);
                 $ipPrefix->asn = $parsedLine->asn;
+                $ipPrefix->upstream_asn = $parsedLine->upstream_asn;
+                $ipPrefix->bgp_path = $parsedLine->path_string;
                 $ipPrefix->save();
 
                 // Lets make note of the prefix we have seen
                 // We are setting key here so above we can do a isset() check instead of in_array()
-                $seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn] = "";
+                $seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->path_string] = "";
             }
             fclose($fp);
         }
@@ -146,6 +154,7 @@ class UpdateBgpData extends Command
         DB::statement('CREATE INDEX `ipv' . $ipVersion . '_bgp_prefixes_ip_dec_start_index` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`ip_dec_start`)');
         DB::statement('CREATE INDEX `ipv' . $ipVersion . '_bgp_prefixes_ip_dec_end_index` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`ip_dec_end`)');
         DB::statement('CREATE INDEX `ipv' . $ipVersion . '_bgp_prefixes_asn_index` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`asn`)');
+        DB::statement('CREATE INDEX `ipv' . $ipVersion . '_bgp_prefixes_upstream_asn_index` ON `ipv' . $ipVersion . '_bgp_prefixes_temp` (`upstream_asn`)');
 
         // Rename temp table to take over
         $this->cli->br()->comment('===================================================');
