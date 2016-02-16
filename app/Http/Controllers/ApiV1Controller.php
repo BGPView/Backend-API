@@ -75,13 +75,12 @@ class ApiV1Controller extends ApiBaseController
         // lets only use the AS number
         $as_number = str_ireplace('as', '', $as_number);
 
-        $ipv4Prefixes = IPv4BgpPrefix::where('asn', $as_number)->get();
-        $ipv6Prefixes = IPv6BgpPrefix::where('asn', $as_number)->get();
+        $prefixes = $this->ipUtils->getBgpPrefixes($as_number);
 
         $output['asn'] = (int) $as_number;
 
         $output['ipv4_prefixes'] = [];
-        foreach ($ipv4Prefixes as $prefix) {
+        foreach ($prefixes['ipv4'] as $prefix) {
             $prefixWhois = $prefix->whois;
 
             $prefixOutput['prefix']         = $prefix->ip . '/' . $prefix->cidr;
@@ -98,7 +97,7 @@ class ApiV1Controller extends ApiBaseController
         }
 
         $output['ipv6_prefixes'] = [];
-        foreach ($ipv6Prefixes as $prefix) {
+        foreach ($prefixes['ipv6'] as $prefix) {
             $prefixWhois = $prefix->whois;
 
             $prefixOutput['prefix'] = $prefix->ip . '/' . $prefix->cidr;

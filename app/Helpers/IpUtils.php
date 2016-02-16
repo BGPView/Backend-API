@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\IPv4BgpPrefix;
+use App\Models\IPv6BgpPrefix;
 use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
@@ -406,15 +407,23 @@ class IpUtils
     {
         $type = $this->getInputType($input);
 
-        if ($type === 4) {
+        if ($type === 'asn') {
+
+            $ipv4Prefixes = IPv4BgpPrefix::where('asn', $input)->get();
+            $ipv6Prefixes = IPv6BgpPrefix::where('asn', $input)->get();
+            return [
+                'ipv4' => $ipv4Prefixes,
+                'ipv6' => $ipv6Prefixes,
+            ];
+
+        } else if ($type === 4) {
             $class = IPv4BgpPrefix::class;
-        } elseif ($type === 6) {
-            $class = IPv6BgpPrefix::class;
         } else {
-            return null;
+            $class = IPv6BgpPrefix::class;
         }
 
-        $ipDec = number_format($this->ip2dec($input), 0, '', '');
+
+        $ipDec = $this->ip2dec($input);
 
         $prefixes = $class::where('ip_dec_start', '<=', $ipDec)
             ->where('ip_dec_end', '>=',  $ipDec)
@@ -423,7 +432,6 @@ class IpUtils
 
         return $prefixes;
     }
-
 
     public function geoip($ip)
     {
