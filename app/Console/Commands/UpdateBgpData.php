@@ -56,44 +56,67 @@ class UpdateBgpData extends Command
         $this->cli->red("########################################################################")->br();
         $this->cli->red("###  MAKE SURE 'max_allowed_packet' IS SET < 1G IN YOUR my.cnf file  ###")->br();
         $this->cli->red("########################################################################")->br();
-        $this->updatePrefixes($ipVersion = 6);
-        $this->updatePrefixes($ipVersion = 4);
+        $this->updatePrefixes();
     }
 
-    private function updatePrefixes($ipVersion)
+    private function updatePrefixes()
     {
         $this->cli->br()->comment('===================================================');
 
-        $filePath = sys_get_temp_dir() . '/ipv' . $ipVersion . '_rib.txt';
-        $funcName = 'IPv' . $ipVersion . 'cidrIpCount';
-        $ipvAmountCidrArray = $this->ipUtils->$funcName();
-        $seenPrefixes = [];
-        $seenTableEntries = [];
-        $seenPeers = [];
-        $newPeers = "";
-        $newPrefixes = "";
-        $newTableEntries = "";
-        $counter = 0;
-        $mysqlTime = "'" . date('Y-m-d H:i:s') . "'";
+        $filePath = storage_path() . '/bgp_lines.txt';
 
-        $this->downloadRIBs($filePath, $ipVersion);
+        $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
+        $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
+
+        $seenV4Prefixes = [];
+        $seenV6Prefixes = [];
+
+        $seenV4TableEntries = [];
+        $seenV6TableEntries = [];
+
+        $seenV4Peers = [];
+        $seenV6Peers = [];
+
+        $newV4Peers = "";
+        $newV6Peers = "";
+
+        $newV4Prefixes = "";
+        $newV6Prefixes = "";
+
+        $newV4TableEntries = "";
+        $newV6TableEntries = "";
+
+        $v4counter = 0;
+        $v6counter = 0;
+
+        $mysqlTime = "'" . date('Y-m-d H:i:s') . "'";
 
         $this->bench->start();
 
         // Cleaning up old temp table
-        $this->cli->br()->comment('Drop old TEMP table');
-        DB::statement('DROP TABLE IF EXISTS ipv' . $ipVersion . '_bgp_prefixes_temp');
-        DB::statement('DROP TABLE IF EXISTS ipv' . $ipVersion . '_bgp_table_temp');
-        DB::statement('DROP TABLE IF EXISTS ipv' . $ipVersion . '_peers_temp');
+        $this->cli->br()->comment('Drop old v4 TEMP table');
+        DB::statement('DROP TABLE IF EXISTS ipv4_bgp_prefixes_temp');
+        DB::statement('DROP TABLE IF EXISTS ipv4_bgp_table_temp');
+        DB::statement('DROP TABLE IF EXISTS ipv4_peers_temp');
+
+        $this->cli->br()->comment('Drop old v6 TEMP table');
+        DB::statement('DROP TABLE IF EXISTS ipv6_bgp_prefixes_temp');
+        DB::statement('DROP TABLE IF EXISTS ipv6_bgp_table_temp');
+        DB::statement('DROP TABLE IF EXISTS ipv6_peers_temp');
 
         // Creating a new temp table to store our new BGP data
-        $this->cli->br()->comment('Cloning ipv' . $ipVersion . '_bgp_prefixes table schema');
-        DB::statement('CREATE TABLE ipv' . $ipVersion . '_bgp_prefixes_temp LIKE ipv' . $ipVersion . '_bgp_prefixes');
-        DB::statement('CREATE TABLE ipv' . $ipVersion . '_bgp_table_temp LIKE ipv' . $ipVersion . '_bgp_table');
-        DB::statement('CREATE TABLE ipv' . $ipVersion . '_peers_temp LIKE ipv' . $ipVersion . '_peers');
+        $this->cli->br()->comment('Cloning ipv4_bgp_prefixes table schema');
+        DB::statement('CREATE TABLE ipv4_bgp_prefixes_temp LIKE ipv4_bgp_prefixes');
+        DB::statement('CREATE TABLE ipv4_bgp_table_temp LIKE ipv4_bgp_table');
+        DB::statement('CREATE TABLE ipv4_peers_temp LIKE ipv4_peers');
+
+        $this->cli->br()->comment('Cloning ipv6_bgp_prefixes table schema');
+        DB::statement('CREATE TABLE ipv6_bgp_prefixes_temp LIKE ipv6_bgp_prefixes');
+        DB::statement('CREATE TABLE ipv6_bgp_table_temp LIKE ipv6_bgp_table');
+        DB::statement('CREATE TABLE ipv6_peers_temp LIKE ipv6_peers');
 
         $this->cli->br()->comment('===================================================');
-        $this->cli->br()->comment('Processing BGP IPv' . $ipVersion . ' entries');
+        $this->cli->br()->comment('Processing input lines');
 
         // Lets read through the file
         $fp = fopen($filePath, 'r');
@@ -102,26 +125,52 @@ class UpdateBgpData extends Command
 
                 $parsedLine = $this->bgpParser->parse($line);
 
+                // Lets see if we have IPv4 input line
+                $v4 = strpos($parsedLine->ip, '.') !== false ? true : false;
+
+                // Now lets set all the variable names
+                if ($v4) {
+                    $ipVersion = 4;
+                    $ipvAmountCidrArray = 'ipv4AmountCidrArray';
+                    $seenPrefixes = 'seenV4Prefixes';
+                    $seenTableEntries = 'seenV4TableEntries';
+                    $seenPeers = 'seenV4Peers';
+                    $newPeers = 'newV4Peers';
+                    $newPrefixes = 'newV4Prefixes';
+                    $newTableEntries = 'newV4TableEntries';
+                    $counter = 'v4counter';
+                } else {
+                    $ipVersion = 6;
+                    $ipvAmountCidrArray = 'ipv6AmountCidrArray';
+                    $seenPrefixes = 'seenV6Prefixes';
+                    $seenTableEntries = 'seenV6TableEntries';
+                    $seenPeers = 'seenV6Peers';
+                    $newPeers = 'newV6Peers';
+                    $newPrefixes = 'newV6Prefixes';
+                    $newTableEntries = 'newV6TableEntries';
+                    $counter = 'v4counter';
+                }
+
                 // Lets try process the peers
                 foreach ($parsedLine->peersSet as $peers) {
                     $peerKeyString = $peers[0] . '|' . $peers[1];
-                    if (isset($seenPeers[$peerKeyString]) === false) {
+                    if (isset($$seenPeers[$peerKeyString]) === false) {
                         // Bulking the raw bulk insert
-                        $newPeers .= '('.$peers[0].','.$peers[1].','.$mysqlTime.','.$mysqlTime.'),';
-                        $seenPeers[$peerKeyString] = true;
+                        $$newPeers .= '('.$peers[0].','.$peers[1].','.$mysqlTime.','.$mysqlTime.'),';
+                        $$seenPeers[$peerKeyString] = true;
                     }
                 }
 
-                $minCidrSize = $ipVersion == 4 ? 24 : 48;
+                $minCidrSize = $v4 ? 24 : 48;
                 // Lets make sure that v4 is min /24
                 if ($parsedLine->cidr > $minCidrSize || $parsedLine->cidr < 1) {
                     continue;
                 }
 
                 // Only entry entries which are not set
-                if (isset($seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn]) === false) {
-                    $newPrefixes .= "('".$parsedLine->ip."','".$parsedLine->cidr."',".$this->ipUtils->ip2dec($parsedLine->ip).",".number_format(($this->ipUtils->ip2dec($parsedLine->ip) + $ipvAmountCidrArray[$parsedLine->cidr] -1), 0, '', '').",".$parsedLine->asn.",".$mysqlTime.",".$mysqlTime."),";
-                    $seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn] = true;
+                if (isset($$seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn]) === false) {
+                    $$newPrefixes .= "('".$parsedLine->ip."','".$parsedLine->cidr."',".$this->ipUtils->ip2dec($parsedLine->ip).",".number_format(($this->ipUtils->ip2dec($parsedLine->ip) + $$ipvAmountCidrArray[$parsedLine->cidr] -1), 0, '', '').",".$parsedLine->asn.",".$mysqlTime.",".$mysqlTime."),";
+                    $$seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn] = true;
                 }
 
                 // Lets make sure we have a proper upstream (and not direct peering)
@@ -131,7 +180,7 @@ class UpdateBgpData extends Command
 
                 // Skip any table entries we have already seen
                 // isset() is MUCH faster than using in_array()
-                if (isset($seenTableEntries[$parsedLine->prefix.'|'.$parsedLine->path_string]) === true) {
+                if (isset($$seenTableEntries[$parsedLine->prefix.'|'.$parsedLine->path_string]) === true) {
                     continue;
                 }
 
@@ -139,37 +188,51 @@ class UpdateBgpData extends Command
                 // However we are now able to bulk insert in a easy single transaction with no issues
                 // This means we reduced our insert time from ~2 hours to ~10 seconds.
                 // Yeah, its worth it!
-                $newTableEntries .= "('".$parsedLine->ip."','".$parsedLine->cidr."',".$parsedLine->asn.",".$parsedLine->upstream_asn.",'".$parsedLine->path_string."',".$mysqlTime.",".$mysqlTime."),";
-                $counter++;
+                $$newTableEntries .= "('".$parsedLine->ip."','".$parsedLine->cidr."',".$parsedLine->asn.",".$parsedLine->upstream_asn.",'".$parsedLine->path_string."',".$mysqlTime.",".$mysqlTime."),";
+                $$counter++;
 
                 // Lets do a mass insert if the counter reach 100,00
-                if ($counter > 250000) {
-                    $this->cli->br()->comment('Inserting another 250,000 bgp entries in one bulk query');
-                    $newTableEntries = rtrim($newTableEntries, ',').';';
-                    DB::statement('INSERT INTO ipv' . $ipVersion . '_bgp_table_temp (ip,cidr,asn,upstream_asn,bgp_path,updated_at,created_at) VALUES '.$newTableEntries);
-                    $newTableEntries = "";
-                    $counter = 0;
+                if ($$counter > 250000 ) {
+                    $this->cli->br()->comment('Inserting another 250,000 bgp entries in one bulk query ('.$ipVersion.')');
+                    $$newTableEntries = rtrim($$newTableEntries, ',').';';
+                    DB::statement('INSERT INTO ipv' . $ipVersion . '_bgp_table_temp (ip,cidr,asn,upstream_asn,bgp_path,updated_at,created_at) VALUES '.$$newTableEntries);
+                    $$newTableEntries = "";
+                    $$counter = 0;
                 }
 
                 // Lets make note of the table entry we have seen
                 // We are setting key here so above we can do a isset() check instead of in_array()
-                $seenTableEntries[$parsedLine->prefix.'|'.$parsedLine->path_string] = true;
+                $$seenTableEntries[$parsedLine->prefix.'|'.$parsedLine->path_string] = true;
 
             }
             fclose($fp);
         }
 
-        $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query');
-        $newPrefixes = rtrim($newPrefixes, ',').';';
-        DB::statement('INSERT INTO ipv' . $ipVersion . '_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,updated_at,created_at) VALUES '.$newPrefixes);
+        // ================================================================
+        $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v6)');
+        $newV4Prefixes = rtrim($newV4Prefixes, ',').';';
+        DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,updated_at,created_at) VALUES '.$newV4Prefixes);
 
-        $this->cli->br()->comment('Inserting all remaining bgp table entries in one bulk query');
-        $newTableEntries = rtrim($newTableEntries, ',').';';
-        DB::statement('INSERT INTO ipv' . $ipVersion . '_bgp_table_temp (ip,cidr,asn,upstream_asn,bgp_path,updated_at,created_at) VALUES '.$newTableEntries);
+        $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v6)');
+        $newV6Prefixes = rtrim($newV6Prefixes, ',').';';
+        DB::statement('INSERT INTO ipv6_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,updated_at,created_at) VALUES '.$newV6Prefixes);
+        // ================================================================
+        $this->cli->br()->comment('Inserting all remaining bgp table entries in one bulk query (v4)');
+        $newV4TableEntries = rtrim($newV4TableEntries, ',').';';
+        DB::statement('INSERT INTO ipv4_bgp_table_temp (ip,cidr,asn,upstream_asn,bgp_path,updated_at,created_at) VALUES '.$newV4TableEntries);
 
-        $this->cli->br()->comment('Inserting all peers in one bulk query');
-        $newPeers = rtrim($newPeers, ',').';';
-        DB::statement('INSERT INTO ipv' . $ipVersion . '_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES '.$newPeers);
+        $this->cli->br()->comment('Inserting all remaining bgp table entries in one bulk query (v6)');
+        $newV6TableEntries = rtrim($newV6TableEntries, ',').';';
+        DB::statement('INSERT INTO ipv6_bgp_table_temp (ip,cidr,asn,upstream_asn,bgp_path,updated_at,created_at) VALUES '.$newV6TableEntries);
+        // ================================================================
+        $this->cli->br()->comment('Inserting all peers in one bulk query (v4)');
+        $newV4Peers = rtrim($newV4Peers, ',').';';
+        DB::statement('INSERT INTO ipv4_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES '.$newV4Peers);
+
+        $this->cli->br()->comment('Inserting all peers in one bulk query (v6)');
+        $newV6Peers = rtrim($newV6Peers, ',').';';
+        DB::statement('INSERT INTO ipv6_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES '.$newV6Peers);
+        // ================================================================
 
         $this->output->newLine(1);
         $this->bench->end();
@@ -181,17 +244,27 @@ class UpdateBgpData extends Command
 
         // Rename temp table to take over
         $this->cli->br()->comment('===================================================');
-        $this->cli->br()->comment('Swapping TEMP table with production table');
-        DB::statement('RENAME TABLE ipv' . $ipVersion . '_bgp_prefixes TO backup_ipv' . $ipVersion . '_bgp_prefixes, ipv' . $ipVersion . '_bgp_prefixes_temp TO ipv' . $ipVersion . '_bgp_prefixes;');
-        DB::statement('RENAME TABLE ipv' . $ipVersion . '_bgp_table TO backup_ipv' . $ipVersion . '_bgp_table, ipv' . $ipVersion . '_bgp_table_temp TO ipv' . $ipVersion . '_bgp_table;');
-        DB::statement('RENAME TABLE ipv' . $ipVersion . '_peers TO backup_ipv' . $ipVersion . '_peers, ipv' . $ipVersion . '_peers_temp TO ipv' . $ipVersion . '_peers;');
+        $this->cli->br()->comment('Swapping v4 TEMP table with production table');
+        DB::statement('RENAME TABLE ipv4_bgp_prefixes TO backup_ipv4_bgp_prefixes, ipv4_bgp_prefixes_temp TO ipv4_bgp_prefixes;');
+        DB::statement('RENAME TABLE ipv4_bgp_table TO backup_ipv4_bgp_table, ipv4_bgp_table_temp TO ipv4_bgp_table;');
+        DB::statement('RENAME TABLE ipv4_peers TO backup_ipv4_peers, ipv4_peers_temp TO ipv4_peers;');
+        $this->cli->br()->comment('===================================================');
+        $this->cli->br()->comment('Swapping v6 TEMP table with production table');
+        DB::statement('RENAME TABLE ipv6_bgp_prefixes TO backup_ipv6_bgp_prefixes, ipv6_bgp_prefixes_temp TO ipv6_bgp_prefixes;');
+        DB::statement('RENAME TABLE ipv6_bgp_table TO backup_ipv6_bgp_table, ipv6_bgp_table_temp TO ipv6_bgp_table;');
+        DB::statement('RENAME TABLE ipv6_peers TO backup_ipv6_peers, ipv6_peers_temp TO ipv6_peers;');
 
         // Delete old table
         $this->cli->br()->comment('===================================================');
-        $this->cli->br()->comment('Removing old production prefix table');
-        DB::statement('DROP TABLE backup_ipv' . $ipVersion . '_bgp_prefixes');
-        DB::statement('DROP TABLE backup_ipv' . $ipVersion . '_bgp_table');
-        DB::statement('DROP TABLE backup_ipv' . $ipVersion . '_peers');
+        $this->cli->br()->comment('Removing old production 4 prefix table');
+        DB::statement('DROP TABLE backup_ipv4_bgp_prefixes');
+        DB::statement('DROP TABLE backup_ipv4_bgp_table');
+        DB::statement('DROP TABLE backup_ipv4_peers');
+        $this->cli->br()->comment('===================================================');
+        $this->cli->br()->comment('Removing old production 6 prefix table');
+        DB::statement('DROP TABLE backup_ipv6_bgp_prefixes');
+        DB::statement('DROP TABLE backup_ipv6_bgp_table');
+        DB::statement('DROP TABLE backup_ipv6_peers');
 
         // Remove RIB file
         $this->cli->br()->comment('===================================================');
@@ -201,24 +274,5 @@ class UpdateBgpData extends Command
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('DONE!!!');
         $this->cli->br()->comment('===================================================');
-    }
-
-    private function downloadRIBs($filePath, $ipVersion = 4)
-    {
-        $this->cli->br()->comment('Downloading IPv' . $ipVersion . ' RIB BGP Dump [' . $filePath . ']');
-        $name = 'ipv' . $ipVersion . 'RibDownloadUrl';
-
-        $fp = fopen ($filePath, 'w+');
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->$name);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_NOPROGRESS, false);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_FILE, $fp);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
-        curl_setopt($ch, CURLOPT_ENCODING , "gzip");
-        curl_exec($ch);
-        curl_close($ch);
-        fclose($fp);
     }
 }

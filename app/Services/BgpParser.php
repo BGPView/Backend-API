@@ -35,24 +35,24 @@ class BgpParser
 
     public function parse($input)
     {
-        $bgpParts = explode(' ', $input);
+        $input = trim(preg_replace('/\s*{[^)]*}/', '', $input));
+        $bgpParts = explode('|', $input);
 
-        $pathArr =  explode('as-path', $input, 2)[1];
-        $pathArr = trim(explode(':', $pathArr, 2)[1]);
-        // Lets reverse the order to start at origin
-        $pathArr = explode(' ', $pathArr);
+        // Remove AS-SETS
+        $bgpParts[6] = trim(preg_replace('/s*{[^)]*}/', '', $bgpParts[6]));
+        $pathArr = explode(' ', $bgpParts[6]);
 
         $peers = $this->getPeers($pathArr);
         $path = $this->getPath($pathArr);
 
-        $prefixParts = explode('/', $bgpParts[0], 2);
+        $prefixParts = explode('/', $bgpParts[5], 2);
 
         $bgpPrefixData = new \stdClass();
-        $bgpPrefixData->prefix = $bgpParts[0];
+        $bgpPrefixData->prefix = $bgpParts[5];
         $bgpPrefixData->ip = $prefixParts[0];
         $bgpPrefixData->cidr = $prefixParts[1];
-        $bgpPrefixData->source = $bgpParts[1];
-        $bgpPrefixData->asn = $bgpParts[3];
+        $bgpPrefixData->source = $bgpParts[8];
+        $bgpPrefixData->asn = end($pathArr);
         $bgpPrefixData->upstream_asn = isset($path[1]) ? $path[1] : null; // Second BGP (Ignoring self)
         $bgpPrefixData->path_string = implode(' ', $path);
         $bgpPrefixData->path = $path;
