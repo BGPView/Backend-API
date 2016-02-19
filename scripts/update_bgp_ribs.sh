@@ -1,43 +1,54 @@
 #!/bin/bash
 
+# Needs AXEL and unix system
+
+rm -f ./storage/bgp_lines.txt;
+touch ./storage/bgp_lines.txt;
+function process_rib {
+    response=$(curl --write-out %{http_code} --silent --output /dev/null -I $1)
+    echo "Curl Response: $response"
+    if [ "200" == $response ]; then
+        rm -f ./storage/temp_rib.*;
+        filename=$1
+        extension="${filename##*.}"
+        axel -o ./storage/temp_rib.$extension $1;
+        ./scripts/bgpdump -m ./storage/temp_rib.$extension >> ./storage/bgp_lines.txt;
+        rm -f ./storage/temp_rib.*;
+    fi
+}
+
+###############################################################################################
+
+# IPv4 RouteViews
 BASE_URL="archive.routeviews.org/bgpdata";
 RIB_FOLDER=`curl ftp://$BASE_URL/ | tail -1 | awk '{print $(NF)}'`
 RIB_FILE=`curl ftp://$BASE_URL/$RIB_FOLDER/RIBS/ | tail -1 | awk '{print $(NF)}'`
+process_rib $BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE
 
-
-#IPv4 RIBs
-echo "Getting IPv4 RIB files"
-IPV4_RIB_URL="http://$BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE"
-echo "IPv4 RIB URL: $IPV4_RIB_URL"
-response=$(curl --write-out %{http_code} --silent --output /dev/null -I $IPV4_RIB_URL)
-echo "Curl Response: $response"
-if [ "200" == $response ]; then
-	echo "Downloading RIB file"
-	rm -f /temp_rib_ipv4.bz2;
-	wget -O /temp_rib_ipv4.bz2 $IPV4_RIB_URL;
-	echo "Doing BGPDump on file: /var/www/html/rib_ipv4.txt"
-	bgpdump2 /temp_rib_ipv4.bz2 > /var/www/html/rib_ipv4.txt;
-	echo "Clean up"
-	rm -f /temp_rib_ipv4.bz2;
-fi
-
+# IPv6 RouteViews
 BASE_URL="archive.routeviews.org/route-views6/bgpdata";
 RIB_FOLDER=`curl ftp://$BASE_URL/ | tail -1 | awk '{print $(NF)}'`
 RIB_FILE=`curl ftp://$BASE_URL/$RIB_FOLDER/RIBS/ | tail -1 | awk '{print $(NF)}'`
+process_rib $BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE
 
+###############################################################################################
 
-#IPv6 RIBs
-echo "Getting IPv6 RIB files"
-IPV6_RIB_URL="http://$BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE"
-echo "IPv6 RIB URL: $IPV6_RIB_URL"
-response=$(curl --write-out %{http_code} --silent --output /dev/null -I $IPV6_RIB_URL)
-echo "Curl Response: $response"
-if [ "200" == $response ]; then
-        echo "Downloading RIB file"
-        rm -f /temp_rib_ipv6.bz2;
-        wget -O /temp_rib_ipv6.bz2 $IPV6_RIB_URL;
-        echo "Doing BGPDump on file: /var/www/html/rib_ipv6.txt"
-        bgpdump2 /temp_rib_ipv6.bz2 -6 > /var/www/html/rib_ipv6.txt;
-        echo "Clean up"
-        rm -f /temp_rib_ipv6.bz2;
-fi
+process_rib http://data.ris.ripe.net/rrc00/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc01/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc02/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc03/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc04/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc05/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc06/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc07/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc08/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc09/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc10/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc11/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc12/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc13/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc14/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc15/latest-bview.gz
+process_rib http://data.ris.ripe.net/rrc16/latest-bview.gz
+
+###############################################################################################
