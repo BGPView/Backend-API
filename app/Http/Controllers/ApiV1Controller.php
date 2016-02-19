@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\ASN;
 use App\Models\IPv4BgpPrefix;
+use App\Models\IPv4Peer;
 use App\Models\IPv6BgpPrefix;
+use App\Models\IPv6Peer;
 use App\Models\IX;
 use App\Models\IXMember;
 use Illuminate\Http\Request;
@@ -21,7 +23,7 @@ class ApiV1Controller extends ApiBaseController
     public function asn(Request $request, $as_number)
     {
         // lets only use the AS number.
-        $as_number = str_ireplace('as', '', $as_number);
+        $as_number = $this->ipUtils->normalizeInput($as_number);
 
         $asnData = ASN::with('emails')->where('asn', $as_number)->first();
 
@@ -68,13 +70,43 @@ class ApiV1Controller extends ApiBaseController
     }
 
     /*
+     * URI: /asn/{as_number}/peers
+     */
+    public function asnPeers($as_number)
+    {
+        $as_number = $this->ipUtils->normalizeInput($as_number);
+        $peerSet['ipv4_peers'] = IPv4Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
+        $peerSet['ipv6_peers'] = IPv6Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
+        $output['ipv4_peers'] = [];
+        $output['ipv6_peers'] = [];
+
+        foreach ($peerSet as $ipVersion => $peers) {
+            foreach ($peers as $peer) {
+                if ($peer->asn_1 == $as_number && $peer->asn_2 == $as_number) {
+                    continue;
+                }
+
+                $peerAsn = $peer->asn_1 == $as_number ? $peer->asn_2 : $peer->asn_1;
+                $asn = ASN::where('asn', $peerAsn)->first();
+
+                $peerAsnInfo['asn']             = $peerAsn;
+                $peerAsnInfo['name']            = is_null($asn) ? null : $asn->name;
+                $peerAsnInfo['description']     = is_null($asn) ? null : $asn->description;
+                $peerAsnInfo['country_code']    = is_null($asn) ? null : $asn->counrty_code;
+
+                $output[$ipVersion][] = $peerAsnInfo;
+            }
+        }
+
+        return $this->sendData($output);
+    }
+
+    /*
      * URI: /asn/{as_number}/prefixes
      */
     public function asnPrefixes($as_number)
     {
-        // lets only use the AS number
-        $as_number = str_ireplace('as', '', $as_number);
-
+        $as_number = $this->ipUtils->normalizeInput($as_number);
         $prefixes = $this->ipUtils->getBgpPrefixes($as_number);
 
         $output['asn'] = (int) $as_number;
