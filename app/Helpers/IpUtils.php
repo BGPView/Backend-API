@@ -329,7 +329,7 @@ class IpUtils
         $type = $this->getInputType($input);
 
         if ($type === 'asn') {
-            return "AS" . str_ireplace('as', '', $input);
+            return (int) str_ireplace('as', '', $input);
         }
 
         return explode('/', $input, 2)[0];
