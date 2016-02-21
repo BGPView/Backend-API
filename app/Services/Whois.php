@@ -36,7 +36,7 @@ class Whois
     public function __construct($input, $cidr = null)
     {
         $this->ipUtils = new IpUtils;
-        $this->input = 'AS' . $this->ipUtils->normalizeInput(trim($input));
+        $this->input = $this->ipUtils->normalizeInput(trim($input), $showAS = true);
         $allocation = $this->ipUtils->getAllocationEntry($this->input, $cidr);
 
         // Lets make sure we found an allocation first
@@ -82,7 +82,7 @@ class Whois
         try {
             $results = $this->$functionName();
         } catch(\Exception $e) {
-            Log::warning("Something went wrong on: " . $this->input . "(" . $this->rir->whois_server . ")", $e->getMessage());
+            Log::warning(["Something went wrong on: " . $this->input . "(" . $this->rir->whois_server . ")"], $e->getMessage());
             return null;
         }
 

@@ -324,11 +324,14 @@ class IpUtils
         return "asn";
     }
 
-    public function normalizeInput($input)
+    public function normalizeInput($input, $showAs = false)
     {
         $type = $this->getInputType($input);
 
         if ($type === 'asn') {
+            if ($showAs === true) {
+                return 'AS'.str_ireplace('as', '', $input);
+            }
             return (int) str_ireplace('as', '', $input);
         }
 
