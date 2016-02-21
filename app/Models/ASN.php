@@ -112,8 +112,6 @@ class ASN extends Model {
     {
         $prefixes = (new IpUtils())->getBgpPrefixes($as_number);
 
-        $output['asn'] = (int) $as_number;
-
         $output['ipv4_prefixes'] = [];
         foreach ($prefixes['ipv4'] as $prefix) {
             $prefixWhois = $prefix->whois;
@@ -146,6 +144,58 @@ class ASN extends Model {
             $output['ipv6_prefixes'][]  = $prefixOutput;
             $prefixOutput = null;
             $prefixWhois = null;
+        }
+
+        return $output;
+    }
+
+    public static function getUpstream($as_number)
+    {
+        $ipv4Upstreams = IPv4BgpEntry::where('asn', $as_number)->get();
+        $ipv6Upstreams = IPv6BgpEntry::where('asn', $as_number)->get();
+
+        $output['ipv4_upstream'] = [];
+        foreach ($ipv4Upstreams as $upstream) {
+
+            if (isset($output['ipv4_upstream'][$upstream->upstream_asn]) === true) {
+                if (in_array($upstream->bgp_path, $output['ipv4_upstream'][$upstream->upstream_asn]['bgp_paths']) === false) {
+                    $output['ipv4_upstream'][$upstream->upstream_asn]['bgp_paths'][] = $upstream->bgp_path;
+                }
+                continue;
+            }
+
+            $upstreamAsn = self::where('asn', $upstream->upstream_asn)->first();
+
+            $upstreamOutput['asn']          = $upstream->upstream_asn;
+            $upstreamOutput['name']         = isset($upstreamAsn->name) ? $upstreamAsn->name : null;
+            $upstreamOutput['description']  = isset($upstreamAsn->description) ? $upstreamAsn->description : null;
+            $upstreamOutput['bgp_paths'][]  = $upstream->bgp_path;
+
+            $output['ipv4_upstream'][$upstream->upstream_asn]  = $upstreamOutput;
+            $upstreamOutput = null;
+            $upstreamAsn = null;
+        }
+
+        $output['ipv6_upstream'] = [];
+        foreach ($ipv6Upstreams as $upstream) {
+
+            if (isset($output['ipv6_upstream'][$upstream->upstream_asn]) === true) {
+                if (in_array($upstream->bgp_path, $output['ipv6_upstream'][$upstream->upstream_asn]['bgp_paths']) === false) {
+                    $output['ipv6_upstream'][$upstream->upstream_asn]['bgp_paths'][] = $upstream->bgp_path;
+                }
+                continue;
+            }
+
+            $upstreamAsn = self::where('asn', $upstream->upstream_asn)->first();
+
+            $upstreamOutput['asn']          = $upstream->upstream_asn;
+            $upstreamOutput['name']         = isset($upstreamAsn->name) ? $upstreamAsn->name : null;
+            $upstreamOutput['description']  = isset($upstreamAsn->description) ? $upstreamAsn->description : null;
+            $upstreamOutput['bgp_paths'][]  = $upstream->bgp_path;
+
+            $output['ipv6_upstream'][$upstream->upstream_asn]  = $upstreamOutput;
+            $upstreamOutput = null;
+            $upstreamAsn = null;
         }
 
         return $output;

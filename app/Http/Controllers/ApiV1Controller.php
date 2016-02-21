@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ASN;
+use App\Models\IPv4BgpEntry;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv4Peer;
 use App\Models\IPv6BgpPrefix;
@@ -22,6 +23,7 @@ class ApiV1Controller extends ApiBaseController
      * Optional Params: with_peers
      * Optional Params: with_prefixes
      * Optional Params: with_ixs
+     * Optional Params: with_upstreams
      */
     public function asn(Request $request, $as_number)
     {
@@ -57,10 +59,9 @@ class ApiV1Controller extends ApiBaseController
         if ($request->has('with_prefixes') === true) {
             $output['prefixes'] = ASN::getPrefixes($as_number);
         }
-
-
-
-
+        if ($request->has('with_upstreams') === true) {
+            $output['upstreams'] = ASN::getUpstream($as_number);
+        }
         if ($request->has('with_raw_whois') === true) {
             $output['raw_whois'] = $asnData->raw_whois;
         }
@@ -100,6 +101,17 @@ class ApiV1Controller extends ApiBaseController
         $prefixes   = ASN::getPrefixes($as_number);
 
         return $this->sendData($prefixes);
+    }
+
+    /*
+     * URI: /asn/{as_number}/upstreams
+     */
+    public function asnUpstreams($as_number)
+    {
+        $as_number  = $this->ipUtils->normalizeInput($as_number);
+        $upstreams  = ASN::getUpstream($as_number);
+
+        return $this->sendData($upstreams);
     }
 
     /*

@@ -63,6 +63,8 @@ class BgpParser
 
     private function getPath($pathArr)
     {
+        $pathArr = array_unique($pathArr);
+
         foreach ($pathArr as $key => $asnHop) {
             // Since we are dealing with ONLY publicly seen prefixes
             // This means that we will need to make sure there is at least
