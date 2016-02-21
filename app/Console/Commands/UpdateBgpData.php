@@ -89,6 +89,9 @@ class UpdateBgpData extends Command
         $v4counter = 0;
         $v6counter = 0;
 
+        $v4PrefixCounter = 0;
+        $v6PrefixCounter = 0;
+
         $mysqlTime = "'" . date('Y-m-d H:i:s') . "'";
 
         $this->bench->start();
@@ -125,6 +128,11 @@ class UpdateBgpData extends Command
 
                 $parsedLine = $this->bgpParser->parse($line);
 
+                // if we dont see an ASN then lets skip
+                if (empty($parsedLine->asn) === true){
+                    continue;
+                }
+
                 // Lets see if we have IPv4 input line
                 $v4 = strpos($parsedLine->ip, '.') !== false ? true : false;
 
@@ -139,6 +147,7 @@ class UpdateBgpData extends Command
                     $newPrefixes = 'newV4Prefixes';
                     $newTableEntries = 'newV4TableEntries';
                     $counter = 'v4counter';
+                    $prefixCounter = 'v4PrefixCounter';
                 } else {
                     $ipVersion = 6;
                     $ipvAmountCidrArray = 'ipv6AmountCidrArray';
@@ -148,7 +157,8 @@ class UpdateBgpData extends Command
                     $newPeers = 'newV6Peers';
                     $newPrefixes = 'newV6Prefixes';
                     $newTableEntries = 'newV6TableEntries';
-                    $counter = 'v4counter';
+                    $counter = 'v6counter';
+                    $prefixCounter = 'v6PrefixCounter';
                 }
 
                 // Lets try process the peers
@@ -167,12 +177,21 @@ class UpdateBgpData extends Command
                     continue;
                 }
 
-                // Only entry entries which are not set
+                // Only entry prefixes which are not set
                 if (isset($$seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn]) === false) {
+
                     $$newPrefixes .= "('".$parsedLine->ip."','".$parsedLine->cidr."',".$this->ipUtils->ip2dec($parsedLine->ip).",".number_format(($this->ipUtils->ip2dec($parsedLine->ip) + $$ipvAmountCidrArray[$parsedLine->cidr] -1), 0, '', '').",".$parsedLine->asn.",".$mysqlTime.",".$mysqlTime."),";
                     $$seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn] = true;
-                }
+                    $$prefixCounter++;
 
+                    if ($$prefixCounter > 250000 ) {
+                        $this->cli->br()->comment('Inserting another 250,000 prefixes in one bulk query ('.$ipVersion.')');
+                        $$newPrefixes = rtrim($$newPrefixes, ',').';';
+                        DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,updated_at,created_at) VALUES '.$$newPrefixes);
+                        $$newPrefixes = "";
+                        $$prefixCounter = 0;
+                    }
+                }
                 // Lets make sure we have a proper upstream (and not direct peering)
                 if (is_null($parsedLine->upstream_asn) === true) {
                     continue;
@@ -209,7 +228,7 @@ class UpdateBgpData extends Command
         }
 
         // ================================================================
-        $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v6)');
+        $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v4)');
         $newV4Prefixes = rtrim($newV4Prefixes, ',').';';
         DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,updated_at,created_at) VALUES '.$newV4Prefixes);
 
