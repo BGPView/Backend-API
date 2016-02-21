@@ -61,8 +61,11 @@ class UpdateBgpData extends Command
 
     private function updatePrefixes()
     {
+        $this->bench->start();
+
         $this->cli->br()->comment('===================================================');
 
+        exec('bash '.base_path() . '/scripts/update_bgp_ribs.sh');
         $filePath = storage_path() . '/bgp_lines.txt';
 
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
@@ -93,8 +96,6 @@ class UpdateBgpData extends Command
         $v6PrefixCounter = 0;
 
         $mysqlTime = "'" . date('Y-m-d H:i:s') . "'";
-
-        $this->bench->start();
 
         // Cleaning up old temp table
         $this->cli->br()->comment('Drop old v4 TEMP table');
