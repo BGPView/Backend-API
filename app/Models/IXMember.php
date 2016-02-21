@@ -29,4 +29,24 @@ class IXMember extends Model {
     {
         return $this->belongsTo('App\Models\ASN', 'asn', 'asn');
     }
+
+    public static function getMembers($asn)
+    {
+        $ixs = [];
+        foreach (self::where('asn', $asn)->get() as $ixMember) {
+            $ixInfo = $ixMember->ix;
+
+            $ix_data['ix_id']           = $ixInfo->id;
+            $ix_data['name']            = $ixInfo->name;
+            $ix_data['name_full']       = $ixInfo->name_full;
+            $ix_data['counrty_code']    = $ixInfo->counrty_code;
+            $ix_data['ipv4_address']    = $ixMember->ipv4_address;
+            $ix_data['ipv6_address']    = $ixMember->ipv6_address;
+            $ix_data['speed']           = $ixMember->speed;
+
+            $ixs[] = $ix_data;
+        }
+
+        return $ixs;
+    }
 }

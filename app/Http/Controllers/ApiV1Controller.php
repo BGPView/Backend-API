@@ -19,6 +19,9 @@ class ApiV1Controller extends ApiBaseController
     /*
      * URI: /asn/{as_number}
      * Optional Params: with_raw_whois
+     * Optional Params: with_peers
+     * Optional Params: with_prefixes
+     * Optional Params: with_ixs
      */
     public function asn(Request $request, $as_number)
     {
@@ -45,21 +48,18 @@ class ApiV1Controller extends ApiBaseController
         $output['traffic_ratio']        = $asnData->traffic_ratio;
         $output['owner_address']        = $asnData->owner_address;
 
-        $ixs = [];
-        foreach (IXMember::where('asn', $asnData->asn)->get() as $ixMember) {
-            $ixInfo = $ixMember->ix;
-
-            $ix_data['ix_id']           = $ixInfo->id;
-            $ix_data['name']            = $ixInfo->name;
-            $ix_data['name_full']       = $ixInfo->name_full;
-            $ix_data['counrty_code']    = $ixInfo->counrty_code;
-            $ix_data['ipv4_address']    = $ixMember->ipv4_address;
-            $ix_data['ipv6_address']    = $ixMember->ipv6_address;
-            $ix_data['speed']           = $ixMember->speed;
-
-            $ixs[] = $ix_data;
+        if ($request->has('with_ixs') === true) {
+            $output['internet_exchanges'] = IXMember::getMembers($asnData->asn);
         }
-        $output['internet_exchanges']        = $ixs;
+        if ($request->has('with_peers') === true) {
+            $output['peers'] = ASN::getPeers($as_number);
+        }
+        if ($request->has('with_prefixes') === true) {
+            $output['prefixes'] = ASN::getPrefixes($as_number);
+        }
+
+
+
 
         if ($request->has('with_raw_whois') === true) {
             $output['raw_whois'] = $asnData->raw_whois;
@@ -74,31 +74,21 @@ class ApiV1Controller extends ApiBaseController
      */
     public function asnPeers($as_number)
     {
-        $as_number = $this->ipUtils->normalizeInput($as_number);
-        $peerSet['ipv4_peers'] = IPv4Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
-        $peerSet['ipv6_peers'] = IPv6Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
-        $output['ipv4_peers'] = [];
-        $output['ipv6_peers'] = [];
+        $as_number  = $this->ipUtils->normalizeInput($as_number);
+        $peers      = ASN::getPeers($as_number);
 
-        foreach ($peerSet as $ipVersion => $peers) {
-            foreach ($peers as $peer) {
-                if ($peer->asn_1 == $as_number && $peer->asn_2 == $as_number) {
-                    continue;
-                }
+        return $this->sendData($peers);
+    }
 
-                $peerAsn = $peer->asn_1 == $as_number ? $peer->asn_2 : $peer->asn_1;
-                $asn = ASN::where('asn', $peerAsn)->first();
+    /*
+     * URI: /asn/{as_number}/ixs
+     */
+    public function asnIxs($as_number)
+    {
+        $as_number  = $this->ipUtils->normalizeInput($as_number);
+        $ixs        = IXMember::getMembers($as_number);
 
-                $peerAsnInfo['asn']             = $peerAsn;
-                $peerAsnInfo['name']            = is_null($asn) ? null : $asn->name;
-                $peerAsnInfo['description']     = is_null($asn) ? null : $asn->description;
-                $peerAsnInfo['country_code']    = is_null($asn) ? null : $asn->counrty_code;
-
-                $output[$ipVersion][] = $peerAsnInfo;
-            }
-        }
-
-        return $this->sendData($output);
+        return $this->sendData($ixs);
     }
 
     /*
@@ -106,46 +96,10 @@ class ApiV1Controller extends ApiBaseController
      */
     public function asnPrefixes($as_number)
     {
-        $as_number = $this->ipUtils->normalizeInput($as_number);
-        $prefixes = $this->ipUtils->getBgpPrefixes($as_number);
+        $as_number  = $this->ipUtils->normalizeInput($as_number);
+        $prefixes   = ASN::getPrefixes($as_number);
 
-        $output['asn'] = (int) $as_number;
-
-        $output['ipv4_prefixes'] = [];
-        foreach ($prefixes['ipv4'] as $prefix) {
-            $prefixWhois = $prefix->whois;
-
-            $prefixOutput['prefix']         = $prefix->ip . '/' . $prefix->cidr;
-            $prefixOutput['ip']             = $prefix->ip;
-            $prefixOutput['cidr']           = $prefix->cidr;
-
-            $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
-            $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
-            $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
-
-            $output['ipv4_prefixes'][]  = $prefixOutput;
-            $prefixOutput = null;
-            $prefixWhois = null;
-        }
-
-        $output['ipv6_prefixes'] = [];
-        foreach ($prefixes['ipv6'] as $prefix) {
-            $prefixWhois = $prefix->whois;
-
-            $prefixOutput['prefix'] = $prefix->ip . '/' . $prefix->cidr;
-            $prefixOutput['ip']     = $prefix->ip;
-            $prefixOutput['cidr']   = $prefix->cidr;
-
-            $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
-            $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
-            $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
-
-            $output['ipv6_prefixes'][]  = $prefixOutput;
-            $prefixOutput = null;
-            $prefixWhois = null;
-        }
-
-        return $this->sendData($output);
+        return $this->sendData($prefixes);
     }
 
     /*

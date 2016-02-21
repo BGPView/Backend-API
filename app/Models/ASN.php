@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\IpUtils;
 use Illuminate\Database\Eloquent\Model;
 
 class ASN extends Model {
@@ -77,5 +78,76 @@ class ASN extends Model {
             }
         }
         return $abuse_contacts;
+    }
+
+    public static function getPeers($as_number)
+    {
+        $peerSet['ipv4_peers'] = IPv4Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
+        $peerSet['ipv6_peers'] = IPv6Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
+        $output['ipv4_peers'] = [];
+        $output['ipv6_peers'] = [];
+
+        foreach ($peerSet as $ipVersion => $peers) {
+            foreach ($peers as $peer) {
+                if ($peer->asn_1 == $as_number && $peer->asn_2 == $as_number) {
+                    continue;
+                }
+
+                $peerAsn = $peer->asn_1 == $as_number ? $peer->asn_2 : $peer->asn_1;
+                $asn = self::where('asn', $peerAsn)->first();
+
+                $peerAsnInfo['asn']             = $peerAsn;
+                $peerAsnInfo['name']            = is_null($asn) ? null : $asn->name;
+                $peerAsnInfo['description']     = is_null($asn) ? null : $asn->description;
+                $peerAsnInfo['country_code']    = is_null($asn) ? null : $asn->counrty_code;
+
+                $output[$ipVersion][] = $peerAsnInfo;
+            }
+        }
+
+        return $output;
+    }
+
+    public static function getPrefixes($as_number)
+    {
+        $prefixes = (new IpUtils())->getBgpPrefixes($as_number);
+
+        $output['asn'] = (int) $as_number;
+
+        $output['ipv4_prefixes'] = [];
+        foreach ($prefixes['ipv4'] as $prefix) {
+            $prefixWhois = $prefix->whois;
+
+            $prefixOutput['prefix']         = $prefix->ip . '/' . $prefix->cidr;
+            $prefixOutput['ip']             = $prefix->ip;
+            $prefixOutput['cidr']           = $prefix->cidr;
+
+            $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
+            $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
+            $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
+
+            $output['ipv4_prefixes'][]  = $prefixOutput;
+            $prefixOutput = null;
+            $prefixWhois = null;
+        }
+
+        $output['ipv6_prefixes'] = [];
+        foreach ($prefixes['ipv6'] as $prefix) {
+            $prefixWhois = $prefix->whois;
+
+            $prefixOutput['prefix'] = $prefix->ip . '/' . $prefix->cidr;
+            $prefixOutput['ip']     = $prefix->ip;
+            $prefixOutput['cidr']   = $prefix->cidr;
+
+            $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
+            $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
+            $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
+
+            $output['ipv6_prefixes'][]  = $prefixOutput;
+            $prefixOutput = null;
+            $prefixWhois = null;
+        }
+
+        return $output;
     }
 }
