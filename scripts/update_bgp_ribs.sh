@@ -34,15 +34,15 @@ process_rib $BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE
 ###############################################################################################
 
 process_rib http://data.ris.ripe.net/rrc00/latest-bview.gz
-process_rib http://data.ris.ripe.net/rrc01/latest-bview.gz
+# process_rib http://data.ris.ripe.net/rrc01/latest-bview.gz #Outdated and not used anymore
 process_rib http://data.ris.ripe.net/rrc02/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc03/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc04/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc05/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc06/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc07/latest-bview.gz
-process_rib http://data.ris.ripe.net/rrc08/latest-bview.gz
-process_rib http://data.ris.ripe.net/rrc09/latest-bview.gz
+# process_rib http://data.ris.ripe.net/rrc08/latest-bview.gz #Outdated and not used anymore
+# process_rib http://data.ris.ripe.net/rrc09/latest-bview.gz #Outdated and not used anymore
 process_rib http://data.ris.ripe.net/rrc10/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc11/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc12/latest-bview.gz
