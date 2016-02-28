@@ -198,6 +198,9 @@ class ASN extends Model {
             $upstreamAsn = null;
         }
 
+        $output['ipv4_upstream'] = array_values($output['ipv4_upstream']);
+        $output['ipv6_upstream'] = array_values($output['ipv6_upstream']);
+
         return $output;
     }
 }
