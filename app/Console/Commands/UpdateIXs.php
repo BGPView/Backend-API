@@ -180,6 +180,11 @@ class UpdateIXs extends Command
 
         $this->cli->br()->comment('Entering ' . count($this->ix_memebrs) . ' IX members into DB');
         foreach ($this->ix_memebrs as $member) {
+
+            if (empty($member->asn) === true) {
+                continue;
+            }
+
             $ixMember = new IXMember;
             $ixMember->setTable('ix_members_temp');
             $ixMember->ix_peeringdb_id  = $member->ixlan_id;
