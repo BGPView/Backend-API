@@ -123,18 +123,19 @@ class ApiV1Controller extends ApiBaseController
         $ipVersion = $this->ipUtils->getInputType($ip);
 
         if ($ipVersion === 4) {
-            $prefix = IPv4BgpPrefix::where('ip', $ip)->where('cidr', $cidr)->first();
+            $prefixes = IPv4BgpPrefix::where('ip', $ip)->where('cidr', $cidr)->get();
         } else if ($ipVersion === 6) {
-            $prefix = IPv6BgpPrefix::where('ip', $ip)->where('cidr', $cidr)->first();
+            $prefixes = IPv6BgpPrefix::where('ip', $ip)->where('cidr', $cidr)->get();
         } else {
             $data = $this->makeStatus('Malformed input', false);
             return $this->respond($data);
         }
 
-        if (is_null($prefix) === true) {
+        if (empty($prefixes) === true) {
             $data = $this->makeStatus('Could not find prefix in BGP table', false);
             return $this->respond($data);
         }
+        $prefix = $prefixes[0];
 
         $prefixWhois = $prefix->whois();
         $allocation = $this->ipUtils->getAllocationEntry($prefix->ip);
@@ -143,7 +144,10 @@ class ApiV1Controller extends ApiBaseController
         $output['prefix']           = $prefix->ip . '/' . $prefix->cidr;
         $output['ip']               = $prefix->ip;
         $output['cidr']             = $prefix->cidr;
-        $output['asn']              = $prefix->asn;
+        $output['asns']             = [];
+        foreach ($prefixes as $prefixData) {
+            $output['asns'][] = $prefixData->asn;
+        }
         $output['name']             = $prefixWhois ? $prefixWhois->name : null;
         $output['description_short']= $prefixWhois ? $prefixWhois->description : null;
         $output['description_full'] = $prefixWhois ? $prefixWhois->description_full : null;
