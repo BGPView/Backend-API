@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\IanaAssignment;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv6BgpPrefix;
 use App\Models\RirAsnAllocation;
@@ -336,6 +337,15 @@ class IpUtils
         }
 
         return explode('/', $input, 2)[0];
+    }
+
+    public function getIanaAssignmentEntry($input)
+    {
+        $type = $this->getInputType($input);
+
+        $input = $this->normalizeInput($input);
+
+        return IanaAssignment::where('type', $type)->where('start', '<=', $input)->where('end', '>=', $input)->first();
     }
 
     public function getAllocationEntry($input, $cidr = null)
