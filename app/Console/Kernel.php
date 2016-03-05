@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\UpdateBgpData::class,
         \App\Console\Commands\UpdatePrefixWhoisData::class,
         \App\Console\Commands\UpdateIXs::class,
+        \App\Console\Commands\UpdateIanaAssignments::class,
     ];
 
     /**
