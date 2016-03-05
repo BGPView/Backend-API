@@ -32,7 +32,15 @@ class Whois
                 'cert.br',
                 'arin.poc',
                 'supplied.unknown',
+
                 'nic.ad.jp',
+                'cnnic.net',
+                'idnic.net',
+                'nic.or.kr',
+                'irinn.in',
+                'vnnic.vn',
+                'twnic.net.tw',
+
             ];
 
     public function __construct($input, $cidr = null)
