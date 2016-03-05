@@ -10,6 +10,7 @@ use App\Models\IPv6BgpPrefix;
 use App\Models\IPv6Peer;
 use App\Models\IX;
 use App\Models\IXMember;
+use App\Models\RirAsnAllocation;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -31,6 +32,7 @@ class ApiV1Controller extends ApiBaseController
         $as_number = $this->ipUtils->normalizeInput($as_number);
 
         $asnData = ASN::with('emails')->where('asn', $as_number)->first();
+        $allocation = RirAsnAllocation::where('asn', $as_number)->first();
 
         if (is_null($asnData)) {
             $data = $this->makeStatus('Could not find ASN', false);
@@ -49,6 +51,10 @@ class ApiV1Controller extends ApiBaseController
         $output['traffic_estimation']   = $asnData->traffic_estimation;
         $output['traffic_ratio']        = $asnData->traffic_ratio;
         $output['owner_address']        = $asnData->owner_address;
+
+        $output['rir_allocation']['rir_name']           = $allocation->rir->name;
+        $output['rir_allocation']['country_code']       = $allocation->counrty_code;
+        $output['rir_allocation']['date_allocated']     = $allocation->date_allocated . ' 00:00:00';
 
         if ($request->has('with_ixs') === true) {
             $output['internet_exchanges'] = IXMember::getMembers($asnData->asn);
@@ -242,7 +248,7 @@ class ApiV1Controller extends ApiBaseController
         foreach ($ix->members as $member) {
             $asnInfo = $member->asn_info;
 
-            $memberInfo['asn']          = $asnInfo ? $asnInfo->asn : null;
+            $memberInfo['asn']          = $member->asn;
             $memberInfo['name']         = $asnInfo ? $asnInfo->name: null;
             $memberInfo['description']  = $asnInfo ? $asnInfo->description : null;
             $memberInfo['counrty_code'] = $asnInfo ? $asnInfo->counrty_code : null;
