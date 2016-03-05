@@ -85,7 +85,7 @@ class Whois
 
     public function parse()
     {
-        if (is_null($this->rawData) === true) {
+        if (is_null($this->rawData) === true || count(explode("\n", $this->rawData)) < 3) {
             $whoisServer = isset($this->rir->whois_server) ? $this->rir->whois_server : 'NO WHOIS SERVER';
             Log::warning("No raw whois data returned for: " . $this->input . "(" . $whoisServer . ")");
             return null;

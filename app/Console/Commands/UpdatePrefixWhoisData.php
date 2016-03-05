@@ -9,6 +9,7 @@ use App\Models\IPv4PrefixWhois;
 use App\Models\IPv6PrefixWhoisEmail;
 use App\Models\IPv6BgpPrefix;
 use App\Models\IPv6PrefixWhois;
+use App\Models\RirIPv4Allocation;
 use App\Services\BgpParser;
 use App\Services\Whois;
 use Carbon\Carbon;
@@ -67,13 +68,25 @@ class UpdatePrefixWhoisData extends Command
         $threeWeeksAgo = Carbon::now()->subWeeks(3)->timestamp;
 
         $this->cli->br()->comment('Getting all the IPv' . $ipVersion . 'prefixes from the BGP table');
+
+        $className = 'App\Models\RirIPv' . $ipVersion . 'Allocation';
+        $sourcePrefixes['rir_prefixes'] = $className::all();
+
         $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
-        $ipPrefixes = $className::all();
+        //$sourcePrefixes['bgp_prefixes'] = $className::all();
 
-        $this->cli->br()->comment('Shuffling the prefixes order');
-        $ipPrefixes = $ipPrefixes->shuffle();
+        $prefixes = [];
+        foreach ($sourcePrefixes as $sourcePrefix) {
+            foreach ($sourcePrefix as $prefixObj) {
+                if (isset($prefixes[$prefixObj->ip . '/' . $prefixObj->cidr]) === false) {
+                    $prefixes[$prefixObj->ip . '/' . $prefixObj->cidr] = $prefixObj;
+                }
+            }
+        }
 
-        foreach ($ipPrefixes as $ipPrefix) {
+        shuffle($prefixes);
+
+        foreach ($prefixes as $ipPrefix) {
 
             // Lets skip if its a bogon address
             if ($ipVersion == 4 && $this->ipUtils->isBogonAddress($ipPrefix->ip)) {

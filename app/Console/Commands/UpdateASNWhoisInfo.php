@@ -109,6 +109,8 @@ class UpdateASNWhoisInfo extends Command
             }
         }
 
+        shuffle($asns);
+
         foreach ($asns as $as_number => $rir_id) {
             // Lets check if the ASN has already been looked at in the past
             if (ASN::where('asn', $as_number)->first() === null) {
