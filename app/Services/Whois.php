@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\IpUtils;
+use App\Models\Rir;
 use Illuminate\Support\Facades\Log;
 
 class Whois
@@ -39,17 +40,31 @@ class Whois
         $this->input = $this->ipUtils->normalizeInput(trim($input), $showAS = true);
         $allocation = $this->ipUtils->getAllocationEntry($this->input, $cidr);
 
-        // Lets make sure we found an allocation first
-        if (is_null($allocation) !== true) {
-            $this->rir = $allocation->rir;
-            $this->allocationData = $allocation;
-            // Lets fetch the raw whois data
-            $this->rawData = $this->getRawWhois();
-            $this->rawLines = explode("\n", $this->rawData);
+        if (is_null($allocation) === true || empty($allocation) === true) {
+            $assignment = $this->ipUtils->getIanaAssignmentEntry($this->input);
+
+            if (is_null($assignment) === true || empty($assignment) === true) {
+                $this->rawData = null;
+                $this->rawLines = [];
+                return;
+            } else {
+                $this->rir = Rir::where('whois_server', $assignment->whois_server)->first();
+            }
+
         } else {
+            $this->rir = $allocation->rir;
+        }
+
+        if (empty($this->rir) || is_null($this->rir) === true) {
             $this->rawData = null;
             $this->rawLines = [];
+            return;
         }
+
+        $this->allocationData = $allocation;
+        // Lets fetch the raw whois data
+        $this->rawData = $this->getRawWhois();
+        $this->rawLines = explode("\n", $this->rawData);
 
     }
 
@@ -62,7 +77,8 @@ class Whois
     public function parse()
     {
         if (is_null($this->rawData) === true) {
-            Log::warning("No raw whois data returned for: " . $this->input . "(" . $this->rir->whois_server . ")");
+            $whoisServer = isset($this->rir->whois_server) ? $this->rir->whois_server : 'NO WHOIS SERVER';
+            Log::warning("No raw whois data returned for: " . $this->input . "(" . $whoisServer . ")");
             return null;
         }
 
@@ -82,7 +98,7 @@ class Whois
         try {
             $results = $this->$functionName();
         } catch(\Exception $e) {
-            Log::warning(["Something went wrong on: " . $this->input . "(" . $this->rir->whois_server . ")"], $e->getMessage());
+            Log::warning(["Something went wrong on: " . $this->input . "(" . $this->rir->whois_server . ")"], [$e->getMessage()]);
             return null;
         }
 
