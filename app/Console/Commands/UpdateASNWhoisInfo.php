@@ -4,6 +4,9 @@ namespace App\Console\Commands;
 
 use App\Models\ASN;
 use App\Models\ASNEmail;
+use App\Models\IPv4BgpEntry;
+use App\Models\IPv6BgpEntry;
+use App\Models\IXMember;
 use App\Models\RirAsnAllocation;
 use App\Services\Whois;
 use Carbon\Carbon;
@@ -91,15 +94,27 @@ class UpdateASNWhoisInfo extends Command
     {
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Adding newly allocated ASNs')->br();
-        $allocatedAsns = RirAsnAllocation::all();
-        $allocatedAsns = $allocatedAsns->shuffle();
 
-        foreach ($allocatedAsns as $allocatedAsn) {
+        $sourceAsns['allocated_asns'] = RirAsnAllocation::all();
+        $sourceAsns['ix_ssns'] = IXMember::all();
+        $sourceAsns['ipv4_bgp_asns'] = IPv4BgpEntry::select('asn')->distinct()->get();
+        $sourceAsns['ipv6_bgp_asns'] = IPv6BgpEntry::select('asn')->distinct()->get();
+
+        $asns = [];
+        foreach ($sourceAsns as $sourceAsn) {
+            foreach ($sourceAsn as $asnObj) {
+                if (isset($asns[$asnObj->asn]) === false) {
+                    $asns[$asnObj->asn] = isset($asnObj->rir_id) ? $asnObj->rir_id : null;
+                }
+            }
+        }
+
+        foreach ($asns as $as_number => $rir_id) {
             // Lets check if the ASN has already been looked at in the past
-            if (ASN::where('asn', $allocatedAsn->asn)->first() === null) {
-                $this->cli->br()->comment('Looking up and adding: AS' . $allocatedAsn->asn);
+            if (ASN::where('asn', $as_number)->first() === null) {
+                $this->cli->br()->comment('Looking up and adding: AS' . $as_number);
 
-                $asnWhois = new Whois($allocatedAsn->asn);
+                $asnWhois = new Whois($as_number);
                 $parsedWhois = $asnWhois->parse();
 
                 // Skip null results
@@ -113,8 +128,8 @@ class UpdateASNWhoisInfo extends Command
                 }
 
                 $asn = new ASN;
-                $asn->rir_id = $allocatedAsn->rir_id;
-                $asn->asn = $allocatedAsn->asn;
+                $asn->rir_id = $rir_id;
+                $asn->asn = $as_number;
                 $asn->name = $parsedWhois->name;
                 $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
                 $asn->description_full = json_encode($parsedWhois->description);
