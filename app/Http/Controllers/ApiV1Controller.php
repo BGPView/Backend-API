@@ -6,8 +6,10 @@ use App\Models\ASN;
 use App\Models\IPv4BgpEntry;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv4Peer;
+use App\Models\IPv4PrefixWhois;
 use App\Models\IPv6BgpPrefix;
 use App\Models\IPv6Peer;
+use App\Models\IPv6PrefixWhois;
 use App\Models\IX;
 use App\Models\IXMember;
 use App\Models\RirAsnAllocation;
@@ -137,13 +139,24 @@ class ApiV1Controller extends ApiBaseController
             return $this->respond($data);
         }
 
-        if (empty($prefixes) === true) {
+        if ($prefixes->count() === 0) {
+            if ($ipVersion === 4) {
+                $prefix = IPv4PrefixWhois::where('ip', $ip)->where('cidr', $cidr)->first();
+            } else {
+                $prefix = IPv6PrefixWhois::where('ip', $ip)->where('cidr', $cidr)->first();
+            }
+
+            $prefixWhois = $prefix;
+        } else {
+            $prefix = $prefixes[0];
+            $prefixWhois = $prefix->whois();
+        }
+
+        if (is_null($prefix) === true) {
             $data = $this->makeStatus('Could not find prefix in BGP table', false);
             return $this->respond($data);
         }
-        $prefix = $prefixes[0];
 
-        $prefixWhois = $prefix->whois();
         $allocation = $this->ipUtils->getAllocationEntry($prefix->ip);
         $geoip = $this->ipUtils->geoip($prefix->ip);
 
