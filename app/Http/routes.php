@@ -36,8 +36,8 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('/prefix/{ip}/{cidr}', ['as' => 'prefix', 'uses' => 'ApiV1Controller@prefix']);
     Route::get('/ip/{ip}', ['as' => 'ip', 'uses' => 'ApiV1Controller@ip']);
     Route::get('/ix/{ix_id}', ['as' => 'ix', 'uses' => 'ApiV1Controller@ix']);
-    // #### TO DO ####
-    //  /asn/{as_number}/peers
-    //  /asn/{as_number}/ix
+});
 
+Route::group(['middleware' => ['web']], function () {
+    Route::any('/register-application', ['as' => 'register.application', 'uses' => 'ApiBaseController@registerApplication']);
 });

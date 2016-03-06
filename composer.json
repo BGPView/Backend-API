@@ -12,6 +12,7 @@
         "devster/ubench": "1.2.*",
         "barryvdh/laravel-debugbar": "^2.1",
         "geoip2/geoip2": "~2.0",
+        "guzzlehttp/guzzle": "~5.3|~6.0",
         "doctrine/dbal": "^2.5"
     },
     "require-dev": {
