@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Log;
 
 class Whois
 {
-    private $whoisUrl = "http://185.42.223.50/whois.php";
+    // private $whoisUrl = "http://185.42.223.50/whois.php";
+    private $whoisUrl = "http://45.32.178.6/whois.php";
     private $rir;
     private $allocationData;
     private $input;
