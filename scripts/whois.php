@@ -32,7 +32,7 @@ switch (strtolower($whois_server)) {
         break;
     case 'whois.arin.net':
         if (stristr($finalInput, 'as')) {
-            $finalInput = "+ ".$finalInput;
+            $finalInput = "+ ".str_ireplace('as', '', $finalInput);
         } else {
             $finalInput = "r + ".$finalInput;
         }
