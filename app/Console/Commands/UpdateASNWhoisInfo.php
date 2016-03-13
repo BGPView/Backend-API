@@ -196,7 +196,7 @@ class UpdateASNWhoisInfo extends Command
             $parsedWhois = $asnWhois->parse();
 
             // Skip null results
-            if (is_null($parsedWhois) === true) {
+            if (is_null($parsedWhois) === true || isset($parsedWhois->name) === false) {
                 continue;
             }
 
