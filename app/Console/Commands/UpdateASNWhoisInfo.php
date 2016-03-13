@@ -119,20 +119,23 @@ class UpdateASNWhoisInfo extends Command
                 $asnWhois = new Whois($as_number);
                 $parsedWhois = $asnWhois->parse();
 
+                $asn = new ASN;
+
                 // Skip null results
                 if (is_null($parsedWhois) === true) {
+
+                    // Save the null entry
+                    $asn->rir_id = $rir_id;
+                    $asn->asn = $as_number;
+                    $asn->raw_whois = $asnWhois->raw();
+                    $asn->save();
+
                     continue;
                 }
 
-                // Dont save things without names
-                if (empty($parsedWhois->name) === true) {
-                    continue;
-                }
-
-                $asn = new ASN;
                 $asn->rir_id = $rir_id;
                 $asn->asn = $as_number;
-                $asn->name = $parsedWhois->name;
+                $asn->name = empty($parsedWhois->name) !== true ? $parsedWhois->name : null;
                 $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
                 $asn->description_full = json_encode($parsedWhois->description);
 

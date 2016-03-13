@@ -177,11 +177,6 @@ class UpdatePrefixWhoisData extends Command
                 // Add them as null record
                 $newPrefixWhois->ip = $ipPrefix->ip;
                 $newPrefixWhois->cidr = $ipPrefix->cidr;
-                $newPrefixWhois->name = null;
-                $newPrefixWhois->description = null;
-                $newPrefixWhois->description_full = null;
-                $newPrefixWhois->counrty_code = null;
-                $newPrefixWhois->owner_address = null;
                 $newPrefixWhois->raw_whois = $ipWhois->raw();
                 $newPrefixWhois->save();
 
