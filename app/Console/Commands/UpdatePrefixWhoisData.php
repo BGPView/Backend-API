@@ -168,13 +168,26 @@ class UpdatePrefixWhoisData extends Command
             $ipWhois = new Whois($ipPrefix->ip, $ipPrefix->cidr);
             $parsedWhois = $ipWhois->parse();
 
+            $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhois';
+            $newPrefixWhois = new $className;
+
             // Skip null results
             if (is_null($parsedWhois) === true) {
+
+                // Add them as null record
+                $newPrefixWhois->ip = $ipPrefix->ip;
+                $newPrefixWhois->cidr = $ipPrefix->cidr;
+                $newPrefixWhois->name = null;
+                $newPrefixWhois->description = null;
+                $newPrefixWhois->description_full = null;
+                $newPrefixWhois->counrty_code = null;
+                $newPrefixWhois->owner_address = null;
+                $newPrefixWhois->raw_whois = $ipWhois->raw();
+                $newPrefixWhois->save();
+
                 continue;
             }
 
-            $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhois';
-            $newPrefixWhois = new $className;
             $newPrefixWhois->ip = $ipPrefix->ip;
             $newPrefixWhois->cidr = $ipPrefix->cidr;
             $newPrefixWhois->name = $parsedWhois->name;

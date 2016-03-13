@@ -1,0 +1,48 @@
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AlterTableNullableWhois extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('ipv4_prefix_whois', function($table)
+        {
+            $table->integer('name')->nullable()->change();
+            $table->integer('counrty_code')->index()->nullable()->change();
+        });
+
+        Schema::table('ipv6_prefix_whois', function($table)
+        {
+            $table->integer('name')->nullable()->change();
+            $table->integer('counrty_code')->index()->nullable()->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('ipv4_prefix_whois', function($table)
+        {
+            $table->integer('name')->change();
+            $table->integer('counrty_code')->index()->change();
+        });
+
+        Schema::table('ipv6_prefix_whois', function($table)
+        {
+            $table->integer('name')->change();
+            $table->integer('counrty_code')->index()->change();
+        });
+
+    }
+}
