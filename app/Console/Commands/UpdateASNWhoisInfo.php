@@ -196,31 +196,31 @@ class UpdateASNWhoisInfo extends Command
             $parsedWhois = $asnWhois->parse();
 
             // Skip null results
-            if (is_null($parsedWhois) === true || isset($parsedWhois->name) === false) {
+            if (is_null($parsedWhois) === true) {
                 continue;
             }
 
-            $asn->name = $parsedWhois->name;
-            $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-            $asn->description_full = json_encode($parsedWhois->description);
+            $oldAsn->name = $parsedWhois->name;
+            $oldAsn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
+            $oldAsn->description_full = json_encode($parsedWhois->description);
 
             // If we have the PeerDB info lets update it.
-            if ($peerDb = $this->getPeeringDbInfo($asn->asn)) {
-                $asn->website = $peerDb->website;
-                $asn->looking_glass = $peerDb->looking_glass;
-                $asn->traffic_estimation = $peerDb->info_traffic;
-                $asn->traffic_ratio = $peerDb->info_ratio;
+            if ($peerDb = $this->getPeeringDbInfo($oldAsn->asn)) {
+                $oldAsn->website = $peerDb->website;
+                $oldAsn->looking_glass = $peerDb->looking_glass;
+                $oldAsn->traffic_estimation = $peerDb->info_traffic;
+                $oldAsn->traffic_ratio = $peerDb->info_ratio;
             }
 
-            $asn->counrty_code = $parsedWhois->counrty_code;
-            $asn->owner_address = json_encode($parsedWhois->address);
-            $asn->raw_whois = $asnWhois->raw();
-            $asn->save();
+            $oldAsn->counrty_code = $parsedWhois->counrty_code;
+            $oldAsn->owner_address = json_encode($parsedWhois->address);
+            $oldAsn->raw_whois = $asnWhois->raw();
+            $oldAsn->save();
 
             // Save ASN Emails
             foreach ($parsedWhois->emails as $email) {
                 $asnEmail = new ASNEmail;
-                $asnEmail->asn_id = $asn->id;
+                $asnEmail->asn_id = $oldAsn->id;
                 $asnEmail->email_address = $email;
 
                 // Check if its an abuse email
