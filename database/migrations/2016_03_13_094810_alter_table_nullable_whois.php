@@ -15,13 +15,13 @@ class AlterTableNullableWhois extends Migration
         Schema::table('ipv4_prefix_whois', function($table)
         {
             $table->integer('name')->nullable()->change();
-            $table->integer('counrty_code')->index()->nullable()->change();
+            $table->integer('counrty_code')->nullable()->change();
         });
 
         Schema::table('ipv6_prefix_whois', function($table)
         {
             $table->integer('name')->nullable()->change();
-            $table->integer('counrty_code')->index()->nullable()->change();
+            $table->integer('counrty_code')->nullable()->change();
         });
     }
 
