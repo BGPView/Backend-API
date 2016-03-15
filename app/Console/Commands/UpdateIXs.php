@@ -138,7 +138,7 @@ class UpdateIXs extends Command
                 $newIx = new IX;
                 $newIx->peeringdb_id    = $ix->id;
                 $newIx->name            = $ix->name;
-                $newIx->name_full       = $ix->name_long;
+                $newIx->name_full       = !empty($ix->name_long) ? $ix->name_long : $ix->name;
                 $newIx->website         = $ix->website;
                 $newIx->tech_email      = $ix->tech_email;
                 $newIx->tech_phone      = $ix->tech_phone;
@@ -155,7 +155,7 @@ class UpdateIXs extends Command
 
             // Lets update the info that we have about the IX:
             $ixEntry->name          = $ix->name;
-            $ixEntry->name_full     = $ix->name_long;
+            $ixEntry->name_full     = !empty($ix->name_long) ? $ix->name_long : $ix->name;
             $ixEntry->website       = $ix->website;
             $ixEntry->tech_email    = $ix->tech_email;
             $ixEntry->tech_phone    = $ix->tech_phone;
