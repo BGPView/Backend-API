@@ -15,8 +15,8 @@ class UpdateIXs extends Command
     private $cli;
     private $bench;
     private $ipUtils;
-    private $peeringdb_ix_url = 'https://beta.peeringdb.com/api/ix';
-    private $peeringdb_ix_members_url = 'https://beta.peeringdb.com/api/netixlan';
+    private $peeringdb_ix_url = 'https://www.peeringdb.com/api/ix';
+    private $peeringdb_ix_members_url = 'https://www.peeringdb.com/api/netixlan';
     private $ixs = [];
     private $ix_memebrs = [];
 

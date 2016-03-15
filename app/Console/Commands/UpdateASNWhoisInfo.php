@@ -19,7 +19,7 @@ class UpdateASNWhoisInfo extends Command
     private $cli;
 
     // For docs: https://beta.peeringdb.com/apidocs/
-    private $peeringdb_url = 'https://beta.peeringdb.com/api/asn';
+    private $peeringdb_url = 'https://www.peeringdb.com/api/net';
     private $peeringDBData;
 
     /**
