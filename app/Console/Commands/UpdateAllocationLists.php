@@ -8,6 +8,7 @@ use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use League\CLImate\CLImate;
 use Ubench;
 
@@ -17,6 +18,11 @@ class UpdateAllocationLists extends Command
     private $cli;
     private $ipUtils;
     private $bench;
+
+    private $seenIpv4Allocation = [];
+    private $seenIpv6Allocation = [];
+    private $seenAsnAllocation = [];
+
     /**
      * The name and signature of the console command.
      *
@@ -77,13 +83,59 @@ class UpdateAllocationLists extends Command
             ))->br();
         }
 
+        $this->bench->start();
+        $mysqlTime = date('Y-m-d H:i:s');
+        $this->cli->br()->comment('Inserting the allocations into DB');
 
+        DB::statement('DROP TABLE IF EXISTS rir_ipv4_allocations_temp');
+        DB::statement('DROP TABLE IF EXISTS rir_ipv6_allocations_temp');
+        DB::statement('DROP TABLE IF EXISTS rir_asn_allocations_temp');
+
+        DB::statement('CREATE TABLE rir_ipv4_allocations_temp LIKE rir_ipv4_allocations');
+        DB::statement('CREATE TABLE rir_ipv6_allocations_temp LIKE rir_ipv6_allocations');
+        DB::statement('CREATE TABLE rir_asn_allocations_temp LIKE rir_asn_allocations');
+
+        $asnInsertLine = '';
+        foreach ($this->seenAsnAllocation as $asn) {
+            $asnInsertLine .= '('.$asn['rir_id'].','.$asn['asn'].',"'.$asn['counrty_code'].'","'.$asn['date_allocated'].'", "'.$mysqlTime.'", "'.$mysqlTime.'"),';
+        }
+        $asnInsertLine= rtrim($asnInsertLine, ',').';';
+        DB::statement('INSERT INTO rir_asn_allocations_temp (rir_id,asn,counrty_code,date_allocated,updated_at,created_at) VALUES '.$asnInsertLine);
+
+        $ipv4InsertLine = '';
+        foreach ($this->seenIpv4Allocation as $ipv4) {
+            $ipv4InsertLine .= '('.$ipv4['rir_id'].',"'.$ipv4['ip'].'",'.$ipv4['cidr'].','.$ipv4['ip_dec_start'].','.$ipv4['ip_dec_end'].',"'.$ipv4['counrty_code'].'","'.$ipv4['date_allocated'].'", "'.$mysqlTime.'", "'.$mysqlTime.'"),';
+        }
+        $ipv4InsertLine= rtrim($ipv4InsertLine, ',').';';
+        DB::statement('INSERT INTO rir_ipv4_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,updated_at,created_at) VALUES '.$ipv4InsertLine);
+
+        $ipv6InsertLine = '';
+        foreach ($this->seenIpv6Allocation as $ipv6) {
+            $ipv6InsertLine .= '('.$ipv6['rir_id'].',"'.$ipv6['ip'].'",'.$ipv6['cidr'].','.$ipv6['ip_dec_start'].','.$ipv6['ip_dec_end'].',"'.$ipv6['counrty_code'].'","'.$ipv6['date_allocated'].'", "'.$mysqlTime.'", "'.$mysqlTime.'"),';
+        }
+        $ipv6InsertLine= rtrim($ipv6InsertLine, ',').';';
+        DB::statement('INSERT INTO rir_ipv4_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,updated_at,created_at) VALUES '.$ipv6InsertLine);
+
+        DB::statement('RENAME TABLE rir_ipv4_allocations TO backup_rir_ipv4_allocations, rir_ipv4_allocations_temp TO rir_ipv4_allocations;');
+        DB::statement('RENAME TABLE rir_ipv6_allocations TO backup_rir_ipv6_allocations, rir_ipv6_allocations_temp TO rir_ipv6_allocations;');
+        DB::statement('RENAME TABLE rir_asn_allocations TO backup_rir_asn_allocations, rir_asn_allocations_temp TO rir_asn_allocations;');
+
+        DB::statement('DROP TABLE backup_rir_ipv4_allocations');
+        DB::statement('DROP TABLE backup_rir_ipv6_allocations');
+        DB::statement('DROP TABLE backup_rir_asn_allocations');
+
+        $this->bench->end();
+        $this->cli->info(sprintf(
+            'Time: %s, Memory: %s',
+            $this->bench->getTime(),
+            $this->bench->getMemoryPeak()
+        ))->br();
     }
 
     private function updateDb($rir, $list)
     {
         $lines = explode("\n", $list);
-        $this->cli->br()->comment('Updating DB with the ' . $rir->name . ' allocation list ('.count($lines).' entries)');
+        $this->cli->br()->comment('Collection and parsing all resources from' . $rir->name . ' allocation list ('.count($lines).' entries)');
 
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount($reverse = true);
         $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
@@ -101,15 +153,16 @@ class UpdateAllocationLists extends Command
 
                 if ($resourceType === 'asn') {
 
-                    if (is_null(RirAsnAllocation::where('asn', $data[3])->first()) === true) {
-                        $asn = RirAsnAllocation::create([
-                            'rir_id' => $rir->id,
-                            'asn' => $data[3],
-                            'counrty_code' => $data[1],
-                            'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
-                        ]);
-                        $this->cli->br()->comment("Entering new ASN: AS" . $asn->asn . " [" . $rir->name . "]");
+                    if (isset($this->seenAsnAllocation[$data[3]]) === true) {
+                        continue;
                     }
+
+                    $this->seenAsnAllocation[$data[3]] = [
+                        'rir_id' => $rir->id,
+                        'asn' => $data[3],
+                        'counrty_code' => $data[1],
+                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                    ];
 
                 } else if ($resourceType === 'ipv4') {
 
@@ -118,18 +171,20 @@ class UpdateAllocationLists extends Command
                         continue;
                     }
 
-                    if (is_null(RirIPv4Allocation::where('ip', $data[3])->where('cidr', $ipv4AmountCidrArray[$data[4]])->first()) === true) {
-                        $ipv4 = RirIPv4Allocation::create([
-                            'rir_id' => $rir->id,
-                            'ip' => $data[3],
-                            'cidr' => $ipv4AmountCidrArray[$data[4]],
-                            'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                            'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4] - 1,
-                            'counrty_code' => $data[1],
-                            'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
-                        ]);
-                        $this->cli->br()->comment("Entering new IPv4 range: " . $ipv4->ip . "/".$ipv4->cidr." [" . $rir->name . "]");
+                    $cidr = $ipv4AmountCidrArray[$data[4]];
+                    if (isset($this->seenIpv4Allocation[$data[3].'/'.$cidr]) === true) {
+                        continue;
                     }
+
+                    $this->seenIpv4Allocation[$data[3].'/'.$cidr] = [
+                        'rir_id' => $rir->id,
+                        'ip' => $data[3],
+                        'cidr' => $cidr,
+                        'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
+                        'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4] - 1,
+                        'counrty_code' => $data[1],
+                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                    ];
 
                 } else if ($resourceType === 'ipv6') {
 
@@ -137,20 +192,21 @@ class UpdateAllocationLists extends Command
                     if (isset($ipv6AmountCidrArray[$data[4]]) !== true) {
                         continue;
                     }
-                    
-                    if (is_null(RirIPv6Allocation::where('ip', $data[3])->where('cidr', $data[4])->first()) === true) {
 
-                        $ipv6 = RirIPv6Allocation::create([
-                            'rir_id' => $rir->id,
-                            'ip' => $data[3],
-                            'cidr' => $data[4],
-                            'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                            'ip_dec_end' => ($this->ipUtils->ip2dec($data[3]) + $ipv6AmountCidrArray[$data[4]] - 1),
-                            'counrty_code' => $data[1],
-                            'date_allocated' => substr($data[5], 0, 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
-                        ]);
-                        $this->cli->br()->comment("Entering new IPv4 range: " . $ipv6->ip . "/".$ipv6->cidr."  [" . $rir->name . "]");
+                    if (isset($this->seenIpv6Allocation[$data[3].'/'.$data[4]]) === true) {
+                        continue;
                     }
+
+                    $this->seenIpv6Allocation[$data[3].'/'.$data[4]] = [
+                        'rir_id' => $rir->id,
+                        'ip' => $data[3],
+                        'cidr' => $data[4],
+                        'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
+                        'ip_dec_end' => ($this->ipUtils->ip2dec($data[3]) + $ipv6AmountCidrArray[$data[4]] - 1),
+                        'counrty_code' => $data[1],
+                        'date_allocated' => substr($data[5], 0, 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                    ];
+
                 }
             }
         }
