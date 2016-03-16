@@ -114,7 +114,7 @@ class UpdateAllocationLists extends Command
             $ipv6InsertLine .= '('.$ipv6['rir_id'].',"'.$ipv6['ip'].'",'.$ipv6['cidr'].','.$ipv6['ip_dec_start'].','.$ipv6['ip_dec_end'].',"'.$ipv6['counrty_code'].'","'.$ipv6['date_allocated'].'", "'.$mysqlTime.'", "'.$mysqlTime.'"),';
         }
         $ipv6InsertLine= rtrim($ipv6InsertLine, ',').';';
-        DB::statement('INSERT INTO rir_ipv4_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,updated_at,created_at) VALUES '.$ipv6InsertLine);
+        DB::statement('INSERT INTO rir_ipv6_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,updated_at,created_at) VALUES '.$ipv6InsertLine);
 
         DB::statement('RENAME TABLE rir_ipv4_allocations TO backup_rir_ipv4_allocations, rir_ipv4_allocations_temp TO rir_ipv4_allocations;');
         DB::statement('RENAME TABLE rir_ipv6_allocations TO backup_rir_ipv6_allocations, rir_ipv6_allocations_temp TO rir_ipv6_allocations;');

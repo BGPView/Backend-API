@@ -73,7 +73,7 @@ class UpdatePrefixWhoisData extends Command
         $sourcePrefixes['rir_prefixes'] = $className::all();
 
         $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
-        //$sourcePrefixes['bgp_prefixes'] = $className::all();
+        $sourcePrefixes['bgp_prefixes'] = $className::all();
 
         $prefixes = [];
         foreach ($sourcePrefixes as $sourcePrefix) {
