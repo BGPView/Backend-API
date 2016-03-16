@@ -166,20 +166,7 @@ class UpdateASNWhoisInfo extends Command
                     $asnEmail->save();
                 }
 
-                $finalASN = ASN::where('id', $asn->id)->first();
-                dump([
-                    'name' => $finalASN->name,
-                    'website' => $asn->website,
-                    'looking_glass' => $asn->looking_glass,
-                    'traffic_estimation' => $asn->traffic_estimation,
-                    'traffic_ratio' => $asn->traffic_ratio,
-                    'description' => $finalASN->description,
-                    'description_full' => $finalASN->description_full,
-                    'counrty_code' => $finalASN->counrty_code,
-                    'owner_address' => $finalASN->owner_address,
-                    'abuse_emails' => $finalASN->emails()->where('abuse_email', true)->get()->lists('email_address'),
-                    'emails' => $finalASN->emails()->lists('email_address'),
-                ]);
+                $this->cli->br()->comment($asn->asn . ' - ' . $asn->description . ' ['.$asn->name.']')->br();
             }
         }
 

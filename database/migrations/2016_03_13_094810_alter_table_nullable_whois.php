@@ -14,14 +14,14 @@ class AlterTableNullableWhois extends Migration
     {
         Schema::table('ipv4_prefix_whois', function($table)
         {
-            $table->integer('name')->nullable()->change();
-            $table->integer('counrty_code')->nullable()->change();
+            $table->string('name')->nullable()->change();
+            $table->string('counrty_code')->nullable()->change();
         });
 
         Schema::table('ipv6_prefix_whois', function($table)
         {
-            $table->integer('name')->nullable()->change();
-            $table->integer('counrty_code')->nullable()->change();
+            $table->string('name')->nullable()->change();
+            $table->string('counrty_code')->nullable()->change();
         });
     }
 
@@ -34,14 +34,14 @@ class AlterTableNullableWhois extends Migration
     {
         Schema::table('ipv4_prefix_whois', function($table)
         {
-            $table->integer('name')->change();
-            $table->integer('counrty_code')->index()->change();
+            $table->string('name')->change();
+            $table->string('counrty_code')->index()->change();
         });
 
         Schema::table('ipv6_prefix_whois', function($table)
         {
-            $table->integer('name')->change();
-            $table->integer('counrty_code')->index()->change();
+            $table->string('name')->change();
+            $table->string('counrty_code')->index()->change();
         });
 
     }
