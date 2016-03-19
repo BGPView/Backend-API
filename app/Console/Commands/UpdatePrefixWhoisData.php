@@ -70,10 +70,10 @@ class UpdatePrefixWhoisData extends Command
         $this->cli->br()->comment('Getting all the IPv' . $ipVersion . 'prefixes from the BGP table');
 
         $className = 'App\Models\RirIPv' . $ipVersion . 'Allocation';
-        $sourcePrefixes['rir_prefixes'] = $className::all();
+        $sourcePrefixes['rir_prefixes'] = $className::all()->shuffle();
 
         $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
-        $sourcePrefixes['bgp_prefixes'] = $className::all();
+        $sourcePrefixes['bgp_prefixes'] = $className::all()->shuffle();
 
         $prefixes = [];
         foreach ($sourcePrefixes as $sourcePrefix) {
@@ -83,8 +83,6 @@ class UpdatePrefixWhoisData extends Command
                 }
             }
         }
-
-        shuffle($prefixes);
 
         foreach ($prefixes as $ipPrefix) {
 

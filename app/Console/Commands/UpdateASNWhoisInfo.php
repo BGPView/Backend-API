@@ -95,10 +95,10 @@ class UpdateASNWhoisInfo extends Command
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Adding newly allocated ASNs')->br();
 
-        $sourceAsns['allocated_asns'] = RirAsnAllocation::all();
-        $sourceAsns['ix_ssns'] = IXMember::all();
-        $sourceAsns['ipv4_bgp_asns'] = IPv4BgpEntry::select('asn')->distinct()->get();
-        $sourceAsns['ipv6_bgp_asns'] = IPv6BgpEntry::select('asn')->distinct()->get();
+        $sourceAsns['allocated_asns'] = RirAsnAllocation::all()->shuffle();
+        $sourceAsns['ix_ssns'] = IXMember::all()->shuffle();
+        $sourceAsns['ipv4_bgp_asns'] = IPv4BgpEntry::select('asn')->distinct()->get()->shuffle();
+        $sourceAsns['ipv6_bgp_asns'] = IPv6BgpEntry::select('asn')->distinct()->get()->shuffle();
 
         $asns = [];
         foreach ($sourceAsns as $sourceAsn) {
@@ -108,8 +108,6 @@ class UpdateASNWhoisInfo extends Command
                 }
             }
         }
-
-        shuffle($asns);
 
         foreach ($asns as $as_number => $rir_id) {
             // Lets check if the ASN has already been looked at in the past
