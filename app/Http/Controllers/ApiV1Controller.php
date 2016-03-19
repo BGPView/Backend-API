@@ -170,8 +170,8 @@ class ApiV1Controller extends ApiBaseController
         $output['name']             = $prefixWhois ? $prefixWhois->name : null;
         $output['description_short']= $prefixWhois ? $prefixWhois->description : null;
         $output['description_full'] = $prefixWhois ? $prefixWhois->description_full : null;
-        $output['emails']           = $prefixWhois ? $prefixWhois->email_contacts : null;
-        $output['abuse_emails']     = $prefixWhois ? $prefixWhois->abuse_contacts : null;
+        $output['email_contacts']   = $prefixWhois ? $prefixWhois->email_contacts : null;
+        $output['abuse_contacts']   = $prefixWhois ? $prefixWhois->abuse_contacts : null;
         $output['owner_address']    = $prefixWhois ? $prefixWhois->owner_address : null;
 
         $output['country_codes']['whois_country_code']          = $prefixWhois ? $prefixWhois->counrty_code : null;
