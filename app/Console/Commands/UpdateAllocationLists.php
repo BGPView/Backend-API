@@ -135,7 +135,7 @@ class UpdateAllocationLists extends Command
     private function updateDb($rir, $list)
     {
         $lines = explode("\n", $list);
-        $this->cli->br()->comment('Collection and parsing all resources from' . $rir->name . ' allocation list ('.count($lines).' entries)');
+        $this->cli->br()->comment('Collection and parsing all resources from ' . $rir->name . ' allocation list ('.count($lines).' entries)');
 
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount($reverse = true);
         $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
