@@ -68,7 +68,7 @@ class ApiV1Controller extends ApiBaseController
             $output['prefixes'] = ASN::getPrefixes($as_number);
         }
         if ($request->has('with_upstreams') === true) {
-            $output['upstreams'] = ASN::getUpstream($as_number);
+            $output['upstreams'] = ASN::getUpstreams($as_number);
         }
         if ($request->has('with_raw_whois') === true) {
             $output['raw_whois'] = $asnData->raw_whois;
@@ -117,7 +117,7 @@ class ApiV1Controller extends ApiBaseController
     public function asnUpstreams($as_number)
     {
         $as_number  = $this->ipUtils->normalizeInput($as_number);
-        $upstreams  = ASN::getUpstream($as_number);
+        $upstreams  = ASN::getUpstreams($as_number);
 
         return $this->sendData($upstreams);
     }

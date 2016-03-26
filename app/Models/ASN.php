@@ -149,17 +149,17 @@ class ASN extends Model {
         return $output;
     }
 
-    public static function getUpstream($as_number)
+    public static function getUpstreams($as_number)
     {
         $ipv4Upstreams = IPv4BgpEntry::where('asn', $as_number)->get();
         $ipv6Upstreams = IPv6BgpEntry::where('asn', $as_number)->get();
 
-        $output['ipv4_upstream'] = [];
+        $output['ipv4_upstreams'] = [];
         foreach ($ipv4Upstreams as $upstream) {
 
-            if (isset($output['ipv4_upstream'][$upstream->upstream_asn]) === true) {
-                if (in_array($upstream->bgp_path, $output['ipv4_upstream'][$upstream->upstream_asn]['bgp_paths']) === false) {
-                    $output['ipv4_upstream'][$upstream->upstream_asn]['bgp_paths'][] = $upstream->bgp_path;
+            if (isset($output['ipv4_upstreams'][$upstream->upstream_asn]) === true) {
+                if (in_array($upstream->bgp_path, $output['ipv4_upstreams'][$upstream->upstream_asn]['bgp_paths']) === false) {
+                    $output['ipv4_upstreams'][$upstream->upstream_asn]['bgp_paths'][] = $upstream->bgp_path;
                 }
                 continue;
             }
@@ -171,17 +171,17 @@ class ASN extends Model {
             $upstreamOutput['description']  = isset($upstreamAsn->description) ? $upstreamAsn->description : null;
             $upstreamOutput['bgp_paths'][]  = $upstream->bgp_path;
 
-            $output['ipv4_upstream'][$upstream->upstream_asn]  = $upstreamOutput;
+            $output['ipv4_upstreams'][$upstream->upstream_asn]  = $upstreamOutput;
             $upstreamOutput = null;
             $upstreamAsn = null;
         }
 
-        $output['ipv6_upstream'] = [];
+        $output['ipv6_upstreams'] = [];
         foreach ($ipv6Upstreams as $upstream) {
 
-            if (isset($output['ipv6_upstream'][$upstream->upstream_asn]) === true) {
-                if (in_array($upstream->bgp_path, $output['ipv6_upstream'][$upstream->upstream_asn]['bgp_paths']) === false) {
-                    $output['ipv6_upstream'][$upstream->upstream_asn]['bgp_paths'][] = $upstream->bgp_path;
+            if (isset($output['ipv6_upstreams'][$upstream->upstream_asn]) === true) {
+                if (in_array($upstream->bgp_path, $output['ipv6_upstreams'][$upstream->upstream_asn]['bgp_paths']) === false) {
+                    $output['ipv6_upstreams'][$upstream->upstream_asn]['bgp_paths'][] = $upstream->bgp_path;
                 }
                 continue;
             }
@@ -193,13 +193,13 @@ class ASN extends Model {
             $upstreamOutput['description']  = isset($upstreamAsn->description) ? $upstreamAsn->description : null;
             $upstreamOutput['bgp_paths'][]  = $upstream->bgp_path;
 
-            $output['ipv6_upstream'][$upstream->upstream_asn]  = $upstreamOutput;
+            $output['ipv6_upstreams'][$upstream->upstream_asn]  = $upstreamOutput;
             $upstreamOutput = null;
             $upstreamAsn = null;
         }
 
-        $output['ipv4_upstream'] = array_values($output['ipv4_upstream']);
-        $output['ipv6_upstream'] = array_values($output['ipv6_upstream']);
+        $output['ipv4_upstreams'] = array_values($output['ipv4_upstreams']);
+        $output['ipv6_upstreams'] = array_values($output['ipv6_upstreams']);
 
         return $output;
     }
