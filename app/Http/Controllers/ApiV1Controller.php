@@ -254,7 +254,7 @@ class ApiV1Controller extends ApiBaseController
         $output['policy_email'] = $ix->policy_email;
         $output['policy_phone'] = $ix->policy_phone;
         $output['city']         = $ix->city;
-        $output['counrty_code'] = $ix->counrty_code;
+        $output['country_code'] = $ix->counrty_code;
         $output['url_stats']    = $ix->url_stats;
 
         $members = [];
@@ -264,7 +264,7 @@ class ApiV1Controller extends ApiBaseController
             $memberInfo['asn']          = $member->asn;
             $memberInfo['name']         = $asnInfo ? $asnInfo->name: null;
             $memberInfo['description']  = $asnInfo ? $asnInfo->description : null;
-            $memberInfo['counrty_code'] = $asnInfo ? $asnInfo->counrty_code : null;
+            $memberInfo['country_code'] = $asnInfo ? $asnInfo->counrty_code : null;
             $memberInfo['ipv4_address'] = $member->ipv4_address;
             $memberInfo['ipv6_address'] = $member->ipv6_address;
             $memberInfo['speed']        = $member->speed;
