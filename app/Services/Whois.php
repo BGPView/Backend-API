@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class Whois
 {
-    private $whoisUrl = "http://185.42.223.50/whois.php";
+    private $whoisUrl = "http://whois.bgpview.io/whois.php";
 
     private $rir;
     private $allocationData;
