@@ -23,12 +23,22 @@ function process_rib {
 BASE_URL="archive.routeviews.org/bgpdata";
 RIB_FOLDER=`curl ftp://$BASE_URL/ | tail -1 | awk '{print $(NF)}'`
 RIB_FILE=`curl ftp://$BASE_URL/$RIB_FOLDER/RIBS/ | tail -1 | awk '{print $(NF)}'`
+if [ -z "$RIB_FILE" ]
+then
+	RIB_FOLDER=`curl ftp://$BASE_URL/ | tail -2 | head -1 | awk '{print $(NF)}'`
+	RIB_FILE=`curl ftp://$BASE_URL/$RIB_FOLDER/RIBS/ | tail -1 | awk '{print $(NF)}'`
+fi
 process_rib $BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE
 
 # IPv6 RouteViews
 BASE_URL="archive.routeviews.org/route-views6/bgpdata";
 RIB_FOLDER=`curl ftp://$BASE_URL/ | tail -1 | awk '{print $(NF)}'`
 RIB_FILE=`curl ftp://$BASE_URL/$RIB_FOLDER/RIBS/ | tail -1 | awk '{print $(NF)}'`
+if [ -z "$RIB_FILE" ]
+then
+        RIB_FOLDER=`curl ftp://$BASE_URL/ | tail -2 | head -1 | awk '{print $(NF)}'`
+        RIB_FILE=`curl ftp://$BASE_URL/$RIB_FOLDER/RIBS/ | tail -1 | awk '{print $(NF)}'`
+fi
 process_rib $BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE
 
 ###############################################################################################
