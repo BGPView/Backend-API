@@ -93,66 +93,11 @@ class UpdatePrefixWhoisData extends Command
                 $this->cli->br()->comment('Skipping Bogon Address - '.$ipPrefix->ip.'/'.$ipPrefix->cidr);
                 continue;
             }
-
-            $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhois';
-            $prefixTest = $className::where('ip', $ipPrefix->ip)->where('cidr', $ipPrefix->cidr)->first();
-
-            // Lets check if we have seen the prefix already
+            
+            $prefixTest = DB::table('ipv' . $ipVersion . '_prefix_whois')->where('ip', $ipPrefix->ip)->where('cidr', $ipPrefix->cidr)->first();
             if (is_null($prefixTest) !== true) {
-                // If the last time the prefix was scraped is older than 3 weeks, update it
-                if (strtotime($prefixTest->updated_at) < $threeWeeksAgo) {
-                    $this->cli->br()->comment('===================================================');
-                    $this->cli->br()->comment('Updating older prefix whois info - ' . $ipPrefix->ip . '/' . $ipPrefix->cidr)->br();
-
-                    $ipWhois = new Whois($ipPrefix->ip, $ipPrefix->cidr);
-                    $parsedWhois = $ipWhois->parse();
-
-                    // Skip null results
-                    if (is_null($parsedWhois) === true) {
-                        continue;
-                    }
-
-                    $prefixTest->name = $parsedWhois->name;
-                    $prefixTest->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-                    $prefixTest->description_full = json_encode($parsedWhois->description);
-                    $prefixTest->counrty_code = $parsedWhois->counrty_code;
-                    $prefixTest->owner_address = json_encode($parsedWhois->address);
-                    $prefixTest->raw_whois = $ipWhois->raw();
-
-                    // Lets remove old emails for this prefix
-                    $prefixTest->emails()->delete();
-
-                    // Save new emails
-                    foreach ($parsedWhois->emails as $email) {
-                        $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhoisEmail';
-                        $prefixEmail = new $className;
-                        $prefixEmail->prefix_whois_id = $prefixTest->id;
-                        $prefixEmail->email_address = $email;
-
-                        // Check if its an abuse email
-                        if (in_array($email, $parsedWhois->abuse_emails)) {
-                            $prefixEmail->abuse_email = true;
-                        }
-
-                        $prefixEmail->save();
-                    }
-
-                    dump([
-                        'name' => $prefixTest->name,
-                        'description' => $prefixTest->description,
-                        'description_full' => $prefixTest->description_full,
-                        'counrty_code' => $prefixTest->counrty_code,
-                        'owner_address' => $prefixTest->owner_address,
-                        'abuse_emails' => $prefixTest->emails()->where('abuse_email', true)->get()->lists('email_address'),
-                        'emails' => $prefixTest->emails()->lists('email_address'),
-                    ]);
-
-                    $prefixTest->save();
-                }
-
                 continue;
             }
-
             // Since we dont have the prefix in DB lets create it.
 
             $ipAllocation = $this->ipUtils->getAllocationEntry($ipPrefix->ip);
