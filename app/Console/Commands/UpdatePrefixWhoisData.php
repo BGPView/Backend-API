@@ -14,6 +14,7 @@ use App\Services\BgpParser;
 use App\Services\Whois;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use League\CLImate\CLImate;
 use Ubench;
 
@@ -93,7 +94,7 @@ class UpdatePrefixWhoisData extends Command
                 $this->cli->br()->comment('Skipping Bogon Address - '.$ipPrefix->ip.'/'.$ipPrefix->cidr);
                 continue;
             }
-            
+
             $prefixTest = DB::table('ipv' . $ipVersion . '_prefix_whois')->where('ip', $ipPrefix->ip)->where('cidr', $ipPrefix->cidr)->first();
             if (is_null($prefixTest) !== true) {
                 continue;
