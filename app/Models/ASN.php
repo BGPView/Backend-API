@@ -111,13 +111,10 @@ class ASN extends Model {
     public static function getPrefixes($as_number)
     {
         $prefixes = (new IpUtils())->getBgpPrefixes($as_number);
-        $rirs = Rir::all();
 
         $output['ipv4_prefixes'] = [];
         foreach ($prefixes['ipv4'] as $prefix) {
             $prefixWhois = $prefix->whois;
-            $prefixAllocation = $prefix->allocation;
-
 
             $prefixOutput['prefix']         = $prefix->ip . '/' . $prefix->cidr;
             $prefixOutput['ip']             = $prefix->ip;
@@ -126,22 +123,6 @@ class ASN extends Model {
             $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
             $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
             $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
-
-            if (is_null($prefixAllocation) === true) {
-                $parent['prefix']       = null;
-                $parent['ip']           = null;
-                $parent['cidr']         = null;
-                $parent['country_code'] = null;
-                $parent['rir_name']     = null;
-            } else {
-                $parent['prefix']       = $prefixAllocation->ip . '/' . $prefixAllocation->cidr;
-                $parent['ip']           = $prefixAllocation->ip;
-                $parent['cidr']         = $prefixAllocation->cidr;
-                $parent['country_code'] = $prefixAllocation->counrty_code;
-                $parent['rir_name']     = $rirs->where('id', $prefixAllocation->rir_id)->first()->name;
-            }
-
-            $prefixOutput['parent']     = $parent;
 
             $output['ipv4_prefixes'][]  = $prefixOutput;
             $prefixOutput = null;
