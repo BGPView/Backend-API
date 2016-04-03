@@ -184,6 +184,7 @@ class ASN extends Model {
             $upstreamOutput['asn']          = $upstream->upstream_asn;
             $upstreamOutput['name']         = isset($upstreamAsn->name) ? $upstreamAsn->name : null;
             $upstreamOutput['description']  = isset($upstreamAsn->description) ? $upstreamAsn->description : null;
+            $upstreamOutput['country_code'] = isset($upstreamAsn->counrty_code) ? $upstreamAsn->counrty_code : null;
             $upstreamOutput['bgp_paths'][]  = $upstream->bgp_path;
 
             $output['ipv4_upstreams'][$upstream->upstream_asn]  = $upstreamOutput;
@@ -206,6 +207,7 @@ class ASN extends Model {
             $upstreamOutput['asn']          = $upstream->upstream_asn;
             $upstreamOutput['name']         = isset($upstreamAsn->name) ? $upstreamAsn->name : null;
             $upstreamOutput['description']  = isset($upstreamAsn->description) ? $upstreamAsn->description : null;
+            $upstreamOutput['country_code'] = isset($upstreamAsn->counrty_code) ? $upstreamAsn->counrty_code : null;
             $upstreamOutput['bgp_paths'][]  = $upstream->bgp_path;
 
             $output['ipv6_upstreams'][$upstream->upstream_asn]  = $upstreamOutput;
