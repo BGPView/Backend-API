@@ -25,9 +25,18 @@ class IPv4BgpPrefix extends Model {
         return $this->whois();
     }
 
+    public function setWhoisAttribute($value)
+    {
+        $this->attributes['whois'] = $value;
+    }
+
     public function whois()
     {
-        return IPv4PrefixWhois::where('ip', $this->ip)->where('cidr', $this->cidr)->first();
+        if (isset($this->whois) !== true) {
+            $this->whois = IPv4PrefixWhois::where('ip', $this->ip)->where('cidr', $this->cidr)->first();
+        }
+
+        return $this->whois;
     }
 
     public function getAllocationAttribute()
@@ -35,10 +44,19 @@ class IPv4BgpPrefix extends Model {
         return $this->allocation();
     }
 
+    public function setAllocationAttribute($value)
+    {
+        $this->attributes['allocation'] = $value;
+    }
+
     public function allocation()
     {
-        $ipUtils = new IpUtils();
-        return $ipUtils->getAllocationEntry($this->ip, $this->cidr);
+        if (isset($this->allocation) !== true) {
+            $ipUtils = new IpUtils();
+            $this->allocation = $ipUtils->getAllocationEntry($this->ip, $this->cidr);
+        }
+
+        return $this->allocation;
     }
 
     public function asn_info()
