@@ -132,7 +132,7 @@ class ASN extends Model {
             $prefixOutput['parent']['prefix']   = isset($prefixWhois->parent_ip) && isset($prefixWhois->parent_cidr) ? $prefixWhois->parent_ip . '/' . $prefixWhois->parent_cidr : null;
             $prefixOutput['parent']['ip']       = isset($prefixWhois->parent_ip) ? $prefixWhois->parent_ip : null;
             $prefixOutput['parent']['cidr']     = isset($prefixWhois->parent_cidr) ? $prefixWhois->parent_cidr : null;
-            $prefixOutput['parent']['rir_name'] = isset($prefixWhois->rir_id) ? $rirNames[$prefixWhois->rir_id] : null;
+            $prefixOutput['parent']['rir_name'] = isset($prefixWhois->rir_id) && isset($rirNames[$prefixWhois->rir_id]) ? $rirNames[$prefixWhois->rir_id] : null;
 
             $output['ipv4_prefixes'][]  = $prefixOutput;
             $prefixOutput = null;
@@ -154,7 +154,7 @@ class ASN extends Model {
             $prefixOutput['parent']['prefix']   = isset($prefixWhois->parent_ip) && isset($prefixWhois->parent_cidr) ? $prefixWhois->parent_ip . '/' . $prefixWhois->parent_cidr : null;
             $prefixOutput['parent']['ip']       = isset($prefixWhois->parent_ip) ? $prefixWhois->parent_ip : null;
             $prefixOutput['parent']['cidr']     = isset($prefixWhois->parent_cidr) ? $prefixWhois->parent_cidr : null;
-            $prefixOutput['parent']['rir_name'] = isset($prefixWhois->rir_id) ? $rirNames[$prefixWhois->rir_id] : null;
+            $prefixOutput['parent']['rir_name'] = isset($prefixWhois->rir_id) && isset($rirNames[$prefixWhois->rir_id]) ? $rirNames[$prefixWhois->rir_id] : null;
 
             $output['ipv6_prefixes'][]  = $prefixOutput;
             $prefixOutput = null;
