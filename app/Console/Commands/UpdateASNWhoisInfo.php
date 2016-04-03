@@ -134,8 +134,8 @@ class UpdateASNWhoisInfo extends Command
                 $asn->rir_id = $rir_id;
                 $asn->asn = $as_number;
                 $asn->name = empty($parsedWhois->name) !== true ? $parsedWhois->name : null;
-                $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-                $asn->description_full = json_encode($parsedWhois->description);
+                $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $asn->name;
+                $asn->description_full = count($parsedWhois->description) > 0 ? json_encode($parsedWhois->description) : json_encode([$asn->description]);
 
                 // Insert PeerDB Info if we get any
                 if ($peerDb = $this->getPeeringDbInfo($asn->asn)) {
@@ -186,8 +186,8 @@ class UpdateASNWhoisInfo extends Command
             }
 
             $oldAsn->name = $parsedWhois->name;
-            $oldAsn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-            $oldAsn->description_full = json_encode($parsedWhois->description);
+            $oldAsn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $parsedWhois->name;
+            $oldAsn->description_full = count($parsedWhois->description) > 0 ? json_encode($parsedWhois->description) : json_encode([$oldAsn->description]);
 
             // If we have the PeerDB info lets update it.
             if ($peerDb = $this->getPeeringDbInfo($oldAsn->asn)) {
