@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\IpUtils;
 use Illuminate\Database\Eloquent\Model;
 
 class IPv4BgpPrefix extends Model {
