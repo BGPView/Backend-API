@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\IpUtils;
 use Illuminate\Database\Eloquent\Model;
 
 class IPv6BgpPrefix extends Model {
@@ -28,6 +29,17 @@ class IPv6BgpPrefix extends Model {
     public function whois()
     {
         return IPv6PrefixWhois::where('ip', $this->ip)->where('cidr', $this->cidr)->first();
+    }
+
+    public function getAllocationAttribute()
+    {
+        return $this->allocation();
+    }
+
+    public function allocation()
+    {
+        $ipUtils = new IpUtils();
+        return $ipUtils->getAllocationEntry($this->ip, $this->cidr);
     }
 
     public function asn()
