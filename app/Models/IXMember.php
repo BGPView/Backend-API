@@ -36,6 +36,10 @@ class IXMember extends Model {
         foreach (self::where('asn', $asn)->get() as $ixMember) {
             $ixInfo = $ixMember->ix;
 
+            if (is_null($ixInfo) === true) {
+                continue;
+            }
+
             $ix_data['ix_id']           = $ixInfo->id;
             $ix_data['name']            = $ixInfo->name;
             $ix_data['name_full']       = $ixInfo->name_full;
