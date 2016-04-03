@@ -113,7 +113,7 @@ class ASN extends Model {
         $prefixes = (new IpUtils())->getBgpPrefixes($as_number);
 
         $rirNames = [];
-        foreach (RIR::all() as $rir) {
+        foreach (Rir::all() as $rir) {
             $rirNames[$rir->id] = $rir->name;
         }
 
