@@ -129,14 +129,18 @@ class UpdatePrefixWhoisData extends Command
                 continue;
             }
 
+            $newPrefixWhois->rir_id = $ipAllocation->rir_id;
             $newPrefixWhois->ip = $ipPrefix->ip;
             $newPrefixWhois->cidr = $ipPrefix->cidr;
+            $newPrefixWhois->parent_ip = $ipAllocation->ip;
+            $newPrefixWhois->parent_cidr = $ipAllocation->cidr;
             $newPrefixWhois->name = $parsedWhois->name;
             $newPrefixWhois->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
             $newPrefixWhois->description_full = json_encode($parsedWhois->description);
             $newPrefixWhois->counrty_code = $parsedWhois->counrty_code;
             $newPrefixWhois->owner_address = json_encode($parsedWhois->address);
             $newPrefixWhois->raw_whois = $ipWhois->raw();
+
             $newPrefixWhois->save();
 
             // Save Prefix Emails

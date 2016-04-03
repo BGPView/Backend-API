@@ -43,6 +43,5 @@ class AlterTableNullableWhois extends Migration
             $table->string('name')->change();
             $table->string('counrty_code')->index()->change();
         });
-
     }
 }
