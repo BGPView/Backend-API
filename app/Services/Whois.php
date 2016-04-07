@@ -145,14 +145,14 @@ class Whois
         // Get description (Organization)
         if ($this->ipUtils->getInputType($this->input) === 'asn') {
             $orgs = $this->extractValues('OrgName');
-            // Fallback to customer value
-            $orgs = $orgs ?: $this->extractValues('Customer');
             if (is_array($orgs) === true) {
                 $orgs = end($orgs);
             }
             $data->description = [$orgs];
         } else {
             $orgs = $this->extractValues('Organization');
+            // Fallback to customer value
+            $orgs = $orgs ?: $this->extractValues('Customer');
             if (is_array($orgs) === true) {
                 $orgs = end($orgs);
             }
