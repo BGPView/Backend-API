@@ -450,7 +450,12 @@ class IpUtils
     {
         $ip = explode('/', $ip, 2)[0];
         $reader = new Reader(database_path() . '/GeoLite2-City.mmdb');
-        $record = $reader->city($ip);
+
+        try {
+            $record = $reader->city($ip);
+        } catch (\Exception $e) {
+            $record = null;
+        }
 
         return $record;
     }
