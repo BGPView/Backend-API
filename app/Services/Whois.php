@@ -557,6 +557,27 @@ class Whois
 
         }
 
+        // lets make sure we have a fallback for description
+        $removeNames = [
+            '-AS-AP',
+            '-AS-MY',
+            '-AS-IN',
+            '-AS-ID',
+            '-AS-KR',
+            '-AS-VN',
+            '-AS-TW',
+            '-AS-CN',
+        ];
+        if (is_array($data)) {
+            if (empty($data['name']) !== true && empty($data['description']) === true) {
+                $data['description'] = trim(str_replace('-', ' ',str_replace($removeNames, '', $data['name'])));
+            }
+        } else {
+            if (empty($data->name) !== true && empty($data->description) === true) {
+                $data->description = trim(str_replace('-', ' ',str_replace($removeNames, '', $data->name)));
+            }
+        }
+
         return $data;
     }
 

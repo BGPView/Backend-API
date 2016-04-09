@@ -53,6 +53,8 @@ class ASN extends Model {
         $addressLines = [];
 
         foreach($data as $entry) {
+            // Remove/Clean all double commas
+            $entry = preg_replace('/,+/', ',', $entry);
             $addressArr = explode(',', $entry);
             $addressLines = array_merge($addressLines, $addressArr);
         }
