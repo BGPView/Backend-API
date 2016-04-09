@@ -233,7 +233,7 @@ class ApiV1Controller extends ApiBaseController
 
         // Lets sort out the prefix array from smallest to largest
         usort($output['prefixes'], function($a, $b) {
-            return $a['cidr'] - $b['cidr'];
+            return $b['cidr'] - $a['cidr'];
         });
 
         $output['rir_allocation']['rir_name']           = $allocation->rir->name;
