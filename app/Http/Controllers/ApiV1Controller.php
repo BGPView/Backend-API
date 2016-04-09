@@ -231,6 +231,11 @@ class ApiV1Controller extends ApiBaseController
             $output['prefixes'][]  = $prefixOutput;
         }
 
+        // Lets sort out the prefix array from smallest to largest
+        usort($output['prefixes'], function($a, $b) {
+            return $a['cidr'] - $b['cidr'];
+        });
+
         $output['rir_allocation']['rir_name']           = $allocation->rir->name;
         $output['rir_allocation']['country_code']       = $allocation->counrty_code;
         $output['rir_allocation']['ip']                 = $allocation->ip;
