@@ -627,6 +627,13 @@ class Whois
             }
         }
 
+        // Clean up address vals
+        foreach ($finalAddress as $key => $line) {
+            if (empty($line) === true) {
+                unset($finalAddress[$key]);
+            }
+        }
+
         return array_unique($finalAddress);
     }
 
