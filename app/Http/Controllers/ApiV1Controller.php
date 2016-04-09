@@ -169,7 +169,7 @@ class ApiV1Controller extends ApiBaseController
             $asnData['asn'] = $prefixData->asn;
             $asnData['name'] = $asn->name;
             $asnData['description'] = $asn->description;
-            $asnData['country_code'] = $asn->country_code;
+            $asnData['country_code'] = $asn->counrty_code;
 
             $output['asns'][] = $asnData;
         }
@@ -223,7 +223,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixOutput['asn']['asn']     = $prefix->asn;
             $prefixOutput['asn']['name']    = $asn->name;
             $prefixOutput['asn']['description']     = $asn->description;
-            $prefixOutput['asn']['country_code']    = $asn->country_code;
+            $prefixOutput['asn']['country_code']    = $asn->counrty_code;
             $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
             $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
             $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
