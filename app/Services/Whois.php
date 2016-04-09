@@ -513,7 +513,10 @@ class Whois
         foreach ($this->rawLines as $line) {
             $lineParts = explode(":", $line, 2);
             if (strtolower(trim($lineParts[0])) === $key) {
-                $values[] = trim($lineParts[1]);
+                $testVal = trim($lineParts[1]);
+                if (empty($testVal) !== true) {
+                    $values[] = trim($lineParts[1]);
+                }
             }
         }
 
