@@ -203,7 +203,7 @@ class Whois
                 $parts = explode(' ', $line);
                 foreach ($parts as $part) {
                     if (strpos($part, '@') !== false && strpos($part, '.') !== false) {
-                        $data->abuse_emails[] = strtolower($part);
+                        $data->abuse_emails[] = trim(strtolower($part), '\'');
                     }
                 }
                 unset($parts);
@@ -282,7 +282,7 @@ class Whois
                 $parts = explode(' ', $line);
                 foreach ($parts as $part) {
                     if (strpos($part, '@') !== false && strpos($part, '.') !== false) {
-                        $data->abuse_emails[] = strtolower($part);
+                        $data->abuse_emails[] = trim(strtolower($part), '\'');
                     }
                 }
                 unset($parts);
