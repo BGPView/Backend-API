@@ -165,7 +165,13 @@ class ApiV1Controller extends ApiBaseController
         $output['cidr']             = $prefix->cidr;
         $output['asns']             = [];
         foreach ($prefixes as $prefixData) {
-            $output['asns'][] = $prefixData->asn;
+            $asn = ASN::where('asn', $prefixData->asn)->first();
+            $asnData['asn'] = $prefixData->asn;
+            $asnData['name'] = $asn->name;
+            $asnData['description'] = $asn->description;
+            $asnData['country_code'] = $asn->country_code;
+
+            $output['asns'][] = $asnData;
         }
         $output['name']             = $prefixWhois ? $prefixWhois->name : null;
         $output['description_short']= $prefixWhois ? $prefixWhois->description : null;
@@ -209,11 +215,15 @@ class ApiV1Controller extends ApiBaseController
         $output['prefixes'] = [];
         foreach ($prefixes as $prefix) {
             $prefixWhois = $prefix->whois;
+            $asn = ASN::where('asn',$prefix->asn)->first();
 
             $prefixOutput['prefix']         = $prefix->ip . '/' . $prefix->cidr;
             $prefixOutput['ip']             = $prefix->ip;
             $prefixOutput['cidr']           = $prefix->cidr;
-            $prefixOutput['asn']            = $prefix->asn;
+            $prefixOutput['asn']['asn']     = $prefix->asn;
+            $prefixOutput['asn']['name']    = $asn->name;
+            $prefixOutput['asn']['description']     = $asn->description;
+            $prefixOutput['asn']['country_code']    = $asn->country_code;
             $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
             $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
             $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
