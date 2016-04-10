@@ -73,6 +73,9 @@ class Whois
 
         $this->allocationData = $allocation;
         // Lets fetch the raw whois data
+        if (is_null($cidr) !== true) {
+            $this->input .= '/' . $cidr;
+        }
         $this->rawData = $this->getRawWhois();
         $this->rawLines = explode("\n", $this->rawData);
 
