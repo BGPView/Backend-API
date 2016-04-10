@@ -49,6 +49,10 @@ class ASN extends Model {
 
     public function getOwnerAddressAttribute($value)
     {
+        if (is_null($value) === true) {
+            return null;
+        }
+
         $data = json_decode($value);
         $addressLines = [];
 
