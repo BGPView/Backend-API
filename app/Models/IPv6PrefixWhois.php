@@ -38,7 +38,21 @@ class IPv6PrefixWhois extends Model {
 
     public function getOwnerAddressAttribute($value)
     {
-        return json_decode($value);
+        if (is_null($value) === true) {
+            return null;
+        }
+
+        $data = json_decode($value);
+        $addressLines = [];
+
+        foreach($data as $entry) {
+            // Remove/Clean all double commas
+            $entry = preg_replace('/,+/', ',', $entry);
+            $addressArr = explode(',', $entry);
+            $addressLines = array_merge($addressLines, $addressArr);
+        }
+
+        return array_map('trim', $addressLines);
     }
 
     public function getRawWhoisAttribute($value)
