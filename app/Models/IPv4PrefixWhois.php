@@ -43,6 +43,11 @@ class IPv4PrefixWhois extends Model {
         }
 
         $data = json_decode($value);
+
+        if (empty($data) === true) {
+            return null;
+        }
+
         $addressLines = [];
 
         foreach($data as $entry) {

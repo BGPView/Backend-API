@@ -38,11 +38,16 @@ class IPv6PrefixWhois extends Model {
 
     public function getOwnerAddressAttribute($value)
     {
-        if (is_null($value) === true) {
+        if (empty($value) === true) {
             return null;
         }
 
         $data = json_decode($value);
+
+        if (empty($data) === true) {
+            return null;
+        }
+
         $addressLines = [];
 
         foreach($data as $entry) {
