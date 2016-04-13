@@ -57,7 +57,7 @@ class IPv6PrefixWhois extends Model {
             $addressLines = array_merge($addressLines, $addressArr);
         }
 
-        return array_map('trim', $addressLines);
+        return array_values(array_filter(array_map('trim', $addressLines)));
     }
 
     public function getRawWhoisAttribute($value)
