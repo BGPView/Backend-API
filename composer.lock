@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1e83acc2e3185e1c006aaa6cd21d0fce",
-    "content-hash": "cedaef9c9ff8b8ec20cc514ba8449482",
+    "hash": "5b4373d8098c7133a5eee614c02cd1c9",
+    "content-hash": "a8d08512c366b65a1ad9641800d16ba6",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -827,16 +827,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "1.2.3",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "2e89629ff057ebb49492ba08e6995d3a6a80021b"
+                "reference": "31382fef2889136415751badebbd1cb022a4ed72"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/2e89629ff057ebb49492ba08e6995d3a6a80021b",
-                "reference": "2e89629ff057ebb49492ba08e6995d3a6a80021b",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/31382fef2889136415751badebbd1cb022a4ed72",
+                "reference": "31382fef2889136415751badebbd1cb022a4ed72",
                 "shasum": ""
             },
             "require": {
@@ -881,7 +881,7 @@
                 "stream",
                 "uri"
             ],
-            "time": "2016-02-18 21:54:00"
+            "time": "2016-04-13 19:56:01"
         },
         {
             "name": "jakub-onderka/php-console-color",
@@ -1158,16 +1158,16 @@
         },
         {
             "name": "league/climate",
-            "version": "3.2.0",
+            "version": "3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/climate.git",
-                "reference": "834cb907c89eb31e2171b68ee25c0ed26c8f34f4"
+                "reference": "b103fc8faa3780c802cc507d5f0ff534ecc94fb5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/climate/zipball/834cb907c89eb31e2171b68ee25c0ed26c8f34f4",
-                "reference": "834cb907c89eb31e2171b68ee25c0ed26c8f34f4",
+                "url": "https://api.github.com/repos/thephpleague/climate/zipball/b103fc8faa3780c802cc507d5f0ff534ecc94fb5",
+                "reference": "b103fc8faa3780c802cc507d5f0ff534ecc94fb5",
                 "shasum": ""
             },
             "require": {
@@ -1176,7 +1176,7 @@
             },
             "require-dev": {
                 "mikey179/vfsstream": "~1.4",
-                "mockery/mockery": "dev-master",
+                "mockery/mockery": "~0.9",
                 "phpunit/phpunit": "~4.6"
             },
             "type": "library",
@@ -1205,7 +1205,7 @@
                 "php",
                 "terminal"
             ],
-            "time": "2015-08-13 16:50:51"
+            "time": "2016-04-04 20:24:59"
         },
         {
             "name": "league/flysystem",
@@ -1445,16 +1445,16 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "1.18.2",
+            "version": "1.19.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "064b38c16790249488e7a8b987acf1c9d7383c09"
+                "reference": "5f56ed5212dc509c8dc8caeba2715732abb32dbf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/064b38c16790249488e7a8b987acf1c9d7383c09",
-                "reference": "064b38c16790249488e7a8b987acf1c9d7383c09",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/5f56ed5212dc509c8dc8caeba2715732abb32dbf",
+                "reference": "5f56ed5212dc509c8dc8caeba2715732abb32dbf",
                 "shasum": ""
             },
             "require": {
@@ -1519,7 +1519,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2016-04-02 13:12:58"
+            "time": "2016-04-12 18:29:35"
         },
         {
             "name": "mtdowling/cron-expression",
@@ -1710,6 +1710,49 @@
                 "random"
             ],
             "time": "2016-03-18 20:34:03"
+        },
+        {
+            "name": "pear/net_dns2",
+            "version": "1.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mikepultz/netdns2.git",
+                "reference": "ba0ede1df70ed98591a14efc88fb9097eafaf541"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mikepultz/netdns2/zipball/ba0ede1df70ed98591a14efc88fb9097eafaf541",
+                "reference": "ba0ede1df70ed98591a14efc88fb9097eafaf541",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.1.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Net_DNS2": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Mike Pultz",
+                    "email": "mike@mikepultz.com",
+                    "homepage": "http://mikepultz.com/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Native PHP5 DNS Resolver and Updater Library",
+            "homepage": "http://netdns2.com/",
+            "keywords": [
+                "dns",
+                "network"
+            ],
+            "time": "2015-04-13 00:55:32"
         },
         {
             "name": "psr/http-message",
@@ -3047,7 +3090,7 @@
                 {
                     "name": "Pádraic Brady",
                     "email": "padraic.brady@gmail.com",
-                    "homepage": "http://.astrumfutura.com"
+                    "homepage": "http://blog.astrumfutura.com"
                 },
                 {
                     "name": "Dave Marshall",
