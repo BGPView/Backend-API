@@ -41,7 +41,6 @@ class Dns
                     $data = $record->$key;
                 }
 
-
                 $records[$type][] = $data;
             }
         }
