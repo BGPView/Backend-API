@@ -2,26 +2,51 @@
 
 namespace App\Services;
 
-class DNS
+use Net_DNS2_Resolver;
+
+class Dns
 {
     protected $resolvers = [
         '8.8.8.8',
     ];
 
     protected $recordTypes = [
-        'A',
-        'AAAA',
-        'SOA',
-        'NS',
-        'PTR',
-        'MX',
-        'TXT',
-        'CNAME',
+        'A' => 'address',
+        'AAAA' => 'address',
+        'SOA' => 'rname',
+        'NS' => 'nsdname',
+        'MX' => 'exchange',
+        'TXT' => 'text',
+        'CNAME' => 'cname',
+        // 'PTR' => 'ptrdname',  // We take this out as it does not apply for domain
     ];
 
-    public function getAllRecords($input)
-    {
+    private $dns;
 
+    public function __construct()
+    {
+        $this->dns = new Net_DNS2_Resolver(['nameservers' => $this->resolvers]);
+    }
+
+    public function getDomainRecords($input)
+    {
+        $records = [];
+        foreach ($this->recordTypes as $type => $key) {
+            $result = $this->dns->query($input, $type);
+            foreach($result->answer as $record)
+            {
+                if (is_array($record->$key) === true) {
+                    $data = $record->$key[0];
+                } else {
+                    $data = $record->$key;
+                }
+
+
+                $records[$type][] = $data;
+            }
+        }
+
+        return $records;
     }
 
 }
