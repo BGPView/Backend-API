@@ -292,4 +292,38 @@ class ApiV1Controller extends ApiBaseController
 
         return $this->sendData($output);
     }
+
+    /*
+     * URI: /asns/{country_code?}
+     */
+    public function asns(Request $request, $countryCode = null)
+    {
+        $limit = $request->input('limit');
+        if (is_numeric($limit) !== true || $limit < 1 || $limit > 100) {
+            $limit = 20;
+        }
+
+        if (is_null($countryCode) !== true) {
+            $asns = ASN::where('counrty_code', strtoupper($countryCode))->paginate($limit);
+        } else {
+            $asns = ASN::paginate($limit);
+        }
+
+        $output['results_count']    = $asns->total();
+        $output['current_page']     = $asns->currentPage();
+        $output['limit']            = $asns->perPage();
+
+
+        foreach ($asns as $asn) {
+            $asnData['asn']                  = $asn->asn;
+            $asnData['name']                 = $asn->name;
+            $asnData['description_short']    = $asn->description;
+            $asnData['country_code']         = $asn->counrty_code;
+
+            $output['asns'][] = $asnData;
+        }
+
+
+        return $output;
+    }
 }
