@@ -1,5 +1,10 @@
 <?php
 
+// We need to also include the netdns2 PEAR lib
+require_once 'Net/DNS2.php';
+
+$dnsResolver = new Net_DNS2_Resolver(['nameservers' => ['127.0.0.1']]);
+
 define( 'WHOIS_EOL', "\r\n" );
 define( 'WHOIS_PORT', 43 );
 
@@ -39,18 +44,22 @@ switch (strtolower($whois_server)) {
         break;
 }
 
-$rand_ip = '[2a06:1282:'.rand(1, 9999).':f001:e141:f435:1010:deed]';
+$rand_ip = '[2a06:9f81:'.rand(1, 9999).':f001:e141:f435:1010:deed]';
 $socket_options = array( 'socket' => array('bindto' => $rand_ip.':0') );
 $socket_context = stream_context_create($socket_options);
 
 $dns = dns_get_record($whois_server, DNS_AAAA);
-$whois_dns = $dns[array_rand($dns)];
+$dnsResults = $dnsResolver->query($whois_server, 'AAAA');
 
-if (isset($whois_dns['ipv6']) === false) {
-    die("Could not reolve any AAA records for whois server");
-}
-$whois_server_ip = "[" . $whois_dns['ipv6'] . "]";
+$whois_server_ip = $dnsResults->answer[array_rand($dnsResults->answer)]->address;
+$whois_server_ip = "[" . $whois_server_ip . "]";
+
 echo "Source: ".$rand_ip.PHP_EOL;
+
+if ($whois_server == 'whois.apnic.net') {
+    $whois_server_ip = '[2001:dc0:2001:11::220]';
+}
+
 
 $fp = stream_socket_client( 'tcp://'.$whois_server_ip.':'.WHOIS_PORT, $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $socket_context );
 $out = "";
