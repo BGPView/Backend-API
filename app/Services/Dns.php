@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Net_DNS2_Exception;
 use Net_DNS2_Resolver;
 
 class Dns
@@ -32,16 +33,20 @@ class Dns
     {
         $records = [];
         foreach ($this->recordTypes as $type => $key) {
-            $result = $this->dns->query($input, $type);
-            foreach($result->answer as $record)
-            {
-                if (is_array($record->$key) === true) {
-                    $data = array_values($record->$key)[0];
-                } else {
-                    $data = $record->$key;
-                }
+            try {
+                $result = $this->dns->query($input, $type);
+                foreach($result->answer as $record)
+                {
+                    if (is_array($record->$key) === true) {
+                        $data = array_values($record->$key)[0];
+                    } else {
+                        $data = $record->$key;
+                    }
 
-                $records[$type][] = $data;
+                    $records[$type][] = $data;
+                }
+            } catch(Net_DNS2_Exception $e) {
+                continue;
             }
         }
 

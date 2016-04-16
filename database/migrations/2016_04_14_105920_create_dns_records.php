@@ -16,8 +16,8 @@ class CreateDnsRecords extends Migration
         {
             $table->increments('id')->unique();
             $table->string('input')->index();
-            $table->text('record_json');
-            $table->string('record_entry')->index();
+            $table->string('type')->index();
+            $table->string('entry')->index();
             $table->timestamps();
         });
     }

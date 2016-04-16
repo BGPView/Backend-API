@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\IpUtils;
+use App\Models\DNSRecord;
 use App\Services\Dns;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -51,7 +52,19 @@ class UpdateDNSTable extends Command
     public function handle()
     {
         // Download the zip file
-        $file = app_path() . '/top-1m.csv';
+        $file = storage_path() . '/top-1m.csv';
+        if (is_file($file)) {
+            unlink($file);
+        }
+        $this->cli->comment('Downloading Alex top 1million ZIP')->br();
+        copy($this->alexaDomainUrl, $file . '.zip');
+
+        $this->cli->comment('Extracting Alex top 1million ZIP')->br();
+        $zip = new \ZipArchive;
+        $zip->open($file . '.zip');
+        $zip->extractTo(storage_path() .'/');
+        $zip->close();
+        unlink($file . '.zip');
 
         $fp = fopen($file, 'r');
         if ($fp) {
@@ -59,7 +72,20 @@ class UpdateDNSTable extends Command
                 $domain = trim(explode(',', $line)[1]);
 
                 // Delete all old records
-                dump($this->dns->getDomainRecords($domain));
+                DNSRecord::where('input', $domain)->delete();
+
+                $domainRecords = $this->dns->getDomainRecords($domain);
+                foreach ($domainRecords as $type => $records) {
+                    foreach ($records as $record) {
+                        $dnsEntry = new DNSRecord;
+                        $dnsEntry->input = $domain;
+                        $dnsEntry->type = $type;
+                        $dnsEntry->entry = $record;
+                        $dnsEntry->save();
+                    }
+                }
+
+                dump($domain, $domainRecords);
             }
         }
 
