@@ -12,9 +12,6 @@ use Ubench;
 
 class UpdateBgpData extends Command
 {
-
-    private $ipv4RibDownloadUrl = "http://185.42.223.50/rib_ipv4.txt";
-    private $ipv6RibDownloadUrl = "http://185.42.223.50/rib_ipv6.txt";
     private $cli;
     private $bench;
     private $bgpParser;

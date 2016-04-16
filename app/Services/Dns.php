@@ -36,7 +36,7 @@ class Dns
             foreach($result->answer as $record)
             {
                 if (is_array($record->$key) === true) {
-                    $data = $record->$key[0];
+                    $data = array_values($record->$key)[0];
                 } else {
                     $data = $record->$key;
                 }
