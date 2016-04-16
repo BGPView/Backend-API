@@ -37,6 +37,11 @@ class Dns
                 $result = $this->dns->query($input, $type);
                 foreach($result->answer as $record)
                 {
+
+                    if (isset($record->$key) !== true) {
+                        continue;
+                    }
+
                     if (is_array($record->$key) === true) {
                         $data = array_values($record->$key)[0];
                     } else {
