@@ -36,6 +36,8 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('/prefix/{ip}/{cidr}', ['as' => 'prefix', 'uses' => 'ApiV1Controller@prefix']);
     Route::get('/ip/{ip}', ['as' => 'ip', 'uses' => 'ApiV1Controller@ip']);
     Route::get('/ix/{ix_id}', ['as' => 'ix', 'uses' => 'ApiV1Controller@ix']);
+    Route::get('/asns/{country_code?}', ['as' => 'asns', 'uses' => 'ApiV1Controller@asns']);
+
 });
 
 Route::group(['middleware' => ['web']], function () {

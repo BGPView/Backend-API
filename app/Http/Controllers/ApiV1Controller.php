@@ -296,15 +296,15 @@ class ApiV1Controller extends ApiBaseController
     /*
      * URI: /asns/{country_code?}
      */
-    public function asns(Request $request, $countryCode = null)
+    public function asns(Request $request, $country_code = null)
     {
         $limit = $request->input('limit');
         if (is_numeric($limit) !== true || $limit < 1 || $limit > 100) {
             $limit = 20;
         }
 
-        if (is_null($countryCode) !== true) {
-            $asns = ASN::where('counrty_code', strtoupper($countryCode))->paginate($limit);
+        if (is_null($country_code) !== true) {
+            $asns = ASN::where('counrty_code', strtoupper($country_code))->paginate($limit);
         } else {
             $asns = ASN::paginate($limit);
         }
