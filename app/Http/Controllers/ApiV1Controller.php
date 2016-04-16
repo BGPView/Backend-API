@@ -309,21 +309,21 @@ class ApiV1Controller extends ApiBaseController
             $asns = ASN::paginate($limit);
         }
 
-        $output['results_count']    = $asns->total();
-        $output['current_page']     = $asns->currentPage();
-        $output['limit']            = $asns->perPage();
-
-
         foreach ($asns as $asn) {
             $asnData['asn']                  = $asn->asn;
             $asnData['name']                 = $asn->name;
             $asnData['description_short']    = $asn->description;
             $asnData['country_code']         = $asn->counrty_code;
 
-            $output['asns'][] = $asnData;
+            $output[] = $asnData;
         }
 
-
-        return $output;
+        $data = $this->makeStatus();
+        $data['results_count']  = $asns->total();
+        $data['current_page']   = $asns->currentPage();
+        $data['limit']          = $asns->perPage();
+        $data['data']           = $output;
+        
+        return $this->respond($data);
     }
 }
