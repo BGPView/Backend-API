@@ -468,7 +468,7 @@ class IpUtils
         $cidr = $ipParts[1];
 
         $ipDecStart = $this->ip2dec($ip);
-        if ($this->ipUtils->getInputType($ip) == 4) {
+        if ($this->getInputType($ip) == 4) {
             $ipAmount = $this->IPv4cidrIpCount()[$cidr];
         } else {
             $ipAmount = $this->IPv6cidrIpCount()[$cidr];
