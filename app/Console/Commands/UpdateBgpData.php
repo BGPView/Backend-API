@@ -97,13 +97,19 @@ class UpdateBgpData extends Command
         // Cleaning up old temp table
         $this->cli->br()->comment('Drop old v4 TEMP table');
         DB::statement('DROP TABLE IF EXISTS ipv4_bgp_prefixes_temp');
+        DB::statement('DROP TABLE IF EXISTS backup_ipv4_bgp_prefixes');
         DB::statement('DROP TABLE IF EXISTS ipv4_bgp_table_temp');
+        DB::statement('DROP TABLE IF EXISTS backup_ipv4_bgp_table');
         DB::statement('DROP TABLE IF EXISTS ipv4_peers_temp');
+        DB::statement('DROP TABLE IF EXISTS backup_ipv4_peers');
 
         $this->cli->br()->comment('Drop old v6 TEMP table');
         DB::statement('DROP TABLE IF EXISTS ipv6_bgp_prefixes_temp');
+        DB::statement('DROP TABLE IF EXISTS backup_ipv6_bgp_prefixes');
         DB::statement('DROP TABLE IF EXISTS ipv6_bgp_table_temp');
+        DB::statement('DROP TABLE IF EXISTS backup_ipv6_bgp_table');
         DB::statement('DROP TABLE IF EXISTS ipv6_peers_temp');
+        DB::statement('DROP TABLE IF EXISTS backup_ipv6_peers');
 
         // Creating a new temp table to store our new BGP data
         $this->cli->br()->comment('Cloning ipv4_bgp_prefixes table schema');
