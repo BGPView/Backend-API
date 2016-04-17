@@ -46,7 +46,7 @@ class UpdateRoaTable extends Command
         $roas = json_decode(file_get_contents($this->rpkiServer));
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount();
         $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
-        $mysqlTime = "'" . date('Y-m-d H:i:s') . "'";
+        $mysqlTime = '"' . date('Y-m-d H:i:s') . '""';
 
         $this->info('Creating the insert query');
         DB::statement('DROP TABLE IF EXISTS roa_table_temp');
@@ -68,7 +68,7 @@ class UpdateRoaTable extends Command
             }
             $endDec = number_format(($startDec = + $ipAmount -1), 0, '', '');
 
-            $roaInsert .= '("'.$roaIP.'",'.$roaCidr.','.$startDec.','.$endDec.','.$roaAsn.','.$roa->maxLength.', "'.$mysqlTime.'", "'.$mysqlTime.'"),';
+            $roaInsert .= '("'.$roaIP.'",'.$roaCidr.','.$startDec.','.$endDec.','.$roaAsn.','.$roa->maxLength.','.$mysqlTime.','.$mysqlTime.'),';
         }
 
         $this->info('Processing the insert query');
