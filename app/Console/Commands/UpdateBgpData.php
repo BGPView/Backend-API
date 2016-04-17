@@ -185,7 +185,7 @@ class UpdateBgpData extends Command
                     if ($$prefixCounter > 250000 ) {
                         $this->cli->br()->comment('Inserting another 250,000 prefixes in one bulk query ('.$ipVersion.')');
                         $$newPrefixes = rtrim($$newPrefixes, ',').';';
-                        DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES '.$$newPrefixes);
+                        DB::statement('INSERT INTO ipv' . $ipVersion . '_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES '.$$newPrefixes);
                         $$newPrefixes = "";
                         $$prefixCounter = 0;
                     }
@@ -228,11 +228,11 @@ class UpdateBgpData extends Command
         // ================================================================
         $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v4)');
         $newV4Prefixes = rtrim($newV4Prefixes, ',').';';
-        DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,updated_at,created_at) VALUES '.$newV4Prefixes);
+        DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES '.$newV4Prefixes);
 
         $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v6)');
         $newV6Prefixes = rtrim($newV6Prefixes, ',').';';
-        DB::statement('INSERT INTO ipv6_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,updated_at,created_at) VALUES '.$newV6Prefixes);
+        DB::statement('INSERT INTO ipv6_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES '.$newV6Prefixes);
         // ================================================================
         $this->cli->br()->comment('Inserting all remaining bgp table entries in one bulk query (v4)');
         $newV4TableEntries = rtrim($newV4TableEntries, ',').';';
