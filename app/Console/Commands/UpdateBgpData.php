@@ -178,14 +178,14 @@ class UpdateBgpData extends Command
                 // Only entry prefixes which are not set
                 if (isset($$seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn]) === false) {
 
-                    $$newPrefixes .= "('".$parsedLine->ip."','".$parsedLine->cidr."',".$this->ipUtils->ip2dec($parsedLine->ip).",".number_format(($this->ipUtils->ip2dec($parsedLine->ip) + $$ipvAmountCidrArray[$parsedLine->cidr] -1), 0, '', '').",".$parsedLine->asn.",".$mysqlTime.",".$mysqlTime."),";
+                    $$newPrefixes .= "('".$parsedLine->ip."','".$parsedLine->cidr."',".$this->ipUtils->ip2dec($parsedLine->ip).",".number_format(($this->ipUtils->ip2dec($parsedLine->ip) + $$ipvAmountCidrArray[$parsedLine->cidr] -1), 0, '', '').",".$parsedLine->asn.",".$this->bgpParser->checkROA($parsedLine->asn, $parsedLine->prefix).",".$mysqlTime.",".$mysqlTime."),";
                     $$seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn] = true;
                     $$prefixCounter++;
 
                     if ($$prefixCounter > 250000 ) {
                         $this->cli->br()->comment('Inserting another 250,000 prefixes in one bulk query ('.$ipVersion.')');
                         $$newPrefixes = rtrim($$newPrefixes, ',').';';
-                        DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,updated_at,created_at) VALUES '.$$newPrefixes);
+                        DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES '.$$newPrefixes);
                         $$newPrefixes = "";
                         $$prefixCounter = 0;
                     }
