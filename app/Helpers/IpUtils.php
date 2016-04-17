@@ -473,7 +473,7 @@ class IpUtils
         } else {
             $ipAmount = $this->IPv6cidrIpCount()[$cidr];
         }
-        $ipDecEnd = number_format(($startDec = + $ipAmount -1), 0, '', '');
+        $ipDecEnd = number_format(($startDec + $ipAmount -1), 0, '', '');
 
         // Let look for any valid ROA range
         $roa = ROA::where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '<=', $ipDecEnd)->first();
