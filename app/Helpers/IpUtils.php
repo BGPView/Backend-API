@@ -8,13 +8,11 @@ use App\Models\IPv6BgpPrefix;
 use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
+use App\Models\ROA;
 use GeoIp2\Database\Reader;
 
 class IpUtils
 {
-
-    private $rpkiServer = 'http://whois.bgpview.io:8080/export.json';
-    private $roas = null;
 
     public function isBogonAddress($ipAddress)
     {
@@ -465,38 +463,33 @@ class IpUtils
 
     public function checkROA($asn, $prefix)
     {
-        if (is_null($this->roas) === true) {
-            $roas = json_decode(file_get_contents($this->rpkiServer));
-            foreach ($roas->roas as $roa) {
-                $roaParts = explode('/', $roa->prefix);
-                $roaCidr = $roaParts[1];
-                $roaIP = $roaParts[0];
+        $ipParts = explode('/', $prefix);
+        $ip = $ipParts[0];
+        $cidr = $ipParts[1];
 
-                if ($this->getInputType($roaIP) === 4) {
-                    $topPrefix = 24;
-                } else {
-                    $topPrefix = 48;
-                }
-
-                foreach (range($roaCidr, $topPrefix) as $prefixLength) {
-                    if ($prefixLength <= $roa->maxLength) {
-                        $this->roas[$roaIP . '/' . $prefixLength] = str_ireplace('as', '', $roa->asn);
-                    } else {
-                        $this->roas[$roaIP . '/' . $prefixLength] = 'NO VALID';
-                    }
-                }
-            }
+        $ipDecStart = $this->ip2dec($ip);
+        if ($this->ipUtils->getInputType($ip) == 4) {
+            $ipAmount = $this->IPv4cidrIpCount()[$cidr];
+        } else {
+            $ipAmount = $this->IPv6cidrIpCount()[$cidr];
         }
+        $ipDecEnd = number_format(($startDec = + $ipAmount -1), 0, '', '');
+
+        // Let look for any valid ROA range
+        $roa = ROA::where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '<=', $ipDecEnd)->first();
 
         // Check if we have the ASN in the ROA list
-        if (isset($this->roas[$prefix]) === true) {
-            if ($this->roas[$prefix] === $asn) {
-                return 1;
-            } else {
+        if (is_null($roa) !== true) {
+            // if the prefix is too specifc not valid
+            if ($cidr > $roa->max_length || $asn != $roa->asn) {
                 return -1;
             }
+
+            // Valid ROA
+            return 1;
         }
 
+        // Unknown ROA
         return 0;
     }
 }
