@@ -40,6 +40,17 @@ class IPv4BgpPrefix extends Model {
         return $this->allocation();
     }
 
+    public function getRoaStatusAttribute($value)
+    {
+        if ($value == 1) {
+            return 'Valid';
+        } elseif ($value == -1) {
+            return 'Invalid';
+        } else {
+            return 'None';
+        }
+    }
+
     public function allocation()
     {
         if (isset($this->attributes['allocation']) !== true) {

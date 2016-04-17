@@ -50,6 +50,17 @@ class IPv6BgpPrefix extends Model {
         return $this->attributes['allocation'];
     }
 
+    public function getRoaStatusAttribute($value)
+    {
+        if ($value == 1) {
+            return 'Valid';
+        } elseif ($value == -1) {
+            return 'Invalid';
+        } else {
+            return 'None';
+        }
+    }
+
     public function asn()
     {
         return $this->belongsTo('App\Models\ASN', 'asn', 'asn');

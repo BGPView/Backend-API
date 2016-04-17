@@ -138,6 +138,7 @@ class ASN extends Model {
             $prefixOutput['prefix']         = $prefix->ip . '/' . $prefix->cidr;
             $prefixOutput['ip']             = $prefix->ip;
             $prefixOutput['cidr']           = $prefix->cidr;
+            $prefixOutput['roa_status']     = $prefix->roa_status;
 
             $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
             $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
@@ -160,6 +161,7 @@ class ASN extends Model {
             $prefixOutput['prefix'] = $prefix->ip . '/' . $prefix->cidr;
             $prefixOutput['ip']     = $prefix->ip;
             $prefixOutput['cidr']   = $prefix->cidr;
+            $prefixOutput['roa_status']     = $prefix->roa_status;
 
             $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
             $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
