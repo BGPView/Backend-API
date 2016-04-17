@@ -476,7 +476,7 @@ class IpUtils
         $ipDecEnd = number_format(($ipDecStart + $ipAmount -1), 0, '', '');
 
         // Let look for any valid ROA range
-        $roa = ROA::where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '<=', $ipDecEnd)->first();
+        $roa = ROA::where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '>=', $ipDecEnd)->first();
 
         // Check if we have the ASN in the ROA list
         if (is_null($roa) !== true) {
