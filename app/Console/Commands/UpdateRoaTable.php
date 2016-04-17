@@ -73,7 +73,7 @@ class UpdateRoaTable extends Command
 
         $this->info('Processing the insert query');
         $roaInsert = rtrim($roaInsert, ',').';';
-        DB::statement('INSERT INTO roa_table (ip,cidr,ip_dec_start,ip_dec_end,asn,max_length,updated_at,created_at) VALUES '.$roaInsert);
+        DB::statement('INSERT INTO roa_table_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,max_length,updated_at,created_at) VALUES '.$roaInsert);
 
         $this->info('Hot Swapping the ROA list table');
         DB::statement('RENAME TABLE roa_table TO backup_roa_table, roa_table_temp TO roa_table;');
