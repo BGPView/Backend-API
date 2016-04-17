@@ -4,8 +4,6 @@ namespace App\Services;
 
 class BgpParser
 {
-    private $rpkiServer = 'http://whois.bgpview.io:8080/api/v1/validity/';
-
     // These are the teir 1 providers where BGP path should stop at
     private $topTeirAsnSet = [
         7018 => true,   // AT&T
@@ -96,17 +94,4 @@ class BgpParser
 
         return $peers;
     }
-
-    public function checkROA($asn, $prefix)
-    {
-        $data = json_decode(file_get_contents($this->rpkiServer . $asn . '/' . $prefix));
-        if ($data->validated_route->validity->state === 'Valid') {
-            return 1;
-        } elseif($data->validated_route->validity->state === 'Invalid') {
-            return -1;
-        }
-
-        return 0;
-    }
-
 }

@@ -13,6 +13,9 @@ use GeoIp2\Database\Reader;
 class IpUtils
 {
 
+    private $rpkiServer = 'http://whois.bgpview.io:8080/export.json';
+    private $roas = null;
+
     public function isBogonAddress($ipAddress)
     {
         $bogons = [
@@ -458,5 +461,42 @@ class IpUtils
         }
 
         return $record;
+    }
+
+    public function checkROA($asn, $prefix)
+    {
+        if (is_null($this->roas) === true) {
+            $roas = json_decode(file_get_contents($this->rpkiServer));
+            foreach ($roas->roas as $roa) {
+                $roaParts = explode('/', $roa->prefix);
+                $roaCidr = $roaParts[1];
+                $roaIP = $roaParts[0];
+
+                if ($this->getInputType($roaIP) === 4) {
+                    $topPrefix = 24;
+                } else {
+                    $topPrefix = 48;
+                }
+
+                foreach (range($roaCidr, $topPrefix) as $prefixLength) {
+                    if ($prefixLength <= $roa->maxLength) {
+                        $this->roas[$roaIP . '/' . $prefixLength] = str_ireplace('as', '', $roa->asn);
+                    } else {
+                        $this->roas[$roaIP . '/' . $prefixLength] = 'NO VALID';
+                    }
+                }
+            }
+        }
+
+        // Check if we have the ASN in the ROA list
+        if (isset($this->roas[$prefix]) === true) {
+            if ($this->roas[$prefix] === $asn) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+
+        return 0;
     }
 }
