@@ -479,7 +479,7 @@ class IpUtils
         $roas = ROA::where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '>=', $ipDecEnd)->get();
 
         // Check if we have the ASN in the ROA list
-        if (empty($roas) !== true) {
+        if ($roas->count() > 0) {
             // Go through all the matching prefixes and see if they match in size and ASN
             foreach ($roas as $roa) {
                 if ($cidr <= $roa->max_length && $asn == $roa->asn) {
