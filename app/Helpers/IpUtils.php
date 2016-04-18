@@ -476,17 +476,18 @@ class IpUtils
         $ipDecEnd = number_format(($ipDecStart + $ipAmount -1), 0, '', '');
 
         // Let look for any valid ROA range
-        $roa = ROA::where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '>=', $ipDecEnd)->first();
+        $roas = ROA::where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '>=', $ipDecEnd)->get();
 
         // Check if we have the ASN in the ROA list
-        if (is_null($roa) !== true) {
-            // if the prefix is too specifc not valid
-            if ($cidr > $roa->max_length || $asn != $roa->asn) {
-                return -1;
+        if (empty($roas) !== true) {
+            // Go through all the matching prefixes and see if they match in size and ASN
+            foreach ($roas as $roa) {
+                if ($cidr <= $roa->max_length && $asn == $roa->asn) {
+                     return 1;
+                 }
             }
-
-            // Valid ROA
-            return 1;
+            // Invalid ROA
+            return -1;
         }
 
         // Unknown ROA
