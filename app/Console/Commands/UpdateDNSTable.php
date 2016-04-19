@@ -81,6 +81,10 @@ class UpdateDNSTable extends Command
                         $dnsEntry->input = $domain;
                         $dnsEntry->type = $type;
                         $dnsEntry->entry = $record;
+                        if ($type === 'A' || $type === 'AAAA') {
+                            $dnsEntry->ip_dec = $this->ipUtils->ip2dec($dnsEntry->entry);
+                        }
+                        
                         $dnsEntry->save();
                     }
                 }
