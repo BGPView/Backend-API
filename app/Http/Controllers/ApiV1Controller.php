@@ -198,7 +198,22 @@ class ApiV1Controller extends ApiBaseController
             $output['raw_whois'] = $prefixWhois ? $prefixWhois->raw_whois : null;
         }
 
+        if ($request->has('with_dns') === true) {
+            $output['dns'] = $this->ipUtils->getPrefixDns($output['prefix']);
+        }
+
         $output['date_updated']   = (string) ($prefixWhois ? $prefixWhois->updated_at : $prefix->updated_at);
+
+        return $this->sendData($output);
+    }
+
+    /*
+     * URI: /prefix/{ip}/{cidr}/dns
+     */
+    public function prefixDns($ip, $cidr)
+    {
+        $prefix = $ip . '/' . $cidr;
+        $output = $this->ipUtils->getPrefixDns($prefix);
 
         return $this->sendData($output);
     }
