@@ -515,7 +515,7 @@ class IpUtils
                 'domain' => $dnsRecord->input,
                 'record' => $dnsRecord->entry,
                 'record_type' => $dnsRecord->type,
-                'updated_at' => $dnsRecord->updated_at,
+                'updated_at' => (string) $dnsRecord->updated_at,
             ];
         }
 
