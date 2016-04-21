@@ -60,7 +60,7 @@ process_rib http://data.ris.ripe.net/rrc13/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc14/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc15/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc16/latest-bview.gz
-process_rib http://108.61.158.52/bgp4_mtr.gz
-process_rib http://108.61.158.52/bgp6_mtr.gz   
+# process_rib http://108.61.158.52/bgp4_mtr.gz
+# process_rib http://108.61.158.52/bgp6_mtr.gz   
 
 ###############################################################################################
