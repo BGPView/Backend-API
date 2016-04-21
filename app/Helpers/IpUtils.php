@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\DNSRecord;
 use App\Models\IanaAssignment;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv6BgpPrefix;
@@ -492,5 +493,20 @@ class IpUtils
 
         // Unknown ROA
         return 0;
+    }
+
+    public function getPrefixDns($prefix)
+    {
+        $prefixParts = explode('/', $prefix);
+        if ($this->getInputType($prefixParts[0]) === 4) {
+            $ipArrayCount = $this->IPv4cidrIpCount();
+        } else {
+            $ipArrayCount = $this->IPv6cidrIpCount();
+        }
+
+        $startDec = $this->ip2dec($prefixParts[0]);
+        $endDec = $startDec + $ipArrayCount[$prefixParts[1]] - 1;
+
+        return DNSRecord::where('ip_dec', '>=', $startDec)->where('ip_dec', '<=', $endDec)->get();
     }
 }
