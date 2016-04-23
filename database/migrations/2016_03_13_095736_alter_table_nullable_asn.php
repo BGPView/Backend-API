@@ -27,7 +27,7 @@ class AlterTableNullableAsn extends Migration
     {
         Schema::table('asns', function($table)
         {
-            $table->string('name')->change();
+            $table->string('name')->nullable(false)->change();
         });
 
     }
