@@ -27,7 +27,7 @@ class NullableRirIdAsn extends Migration
     {
         Schema::table('asns', function($table)
         {
-            $table->integer('rir_id')->unsigned()->index()->change();
+            $table->integer('rir_id')->nullable(false)->change();
         });
 
     }
