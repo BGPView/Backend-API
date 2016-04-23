@@ -14,16 +14,16 @@ class AddParentFieldsToPrefixWhois extends Migration
     {
         Schema::table('ipv4_prefix_whois', function($table)
         {
-            $table->integer('rir_id')->unsigned()->index();
-            $table->string('parent_ip', 40)->index();
-            $table->integer('parent_cidr')->unsigned()->index();
+            $table->integer('rir_id')->nullable()->unsigned()->index();
+            $table->string('parent_ip', 40)->nullable()->index();
+            $table->integer('parent_cidr')->nullable()->unsigned()->index();
         });
 
         Schema::table('ipv6_prefix_whois', function($table)
         {
-            $table->integer('rir_id')->unsigned()->index();
-            $table->string('parent_ip', 40)->index();
-            $table->integer('parent_cidr')->unsigned()->index();
+            $table->integer('rir_id')->nullable()->unsigned()->index();
+            $table->string('parent_ip', 40)->nullable()->index();
+            $table->integer('parent_cidr')->nullable()->unsigned()->index();
         });
     }
 

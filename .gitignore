@@ -7,3 +7,4 @@ Homestead.json
 /storage/database.sqlite
 /storage/database.sqlite-journal
 /package.xml
+database.sqlite

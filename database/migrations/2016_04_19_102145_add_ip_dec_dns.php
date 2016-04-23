@@ -14,7 +14,7 @@ class AddIpDecDns extends Migration
     {
         Schema::table('dns_records', function($table)
         {
-            $table->decimal('ip_dec', 39, 0)->unsigned()->index()->nullable();
+            $table->decimal('ip_dec', 39, 0)->nullable()->unsigned()->index();
         });
     }
 

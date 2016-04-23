@@ -14,12 +14,12 @@ class AddRoaStatusToBgpprefixes extends Migration
     {
         Schema::table('ipv4_bgp_prefixes', function($table)
         {
-            $table->integer('roa_status')->index();
+            $table->integer('roa_status')->default(0)->index();
         });
 
         Schema::table('ipv6_bgp_prefixes', function($table)
         {
-            $table->integer('roa_status')->index();
+            $table->integer('roa_status')->default(0)->index();
         });
     }
 
