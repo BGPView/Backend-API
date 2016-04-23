@@ -170,6 +170,13 @@ class UpdateIXs extends Command
 
     private function updateIxMembersInfo()
     {
+        $this->bench->start();
+        $this->cli->br()->comment('===================================================');
+        $this->cli->br()->comment('Starting to re-enter the IX member data ');
+
+        $memberList = '';
+        $mysqlTime = date('Y-m-d H:i:s');
+
         // Cleaning up old temp table
         $this->cli->br()->comment('Drop old TEMP IX members table');
         DB::statement('DROP TABLE IF EXISTS ix_members_temp');
@@ -185,17 +192,22 @@ class UpdateIXs extends Command
                 continue;
             }
 
-            $ixMember = new IXMember;
-            $ixMember->setTable('ix_members_temp');
-            $ixMember->ix_peeringdb_id  = $member->ixlan_id;
-            $ixMember->speed            = (int) $member->speed;
-            $ixMember->asn              = $member->asn;
-            $ixMember->ipv4_address     = $member->ipaddr4;
-            $ixMember->ipv4_dec         = $this->ipUtils->ip2dec($member->ipaddr4);
-            $ixMember->ipv6_address     = $member->ipaddr6;
-            $ixMember->ipv6_dec         = $this->ipUtils->ip2dec($member->ipaddr6);
-            $ixMember->save();
+            $memberList .= '('.$member->ixlan_id.',
+                            '.(int) $member->speed.',
+                            '.$member->asn.',
+                            "'.$member->ipaddr4.'",
+                            '.$this->ipUtils->ip2dec($member->ipaddr4).',
+                            "'.$member->ipaddr6.'",
+                            '.$this->ipUtils->ip2dec($member->ipaddr6).',
+                            "'.$mysqlTime.'",
+                            "'.$mysqlTime.'"
+                            ),';
         }
+
+        $this->cli->br()->comment('===================================================');
+        $this->cli->br()->comment('Inserting all members in one bulk query');
+        $memberList = rtrim($memberList, ',').';';
+        DB::statement('INSERT INTO ix_members_temp (ix_peeringdb_id,speed,asn,ipv4_address,ipv4_dec,ipv6_address,ipv6_dec,updated_at,created_at) VALUES '.$memberList);
 
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Swapping TEMP table with production table');
@@ -205,6 +217,14 @@ class UpdateIXs extends Command
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Removing old production prefix table');
         DB::statement('DROP TABLE backup_ix_members');
+
+        $this->output->newLine(1);
+        $this->bench->end();
+        $this->cli->info(sprintf(
+            'Time: %s, Memory: %s',
+            $this->bench->getTime(),
+            $this->bench->getMemoryPeak()
+        ))->br();
     }
 
 }
