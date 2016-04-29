@@ -11,6 +11,8 @@ class Dns
         '45.32.3.108',
     ];
 
+    protected $timeout = 1; // Seconds
+
     protected $recordTypes = [
         'A' => 'address',
         'AAAA' => 'address',
@@ -26,7 +28,10 @@ class Dns
 
     public function __construct()
     {
-        $this->dns = new Net_DNS2_Resolver(['nameservers' => $this->resolvers]);
+        $this->dns = new Net_DNS2_Resolver([
+            'nameservers' => $this->resolvers,
+            'timeout' => $this->timeout,
+        ]);
     }
 
     public function getDomainRecords($input)
