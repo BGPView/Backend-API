@@ -8,7 +8,7 @@ use Net_DNS2_Resolver;
 class Dns
 {
     protected $resolvers = [
-        '8.8.8.8',
+        '45.32.3.108',
     ];
 
     protected $recordTypes = [
