@@ -3,20 +3,20 @@
 namespace App\Console\Commands;
 
 use App\Helpers\IpUtils;
+use App\Jobs\ResolveDnsQuery;
 use App\Models\DNSRecord;
 use App\Services\Dns;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use League\CLImate\CLImate;
 use Ubench;
 
 class UpdateDNSTable extends Command
 {
-    private $cli;
-    private $bench;
-    private $ipUtils;
-    private $dns;
-    private $alexaDomainUrl = 'http://s3.amazonaws.com/alexa-static/top-1m.csv.zip';
+    use DispatchesJobs;
+
+    private $domainUrl;
 
     /**
      * The name and signature of the console command.
@@ -35,13 +35,10 @@ class UpdateDNSTable extends Command
     /**
      * Create a new command instance.
      */
-    public function __construct(CLImate $cli, Ubench $bench, IpUtils $ipUtils, Dns $dns)
+    public function __construct()
     {
         parent::__construct();
-        $this->cli = $cli;
-        $this->bench = $bench;
-        $this->ipUtils = $ipUtils;
-        $this->dns = $dns;
+        $this->domainUrl = 'https://wwws.io/api/full/539/'.config('wwws.email').'/'.config('wwws.password').'/';
     }
 
     /**
@@ -51,49 +48,14 @@ class UpdateDNSTable extends Command
      */
     public function handle()
     {
-        // Download the zip file
-        $file = storage_path() . '/top-1m.csv';
-        if (is_file($file)) {
-            unlink($file);
-        }
-        $this->cli->comment('Downloading Alex top 1million ZIP')->br();
-        copy($this->alexaDomainUrl, $file . '.zip');
-
-        $this->cli->comment('Extracting Alex top 1million ZIP')->br();
-        $zip = new \ZipArchive;
-        $zip->open($file . '.zip');
-        $zip->extractTo(storage_path() .'/');
-        $zip->close();
-        unlink($file . '.zip');
-
-        $fp = fopen($file, 'r');
+        $filePath = '';
+        $fp = fopen($filePath, 'r');
         if ($fp) {
             while (($line = fgets($fp)) !== false) {
-                $domain = trim(explode(',', $line)[1]);
-
-                // Delete all old records
-                DNSRecord::where('input', $domain)->delete();
-
-                $domainRecords = $this->dns->getDomainRecords($domain);
-                foreach ($domainRecords as $type => $records) {
-                    foreach ($records as $record) {
-                        $dnsEntry = new DNSRecord;
-                        $dnsEntry->input = $domain;
-                        $dnsEntry->type = $type;
-                        $dnsEntry->entry = $record;
-                        if ($type === 'A' || $type === 'AAAA') {
-                            $dnsEntry->ip_dec = $this->ipUtils->ip2dec($dnsEntry->entry);
-                        }
-                        
-                        $dnsEntry->save();
-                    }
-                }
-
-                dump($domain, $domainRecords);
+                $this->dispatch(new ResolveDnsQuery($line));
             }
+            fclose($fp);
         }
-
-
     }
 
 }
