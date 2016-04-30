@@ -507,14 +507,13 @@ class IpUtils
         $startDec = $this->ip2dec($prefixParts[0]);
         $endDec = $startDec + $ipArrayCount[$prefixParts[1]] - 1;
 
-        $dnsRecords = DNSRecord::whereBetween('ip_dec', [(string)$startDec, (string)$endDec])->get();
+        $dnsRecords = DNSRecord::whereBetween('ip_dec', [(string)$startDec, (string)$endDec])->get(['input', 'entry']);
 
         $records = [];
         foreach ($dnsRecords as $dnsRecord) {
             $records[] = [
                 'domain' => $dnsRecord->input,
                 'record' => $dnsRecord->entry,
-                'record_type' => $dnsRecord->type,
             ];
         }
 
