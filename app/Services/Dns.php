@@ -14,10 +14,10 @@ class Dns
     protected $timeout = 1; // Seconds
 
     protected $recordTypes = [
+        'NS' => 'nsdname',
         'SOA' => 'rname',
         'A' => 'address',
         'AAAA' => 'address',
-        'NS' => 'nsdname',
         'MX' => 'exchange',
         'TXT' => 'text',
         'CNAME' => 'cname',
@@ -45,7 +45,7 @@ class Dns
 
                     if (isset($record->$key) !== true) {
                         // If there is no SOA lets return nothing
-                        if ($type === 'SOA') {
+                        if ($type === 'NS') {
                             return [];
                         }
                         continue;
@@ -62,7 +62,7 @@ class Dns
             } catch(Net_DNS2_Exception $e) {
 
                 // If there is no SOA lets return nothing
-                if ($type === 'SOA') {
+                if ($type === 'NS') {
                     return [];
                 }
 
