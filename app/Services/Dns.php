@@ -11,7 +11,7 @@ class Dns
         '45.32.3.108',
     ];
 
-    protected $timeout = 1; // Seconds
+    protected $timeout = 0.5; // Seconds
 
     protected $recordTypes = [
         'NS' => 'nsdname',
