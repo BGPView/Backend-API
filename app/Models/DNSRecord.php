@@ -14,6 +14,7 @@ class DNSRecord extends Moloquent {
      */
     protected $table = 'dns_records';
     protected $collection = 'dns_records';
+    protected $connection = 'mongodb';
 
     /**
      * The attributes excluded from the model's JSON form.
