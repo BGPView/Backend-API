@@ -507,7 +507,7 @@ class IpUtils
         $startDec = $this->ip2dec($prefixParts[0]);
         $endDec = $startDec + $ipArrayCount[$prefixParts[1]] - 1;
 
-        $dnsRecords = DNSRecord::whereBetween('ip_dec', [$startDec, $endDec])->get();
+        $dnsRecords = DNSRecord::whereBetween('ip_dec', [(string)$startDec, (string)$endDec])->get();
 
         $records = [];
         foreach ($dnsRecords as $dnsRecord) {
