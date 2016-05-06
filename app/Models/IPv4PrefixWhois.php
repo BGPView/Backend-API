@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Elasticquent\ElasticquentTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class IPv4PrefixWhois extends Model {
+
+    use ElasticquentTrait;
 
     /**
      * The database table used by the model.
