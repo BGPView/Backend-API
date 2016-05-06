@@ -16,6 +16,7 @@
         "doctrine/dbal": "^2.5",
 	"predis/predis": "~1.0",
         "pear/net_dns2": "^1.4",
+	"elasticquent/elasticquent": "dev-master",
         "jenssegers/mongodb": "^3.0"
     },
     "require-dev": {
