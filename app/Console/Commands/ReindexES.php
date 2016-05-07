@@ -2,7 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ASN;
+use App\Models\IPv4PrefixWhois;
+use App\Models\IPv6PrefixWhois;
 use Illuminate\Console\Command;
+use Ubench;
 
 class ReindexES extends Command
 {
@@ -13,6 +17,16 @@ class ReindexES extends Command
      */
     protected $signature = 'zIPLookup:reindex-es';
     protected $batchAmount = 50000;
+    protected $bench;
+
+    /**
+     * Create a new command instance.
+     */
+    public function __construct(Ubench $bench)
+    {
+        parent::__construct();
+        $this->bench = $bench;
+    }
 
     /**
      * The console command description.
@@ -28,13 +42,30 @@ class ReindexES extends Command
      */
     public function handle()
     {
+        $this->bench->start();
+
+        $this->reindexClass(IPv4PrefixWhois::class);
+        $this->reindexClass(IPv6PrefixWhois::class);
+        $this->reindexClass(ASN::class);
+
+        $this->output->newLine(1);
+        $this->bench->end();
+        $this->info(sprintf(
+            'Time: %s, Memory: %s',
+            $this->bench->getTime(),
+            $this->bench->getMemoryPeak()
+        ));
 
     }
 
     private function reindexClass($class)
     {
+        $this->warn('=====================================');
+        $this->info('Getting total count for '. $class);
         $total = $class::count();
+        $this->info('Total: '.$total);
         $batches = floor($total/$this->batchAmount);
+        $this->info('Batch Count: '.$batches);
 
         for ($i = 0; $i <= $batches; $i++) {
             $this->info('Indexing Batch number ' . $i . ' on ' . $class);
