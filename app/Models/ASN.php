@@ -59,6 +59,10 @@ class ASN extends Model {
         $data = json_decode($value);
         $addressLines = [];
 
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return $addressLines;
+        }
+
         foreach($data as $entry) {
             // Remove/Clean all double commas
             $entry = preg_replace('/,+/', ',', $entry);
