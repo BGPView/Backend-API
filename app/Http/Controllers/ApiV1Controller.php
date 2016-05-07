@@ -341,4 +341,26 @@ class ApiV1Controller extends ApiBaseController
         
         return $this->respond($data);
     }
+
+    /*
+     * URI: /search
+     * Mandatory Params: query_term
+     *
+     */
+    public function search(Request $request)
+    {
+        $queryTerm = $request->get('query_term');
+
+        $asns = ASN::search($queryTerm);
+        $ipv4Prefixes = IPv4PrefixWhois::search($queryTerm);
+        $ipv6Prefixes = IPv4PrefixWhois::search($queryTerm);
+
+        $data = [
+            'asns' => $asns,
+            'ipv4_prefixes' => $ipv4Prefixes,
+            'ipv6_prefixes' => $ipv6Prefixes,
+        ];
+
+        return $this->respond($data);
+    }
 }

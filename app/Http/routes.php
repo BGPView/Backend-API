@@ -39,6 +39,7 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('/ix/{ix_id}', ['as' => 'ix', 'uses' => 'ApiV1Controller@ix']);
     Route::get('/asns/{country_code?}', ['as' => 'asns', 'uses' => 'ApiV1Controller@asns']);
 
+    Route::get('/search', ['as' => 'asns', 'uses' => 'ApiV1Controller@search']);
 });
 
 Route::group(['middleware' => ['web']], function () {
