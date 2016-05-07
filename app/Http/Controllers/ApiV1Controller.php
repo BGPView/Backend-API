@@ -353,14 +353,48 @@ class ApiV1Controller extends ApiBaseController
 
         $asns = ASN::search($queryTerm);
         $ipv4Prefixes = IPv4PrefixWhois::search($queryTerm);
-        $ipv6Prefixes = IPv4PrefixWhois::search($queryTerm);
+        $ipv6Prefixes = IPv6PrefixWhois::search($queryTerm);
 
-        $data = [
-            'asns' => $asns,
-            'ipv4_prefixes' => $ipv4Prefixes,
-            'ipv6_prefixes' => $ipv6Prefixes,
-        ];
+        $data['asns'] = [];
+        foreach ($asns as $asn) {
+            $asnData['asn']                 = $asn->asn;
+            $asnData['name']                = $asn->name;
+            $asnData['description_short']   = $asn->description;
+            $asnData['country_code']        = $asn->counrty_code;
+            $asnData['email_contacts']      = $asn->email_contacts;
+            $asnData['abuse_contacts']      = $asn->abuse_contacts;
 
-        return $this->respond($data);
+            $data['asns'][] = $asnData;
+        }
+
+        $data['ipv4_prefixes'] = [];
+        foreach ($ipv4Prefixes as $prefix) {
+            $prefixData['prefix']   = $prefix->ip . '/' . $prefix->cidr;
+            $prefixData['ip']       = $prefix->ip;
+            $prefixData['cidr']     = $prefix->cidr;
+            $prefixData['name']     = $prefix->name;
+            $prefixData['country_code']     = $prefix->counrty_code;
+            $prefixData['description_short']    = $prefix->description;
+            $prefixData['email_contacts']   = $prefix->email_contacts;
+            $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
+
+            $data['ipv4_prefixes'][] = $prefixData;
+        }
+
+        $data['ipv6_prefixes'] = [];
+        foreach ($ipv6Prefixes as $prefix) {
+            $prefixData['prefix']   = $prefix->ip . '/' . $prefix->cidr;
+            $prefixData['ip']       = $prefix->ip;
+            $prefixData['cidr']     = $prefix->cidr;
+            $prefixData['name']     = $prefix->name;
+            $prefixData['country_code']     = $prefix->counrty_code;
+            $prefixData['description_short']    = $prefix->description;
+            $prefixData['email_contacts']   = $prefix->email_contacts;
+            $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
+
+            $data['ipv6_prefixes'][] = $prefixData;
+        }
+
+        return $this->sendData($data);
     }
 }
