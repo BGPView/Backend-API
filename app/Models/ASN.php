@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use App\Helpers\IpUtils;
+use Elasticquent\ElasticquentTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ASN extends Model {
+
+    use ElasticquentTrait;
 
     /**
      * The database table used by the model.
