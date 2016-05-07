@@ -59,7 +59,7 @@ class ASN extends Model {
         $data = json_decode($value);
         $addressLines = [];
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        if (is_object($data) !== true && is_array($data) !== true) {
             return $addressLines;
         }
 
