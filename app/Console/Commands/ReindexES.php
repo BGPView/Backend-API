@@ -63,9 +63,9 @@ class ReindexES extends Command
         $this->warn('=====================================');
         $this->info('Getting total count for '. $class);
         $total = $class::count();
-        $this->info('Total: '.$total);
+        $this->info('Total: ' . number_format($total));
         $batches = floor($total/$this->batchAmount);
-        $this->info('Batch Count: '.$batches);
+        $this->info('Batch Count: ' . $batches);
 
         for ($i = 0; $i <= $batches; $i++) {
             $this->info('Indexing Batch number ' . $i . ' on ' . $class);
