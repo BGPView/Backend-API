@@ -363,7 +363,7 @@ class ApiV1Controller extends ApiBaseController
             $asnData['country_code']        = $asn->counrty_code;
             $asnData['email_contacts']      = $asn->email_contacts;
             $asnData['abuse_contacts']      = $asn->abuse_contacts;
-            $prefixData['rir_name']         = $asn->rir->name;
+            $asnData['rir_name']         = $asn->rir->name;
 
             $data['asns'][] = $asnData;
         }
