@@ -69,7 +69,7 @@ class ReindexES extends Command
 
         for ($i = 0; $i <= $batches; $i++) {
             $this->info('Indexing Batch number ' . $i . ' on ' . $class);
-            $class::with('emails')->offset($i*$this->batchAmount)->limit($this->batchAmount)->get()->addToIndex();
+            $class::with('emails')->with('rir')->offset($i*$this->batchAmount)->limit($this->batchAmount)->get()->addToIndex();
         }
     }
 }
