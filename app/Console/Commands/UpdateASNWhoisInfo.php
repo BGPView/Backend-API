@@ -182,6 +182,8 @@ class UpdateASNWhoisInfo extends Command
 
             // Skip null results
             if (is_null($parsedWhois) === true) {
+                $oldAsn->raw_whois = $asnWhois->raw();
+                $oldAsn->save();
                 continue;
             }
 
