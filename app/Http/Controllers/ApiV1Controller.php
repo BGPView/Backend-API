@@ -363,6 +363,7 @@ class ApiV1Controller extends ApiBaseController
             $asnData['country_code']        = $asn->counrty_code;
             $asnData['email_contacts']      = $asn->email_contacts;
             $asnData['abuse_contacts']      = $asn->abuse_contacts;
+            $prefixData['rir_name']         = $asn->rir->name;
 
             $data['asns'][] = $asnData;
         }
@@ -377,6 +378,10 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['description']    = $prefix->description;
             $prefixData['email_contacts']   = $prefix->email_contacts;
             $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
+            $prefixData['rir_name']         = $prefix->rir->name;
+            $prefixData['parent_prefix']    = $prefix->parent_ip . '/' . $prefix->parent_cidr;
+            $prefixData['parent_ip']        = $prefix->parent_ip;
+            $prefixData['parent_cidr']      = $prefix->parent_cidr;
 
             $data['ipv4_prefixes'][] = $prefixData;
         }
@@ -391,6 +396,10 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['description']      = $prefix->description;
             $prefixData['email_contacts']   = $prefix->email_contacts;
             $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
+            $prefixData['rir_name']         = $prefix->rir->name;
+            $prefixData['parent_prefix']    = $prefix->parent_ip . '/' . $prefix->parent_cidr;
+            $prefixData['parent_ip']        = $prefix->parent_ip;
+            $prefixData['parent_cidr']      = $prefix->parent_cidr;
 
             $data['ipv6_prefixes'][] = $prefixData;
         }
