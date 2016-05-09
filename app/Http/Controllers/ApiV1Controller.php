@@ -359,7 +359,7 @@ class ApiV1Controller extends ApiBaseController
         foreach ($asns as $asn) {
             $asnData['asn']                 = $asn->asn;
             $asnData['name']                = $asn->name;
-            $asnData['description_short']   = $asn->description;
+            $asnData['description']   = $asn->description;
             $asnData['country_code']        = $asn->counrty_code;
             $asnData['email_contacts']      = $asn->email_contacts;
             $asnData['abuse_contacts']      = $asn->abuse_contacts;
@@ -374,7 +374,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['cidr']     = $prefix->cidr;
             $prefixData['name']     = $prefix->name;
             $prefixData['country_code']     = $prefix->counrty_code;
-            $prefixData['description_short']    = $prefix->description;
+            $prefixData['description']    = $prefix->description;
             $prefixData['email_contacts']   = $prefix->email_contacts;
             $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
 
