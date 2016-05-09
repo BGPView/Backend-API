@@ -388,7 +388,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['cidr']     = $prefix->cidr;
             $prefixData['name']     = $prefix->name;
             $prefixData['country_code']     = $prefix->counrty_code;
-            $prefixData['description_short']    = $prefix->description;
+            $prefixData['description']      = $prefix->description;
             $prefixData['email_contacts']   = $prefix->email_contacts;
             $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
 
