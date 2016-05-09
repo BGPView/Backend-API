@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Elasticquent\ElasticquentTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class IPv4PrefixWhois extends Model {
+
+    use ElasticquentTrait;
 
     /**
      * The database table used by the model.
@@ -18,8 +21,13 @@ class IPv4PrefixWhois extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id', 'bgp_prefix_id', 'raw_whois', 'created_at', 'updated_at'];
+    protected $hidden = ['id', 'rir_id', 'bgp_prefix_id', 'raw_whois', 'created_at', 'updated_at'];
 
+
+    public function rir()
+    {
+        return $this->belongsTo('App\Models\Rir');
+    }
 
     public function emails()
     {

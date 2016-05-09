@@ -341,4 +341,69 @@ class ApiV1Controller extends ApiBaseController
         
         return $this->respond($data);
     }
+
+    /*
+     * URI: /search
+     * Mandatory Params: query_term
+     *
+     */
+    public function search(Request $request)
+    {
+        $queryTerm = $request->get('query_term');
+
+        $asns = ASN::search($queryTerm);
+        $ipv4Prefixes = IPv4PrefixWhois::search($queryTerm);
+        $ipv6Prefixes = IPv6PrefixWhois::search($queryTerm);
+
+        $data['asns'] = [];
+        foreach ($asns as $asn) {
+            $asnData['asn']                 = $asn->asn;
+            $asnData['name']                = $asn->name;
+            $asnData['description']   = $asn->description;
+            $asnData['country_code']        = $asn->counrty_code;
+            $asnData['email_contacts']      = $asn->email_contacts;
+            $asnData['abuse_contacts']      = $asn->abuse_contacts;
+            $asnData['rir_name']         = $asn->rir->name;
+
+            $data['asns'][] = $asnData;
+        }
+
+        $data['ipv4_prefixes'] = [];
+        foreach ($ipv4Prefixes as $prefix) {
+            $prefixData['prefix']   = $prefix->ip . '/' . $prefix->cidr;
+            $prefixData['ip']       = $prefix->ip;
+            $prefixData['cidr']     = $prefix->cidr;
+            $prefixData['name']     = $prefix->name;
+            $prefixData['country_code']     = $prefix->counrty_code;
+            $prefixData['description']    = $prefix->description;
+            $prefixData['email_contacts']   = $prefix->email_contacts;
+            $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
+            $prefixData['rir_name']         = $prefix->rir->name;
+            $prefixData['parent_prefix']    = $prefix->parent_ip . '/' . $prefix->parent_cidr;
+            $prefixData['parent_ip']        = $prefix->parent_ip;
+            $prefixData['parent_cidr']      = $prefix->parent_cidr;
+
+            $data['ipv4_prefixes'][] = $prefixData;
+        }
+
+        $data['ipv6_prefixes'] = [];
+        foreach ($ipv6Prefixes as $prefix) {
+            $prefixData['prefix']   = $prefix->ip . '/' . $prefix->cidr;
+            $prefixData['ip']       = $prefix->ip;
+            $prefixData['cidr']     = $prefix->cidr;
+            $prefixData['name']     = $prefix->name;
+            $prefixData['country_code']     = $prefix->counrty_code;
+            $prefixData['description']      = $prefix->description;
+            $prefixData['email_contacts']   = $prefix->email_contacts;
+            $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
+            $prefixData['rir_name']         = $prefix->rir->name;
+            $prefixData['parent_prefix']    = $prefix->parent_ip . '/' . $prefix->parent_cidr;
+            $prefixData['parent_ip']        = $prefix->parent_ip;
+            $prefixData['parent_cidr']      = $prefix->parent_cidr;
+
+            $data['ipv6_prefixes'][] = $prefixData;
+        }
+
+        return $this->sendData($data);
+    }
 }

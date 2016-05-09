@@ -192,17 +192,18 @@ class UpdateIXs extends Command
                 continue;
             }
 
-            $member->ipaddr4 = $member->ipaddr4 ?: 'NULL';
-            $member->ipaddr6 = $member->ipaddr6 ?: 'NULL';
+
             $member->ipaddr4_dec = $member->ipaddr4 ? $this->ipUtils->ip2dec($member->ipaddr4) : 'NULL';
             $member->ipaddr6_dec = $member->ipaddr6 ? $this->ipUtils->ip2dec($member->ipaddr6) : 'NULL';
+            $member->ipaddr4 = $member->ipaddr4 ? '"' . $member->ipaddr4 . '"' : 'NULL';
+            $member->ipaddr6 = $member->ipaddr6 ? '"' . $member->ipaddr6 . '"' : 'NULL';
 
             $memberList .= '('.$member->ixlan_id.',
                             '.(int) $member->speed.',
                             '.$member->asn.',
-                            "'.$member->ipaddr4.'",
+                            '.$member->ipaddr4.',
                             '.$member->ipaddr4_dec.',
-                            "'.$member->ipaddr6.'",
+                            '.$member->ipaddr6.',
                             '.$member->ipaddr6_dec.',
                             "'.$mysqlTime.'",
                             "'.$mysqlTime.'"

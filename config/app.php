@@ -158,6 +158,7 @@ return [
 
         Barryvdh\Debugbar\ServiceProvider::class,
         Jenssegers\Mongodb\MongodbServiceProvider::class,
+        Elasticquent\ElasticquentServiceProvider::class,
 
     ],
 
