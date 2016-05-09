@@ -24,6 +24,11 @@ class IPv6PrefixWhois extends Model {
     protected $hidden = ['id', 'rir_id', 'bgp_prefix_id', 'raw_whois', 'created_at', 'updated_at'];
 
 
+    public function rir()
+    {
+        return $this->belongsTo('App\Models\Rir');
+    }
+    
     public function emails()
     {
         return $this->hasMany('App\Models\IPv6PrefixWhoisEmail', 'prefix_whois_id', 'id');
