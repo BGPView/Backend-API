@@ -19,14 +19,7 @@ class IPv4PrefixWhois extends Model {
             'analyzer' => [
                 'string_lowercase' => [
                     'tokenizer' => 'keyword',
-                    'filter' => [ 'asciifolding', 'lowercase', 'custom_replace' ],
-                ],
-                'filter' => [
-                    'custom_replace' => [
-                        'type' => 'pattern_replace',
-                        'pattern' => '[^a-z0-9 ]',
-                        'replacement' => '',
-                    ],
+                    'filter' => [ 'asciifolding', 'lowercase'],
                 ],
             ],
         ],
