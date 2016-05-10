@@ -25,7 +25,7 @@ class ASN extends Model {
                 'filter' => [
                     'custom_replace' => [
                         'type' => 'pattern_replace',
-                        'pattern' => '[^a-z0-9 \-]',
+                        'pattern' => '[^a-z0-9 ]',
                         'replacement' => '',
                     ],
                 ],

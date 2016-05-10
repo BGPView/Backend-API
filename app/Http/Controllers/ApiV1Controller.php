@@ -350,6 +350,8 @@ class ApiV1Controller extends ApiBaseController
     public function search(Request $request)
     {
         $queryTerm = $request->get('query_term');
+        $queryTerm = trim(str_replace(['/', '?', '!', ':', ',', '\'', '-', '_', '.', '+'], '', strtolower(utf8_encode($queryTerm))));
+
         $elasticQuery['filtered']['query'] = [
             'bool' => [
                 'should' => [
