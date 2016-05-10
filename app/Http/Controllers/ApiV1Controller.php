@@ -369,9 +369,9 @@ class ApiV1Controller extends ApiBaseController
             ],
         ];
 
-        $asns = ASN::searchByQuery($elasticQuery, null, null, $limit = 30);
-        $ipv4Prefixes = IPv4PrefixWhois::searchByQuery($elasticQuery, null, null, $limit = 30);
-        $ipv6Prefixes = IPv6PrefixWhois::searchByQuery($elasticQuery, null, null, $limit = 30);
+        $asns = ASN::searchByQuery($elasticQuery, null, null, $limit = 100);
+        $ipv4Prefixes = IPv4PrefixWhois::searchByQuery($elasticQuery, null, null, $limit = 200);
+        $ipv6Prefixes = IPv6PrefixWhois::searchByQuery($elasticQuery, null, null, $limit = 200);
 
         $data['asns'] = [];
         foreach ($asns as $asn) {
