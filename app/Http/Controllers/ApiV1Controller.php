@@ -358,18 +358,15 @@ class ApiV1Controller extends ApiBaseController
                     ['wildcard' => [
                         'name' => [
                             'value' => '*'.$queryTerm.'*',
-                            'boost' => 2
                         ]
                     ]],
                     ['wildcard' => [
                         'description' => [
                             'value' => '*'.$queryTerm.'*',
-                            'boost' => 1
                         ]
                     ]],
                 ],
-                'minimum_should_match' => 1,
-            ]
+            ],
         ];
 
         $asns = ASN::searchByQuery($elasticQuery, null, null, $limit = 30);
