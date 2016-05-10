@@ -350,10 +350,29 @@ class ApiV1Controller extends ApiBaseController
     public function search(Request $request)
     {
         $queryTerm = $request->get('query_term');
+        $elasticQuery['filtered']['query'] = [
+            'bool' => [
+                'should' => [
+                    ['wildcard' => [
+                        'name' => [
+                            'value' => '*'.$queryTerm.'*',
+                            'boost' => 2
+                        ]
+                    ]],
+                    ['wildcard' => [
+                        'description' => [
+                            'value' => '*'.$queryTerm.'*',
+                            'boost' => 1
+                        ]
+                    ]],
+                ],
+                'minimum_should_match' => 1,
+            ]
+        ];
 
-        $asns = ASN::search($queryTerm);
-        $ipv4Prefixes = IPv4PrefixWhois::search($queryTerm);
-        $ipv6Prefixes = IPv6PrefixWhois::search($queryTerm);
+        $asns = ASN::searchByQuery($elasticQuery, null, null, $limit = 30);
+        $ipv4Prefixes = IPv4PrefixWhois::searchByQuery($elasticQuery, null, null, $limit = 30);
+        $ipv6Prefixes = IPv6PrefixWhois::searchByQuery($elasticQuery, null, null, $limit = 30);
 
         $data['asns'] = [];
         foreach ($asns as $asn) {
