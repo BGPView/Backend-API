@@ -35,6 +35,7 @@ class ApiV1Controller extends ApiBaseController
 
         $asnData = ASN::with('emails')->where('asn', $as_number)->first();
         $allocation = RirAsnAllocation::where('asn', $as_number)->first();
+        $rir = $allocation->rir();
 
         if (is_null($asnData)) {
             $data = $this->makeStatus('Could not find ASN', false);
@@ -54,7 +55,7 @@ class ApiV1Controller extends ApiBaseController
         $output['traffic_ratio']        = $asnData->traffic_ratio;
         $output['owner_address']        = $asnData->owner_address;
 
-        $output['rir_allocation']['rir_name']           = isset($allocation->rir->name) ? $allocation->rir->name : null;
+        $output['rir_allocation']['rir_name']           = isset($rir->name) ? $rir->name : null;
         $output['rir_allocation']['country_code']       = isset($allocation->counrty_code) ? $allocation->counrty_code : null;
         $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
 
