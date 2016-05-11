@@ -35,7 +35,7 @@ class ApiV1Controller extends ApiBaseController
 
         $asnData = ASN::with('emails')->where('asn', $as_number)->first();
         $allocation = RirAsnAllocation::where('asn', $as_number)->first();
-        $rir = $allocation->rir();
+        $rir = $allocation->rir;
 
         if (is_null($asnData)) {
             $data = $this->makeStatus('Could not find ASN', false);
