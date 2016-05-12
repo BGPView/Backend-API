@@ -68,6 +68,11 @@ class UpdateAllocationLists extends Command
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_NOPROGRESS, false);
             curl_setopt($ch, CURLOPT_HEADER, 0);
+
+            if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')){
+                curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            }
+
             $output = curl_exec($ch);
             curl_close($ch);
             $this->output->newLine(1);
