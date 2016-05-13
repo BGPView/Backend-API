@@ -24,9 +24,8 @@ class ASN extends Model {
                     'filter' => [ 'asciifolding', 'lowercase', 'strip_delimiters'],
                 ],
                 'custom_desc' => [
-                    'tokenizer' => 'standard',
-                    'type' => 'custom',
-                    'filter' => [ 'asciifolding', 'lowercase', 'standard'],
+                    'tokenizer' => 'keyword',
+                    'filter' => [ 'asciifolding', 'lowercase'],
                 ],
             ],
             'filter' => [
