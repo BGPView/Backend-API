@@ -28,22 +28,22 @@ class ASN extends Model {
                     'type' => 'custom',
                     'filter' => [ 'asciifolding', 'lowercase', 'standard'],
                 ],
-                'filter' => [
-                     'strip_delimiters' => [
-                         'type' => 'word_delimiter',
-                         'split_on_numerics' => false,
-                         'split_on_case_change' => false,
-                         'generate_word_parts' => false,
-                         'generate_number_parts' => false,
-                         'catenate_all' => true,
-                     ],
+            ],
+            'filter' => [
+                'strip_delimiters' => [
+                    'type' => 'word_delimiter',
+                    'split_on_numerics' => false,
+                    'split_on_case_change' => false,
+                    'generate_word_parts' => false,
+                    'generate_number_parts' => false,
+                    'catenate_all' => true,
                 ],
-                'tokenizer' => [
-                    'ngrams' => [
-                        'type' => 'ngram',
-                        'min_gram' => 5,
-                        'max_gram' => 20,
-                    ],
+            ],
+            'tokenizer' => [
+                'ngrams' => [
+                    'type' => 'ngram',
+                    'min_gram' => 5,
+                    'max_gram' => 20,
                 ],
             ],
         ],
