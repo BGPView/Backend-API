@@ -35,7 +35,7 @@ class ASN extends Model {
                          'split_on_case_change' => false,
                          'generate_word_parts' => false,
                          'generate_number_parts' => false,
-                         'catenate_all' => yes,
+                         'catenate_all' => true,
                      ],
                 ],
                 'tokenizer' => [
