@@ -361,16 +361,21 @@ class ApiV1Controller extends ApiBaseController
                             'value' => '*'.$queryTerm.'*',
                         ]
                     ]],
+                    ['wildcard' => [
+                        'description' => [
+                            'value' => '*'.$queryTerm.'*',
+                        ]
+                    ]],
                     ['multi_match' => [
                         'query' => $queryTerm,
-                        'fields' => ['name'],
+                        'fields' => ['asn^5']
                     ]],
                 ],
-            ],
+                'minimum_should_match' => 1,
+            ]
         ];
 
-        $asnElasticQuery['filtered']['query']['bool']['should']['multi_match']['fields'][] = 'asn^5';
-        $asns = ASN::searchByQuery($asnElasticQuery, null, null, $limit = 100);
+        $asns = ASN::searchByQuery($elasticQuery, null, null, $limit = 100);
         $ipv4Prefixes = IPv4PrefixWhois::searchByQuery($elasticQuery, null, null, $limit = 200);
         $ipv6Prefixes = IPv6PrefixWhois::searchByQuery($elasticQuery, null, null, $limit = 200);
 

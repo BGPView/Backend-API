@@ -10,44 +10,6 @@ class IPv6PrefixWhois extends Model {
     use ElasticquentTrait;
 
     /**
-     * The elasticsearch settings.
-     *
-     * @var array
-     */
-    protected $indexSettings = [
-        'analysis' => [
-            'analyzer' => [
-                'custom_name' => [
-                    'tokenizer' => 'keyword',
-                    'type' => 'custom',
-                    'filter' => [ 'asciifolding', 'lowercase', 'strip_delimiters'],
-                ],
-                'custom_desc' => [
-                    'tokenizer' => 'keyword',
-                    'filter' => [ 'asciifolding', 'lowercase'],
-                ],
-            ],
-            'filter' => [
-                'strip_delimiters' => [
-                    'type' => 'word_delimiter',
-                    'split_on_numerics' => false,
-                    'split_on_case_change' => false,
-                    'generate_word_parts' => false,
-                    'generate_number_parts' => false,
-                    'catenate_all' => true,
-                ],
-            ],
-            'tokenizer' => [
-                'ngrams' => [
-                    'type' => 'ngram',
-                    'min_gram' => 5,
-                    'max_gram' => 20,
-                ],
-            ],
-        ],
-    ];
-
-    /**
      * The elasticsearch mappings.
      *
      * @var array
@@ -55,11 +17,11 @@ class IPv6PrefixWhois extends Model {
     protected $mappingProperties = [
         'name' => [
             'type' => 'string',
-            'analyzer' => 'custom_name'
+            'analyzer' => 'string_lowercase'
         ],
         'description' => [
             'type' => 'string',
-            'analyzer' => 'custom_desc'
+            'analyzer' => 'string_lowercase'
         ],
     ];
 
