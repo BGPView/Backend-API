@@ -17,9 +17,32 @@ class IPv4PrefixWhois extends Model {
     protected $indexSettings = [
         'analysis' => [
             'analyzer' => [
-                'string_lowercase' => [
+                'custom_name' => [
                     'tokenizer' => 'keyword',
-                    'filter' => [ 'asciifolding', 'lowercase'],
+                    'type' => 'custom',
+                    'filter' => [ 'asciifolding', 'lowercase', 'strip_delimiters'],
+                ],
+                'custom_desc' => [
+                    'tokenizer' => 'standard',
+                    'type' => 'custom',
+                    'filter' => [ 'asciifolding', 'lowercase', 'standard'],
+                ],
+                'filter' => [
+                    'strip_delimiters' => [
+                        'type' => 'word_delimiter',
+                        'split_on_numerics' => false,
+                        'split_on_case_change' => false,
+                        'generate_word_parts' => false,
+                        'generate_number_parts' => false,
+                        'catenate_all' => yes,
+                    ],
+                ],
+                'tokenizer' => [
+                    'ngrams' => [
+                        'type' => 'ngram',
+                        'min_gram' => 5,
+                        'max_gram' => 20,
+                    ],
                 ],
             ],
         ],
@@ -33,11 +56,11 @@ class IPv4PrefixWhois extends Model {
     protected $mappingProperties = [
         'name' => [
             'type' => 'string',
-            'analyzer' => 'string_lowercase'
+            'analyzer' => 'custom_name'
         ],
         'description' => [
             'type' => 'string',
-            'analyzer' => 'string_lowercase'
+            'analyzer' => 'custom_desc'
         ],
     ];
 
