@@ -66,6 +66,7 @@ class UpdateAllocationLists extends Command
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $rir->allocation_list_url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($ch, CURLOPT_NOPROGRESS, false);
             curl_setopt($ch, CURLOPT_HEADER, 0);
 
