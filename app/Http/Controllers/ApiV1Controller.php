@@ -185,7 +185,7 @@ class ApiV1Controller extends ApiBaseController
         $output['country_codes']['rir_allocation_country_code'] = $allocation ? $allocation->counrty_code : null;
         $output['country_codes']['maxmind_country_code']        = $geoip ? $geoip->country->isoCode : null;
 
-        $output['rir_allocation']['rir_name']           = $allocation->rir->name;
+        $output['rir_allocation']['rir_name']           = isset($allocation->rir->name) ? $allocation->rir->name : null;
         $output['rir_allocation']['country_code']       = $allocation->counrty_code;
         $output['rir_allocation']['ip']                 = $allocation->ip;
         $output['rir_allocation']['cidr']               = $allocation->cidr;
