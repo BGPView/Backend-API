@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\IpUtils;
 use App\Models\ApiApplication;
+use App\Services\Dns;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -16,9 +17,11 @@ class ApiBaseController extends Controller
 {
     private $_startTime = 0;
     public $ipUtils;
+    public $dns;
 
-    public function __construct(IpUtils $ipUtils)
+    public function __construct(IpUtils $ipUtils, Dns $dns)
     {
+        $this->dns = $dns;
         $this->ipUtils = $ipUtils;
         $this->_startTime = microtime(true) * 1000;
     }
