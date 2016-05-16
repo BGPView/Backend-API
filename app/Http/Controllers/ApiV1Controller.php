@@ -252,12 +252,12 @@ class ApiV1Controller extends ApiBaseController
             return $b['cidr'] - $a['cidr'];
         });
 
-        $output['rir_allocation']['rir_name']           = $allocation->rir->name;
-        $output['rir_allocation']['country_code']       = $allocation->counrty_code;
-        $output['rir_allocation']['ip']                 = $allocation->ip;
-        $output['rir_allocation']['cidr']               = $allocation->cidr;
-        $output['rir_allocation']['prefix']             = $allocation->ip . '/' . $allocation->cidr;
-        $output['rir_allocation']['date_allocated']     = $allocation->date_allocated . ' 00:00:00';
+        $output['rir_allocation']['rir_name']           = isset($allocation->rir->name) ? $allocation->rir->name : null;
+        $output['rir_allocation']['country_code']       = isset($allocation->counrty_code) ? $allocation->counrty_code : null;
+        $output['rir_allocation']['ip']                 = isset($allocation->ip) ? $allocation->ip : null;
+        $output['rir_allocation']['cidr']               = isset($allocation->cidr) ? $allocation->cidr : null;
+        $output['rir_allocation']['prefix']             = isset($allocation->ip) && isset($allocation->cidr) ? $allocation->ip . '/' . $allocation->cidr : null;
+        $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00': null;
 
         $output['maxmind']['country_code']  = $geoip ? $geoip->country->isoCode : null;
         $output['maxmind']['city']          = $geoip ? $geoip->city->name : null;
