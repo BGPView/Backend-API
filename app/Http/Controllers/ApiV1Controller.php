@@ -35,7 +35,6 @@ class ApiV1Controller extends ApiBaseController
 
         $asnData = ASN::with('emails')->where('asn', $as_number)->first();
         $allocation = RirAsnAllocation::where('asn', $as_number)->first();
-        $rir = $allocation ? $allocation->rir : null;
 
         if (is_null($asnData)) {
             $data = $this->makeStatus('Could not find ASN', false);
@@ -55,7 +54,7 @@ class ApiV1Controller extends ApiBaseController
         $output['traffic_ratio']        = $asnData->traffic_ratio;
         $output['owner_address']        = $asnData->owner_address;
 
-        $output['rir_allocation']['rir_name']           = isset($rir->name) ? $rir->name : null;
+        $output['rir_allocation']['rir_name']           = empty($allocation->rir_id) !== true ? $allocation->rir->name : null;
         $output['rir_allocation']['country_code']       = isset($allocation->counrty_code) ? $allocation->counrty_code : null;
         $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
 
@@ -185,7 +184,7 @@ class ApiV1Controller extends ApiBaseController
         $output['country_codes']['rir_allocation_country_code'] = $allocation ? $allocation->counrty_code : null;
         $output['country_codes']['maxmind_country_code']        = $geoip ? $geoip->country->isoCode : null;
 
-        $output['rir_allocation']['rir_name']           = isset($allocation->rir->name) ? $allocation->rir->name : null;
+        $output['rir_allocation']['rir_name']           = empty($allocation->rir_id) !== true ? $allocation->rir->name : null;
         $output['rir_allocation']['country_code']       = isset($allocation->counrty_code) ? $allocation->counrty_code : null;
         $output['rir_allocation']['ip']                 = isset($allocation->ip) ? $allocation->ip : null;
         $output['rir_allocation']['cidr']               = isset($allocation->cidr) ? $allocation->cidr : null;
@@ -255,7 +254,7 @@ class ApiV1Controller extends ApiBaseController
             return $b['cidr'] - $a['cidr'];
         });
 
-        $output['rir_allocation']['rir_name']           = isset($allocation->rir->name) ? $allocation->rir->name : null;
+        $output['rir_allocation']['rir_name']           = empty($allocation->rir_id) !== true ? $allocation->rir->name : null;
         $output['rir_allocation']['country_code']       = isset($allocation->counrty_code) ? $allocation->counrty_code : null;
         $output['rir_allocation']['ip']                 = isset($allocation->ip) ? $allocation->ip : null;
         $output['rir_allocation']['cidr']               = isset($allocation->cidr) ? $allocation->cidr : null;
