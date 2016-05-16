@@ -228,6 +228,8 @@ class ApiV1Controller extends ApiBaseController
         $geoip = $this->ipUtils->geoip($ip);
         $allocation = $this->ipUtils->getAllocationEntry($ip);
 
+        $output['ip'] = $ip;
+        
         $output['prefixes'] = [];
         foreach ($prefixes as $prefix) {
             $prefixWhois = $prefix->whois;
