@@ -16,7 +16,8 @@ return [
     'env' => env('APP_ENV', 'production'),
     'api_docs_url' => env('API_DOCS_URL', ''),
     'whois_query_url' => env('WHOIS_QUERY_URL'),
-    
+    'rpki_server_url' => env('RPKI_SERVER_URL'),    
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

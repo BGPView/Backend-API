@@ -14,7 +14,7 @@ class UpdateRoaTable extends Command
      * @var string
      */
     protected $signature = 'zIPLookup:update-roa-table';
-    protected $rpkiServer = 'http://whois.bgpview.io:8080/export.json';
+    protected $rpkiServer;
     protected $ipUtils;
 
     /**
@@ -33,6 +33,7 @@ class UpdateRoaTable extends Command
     {
         parent::__construct();
         $this->ipUtils = $ipUtils;
+        $this->rpkiServer = config('app.rpki_server_url');
     }
 
     /**
