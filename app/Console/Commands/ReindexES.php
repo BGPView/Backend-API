@@ -48,7 +48,8 @@ class ReindexES extends Command
 
 
         // Setting a brand new index name
-        $versionedIndex = config('elasticquent.default_index') . '_' . time();
+        $entityIndexName = config('elasticquent.default_index');
+        $versionedIndex = $entityIndexName . '_' . time();
         Config::set('elasticquent.default_index', $versionedIndex);
 
         // create new index
@@ -58,7 +59,7 @@ class ReindexES extends Command
         $this->reindexClass(IPv6PrefixWhois::class);
         $this->reindexClass(ASN::class);
 
-        $this->hotSwapIndices($versionedIndex);
+        $this->hotSwapIndices($versionedIndex, $entityIndexName);
 
         $this->output->newLine(1);
         $this->bench->end();
@@ -87,11 +88,10 @@ class ReindexES extends Command
         }
     }
 
-    private function hotSwapIndices($versionedIndex)
+    private function hotSwapIndices($versionedIndex, $entityIndexName)
     {
         $client = ClientBuilder::create()->build();
 
-        $entityIndexName   = config('elasticquent.default_index');
         $indexExists       = $client->indices()->exists(['index' => $entityIndexName]);
         $previousIndexName = null;
         $indices           = $client->indices()->getAliases();
