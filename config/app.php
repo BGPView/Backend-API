@@ -14,7 +14,8 @@ return [
     */
 
     'env' => env('APP_ENV', 'production'),
-
+    'api_docs_url' => env('API_DOCS_URL', ''),
+    
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

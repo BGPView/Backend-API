@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>BGPView API Application</title>
+        <title>API Application</title>
 
         <link href="https://fonts.googleapis.com/css?family=Lato:100" rel="stylesheet" type="text/css">
 
@@ -70,7 +70,7 @@
     <body>
         <div class="container">
             <div class="content">
-                <h1>BGPView API Application</h1>
+                <h1>API Application</h1>
                 <form action="{{ route('register.application') }}" method="POST" class="tsc_form_contact_light nolabel">
                     {!! $errors->first('name', '<span class="error-msg">:message</span>') !!}
                     <input type="text" name="name" class="form-input" placeholder="Name (required)" value="{{ Input::old('name') }}" required />

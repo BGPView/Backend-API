@@ -48,7 +48,7 @@ class ReindexES extends Command
 
 
         // Setting a brand new index name
-        $versionedIndex = 'api_bgpview_io_' . time();
+        $versionedIndex = config('elasticquent.default_index') . '_' . time();
         Config::set('elasticquent.default_index', $versionedIndex);
 
         // create new index
@@ -91,7 +91,7 @@ class ReindexES extends Command
     {
         $client = ClientBuilder::create()->build();
 
-        $entityIndexName   = 'api_bgpview_io';
+        $entityIndexName   = config('elasticquent.default_index');
         $indexExists       = $client->indices()->exists(['index' => $entityIndexName]);
         $previousIndexName = null;
         $indices           = $client->indices()->getAliases();

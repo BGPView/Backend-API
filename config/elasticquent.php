@@ -27,6 +27,6 @@ return array(
     | Elasticquent models.
     */
 
-    'default_index' => 'api_bgpview_io',
+    'default_index' => 'main_index',
 
 );
