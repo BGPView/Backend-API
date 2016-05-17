@@ -106,9 +106,9 @@ class ApiBaseController extends Controller
             $application->save();
 
             Mail::send('api.email', ['key' => $application->key], function ($message) use ($application) {
-                $message->from('postmaster@bgpview.io', 'BGPView [NoReply]');
+                $message->from(config('mail.from.address'), config('mail.from.name'));
                 $message->to($application->email);
-                $message->subject('BGPView API Key');
+                $message->subject('BGP API Key');
             });
 
             return view('api.register-application-done');
