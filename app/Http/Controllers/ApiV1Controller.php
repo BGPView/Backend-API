@@ -153,7 +153,7 @@ class ApiV1Controller extends ApiBaseController
         }
 
         if (is_null($prefix) === true) {
-            $data = $this->makeStatus('Could not find prefix in BGP table', false);
+            $data = $this->makeStatus('Prefix not found in BGP table or malformed', false);
             return $this->respond($data);
         }
 
