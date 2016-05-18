@@ -41,7 +41,7 @@ class IpUtils
             $subnet &= $mask; # nb: in case the supplied subnet wasn't correctly aligned
 
             if (($ip & $mask) == $subnet) {
-                return true;
+                return $bogonPrefix;
             }
         }
 
