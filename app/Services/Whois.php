@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class Whois
 {
-    private $whoisUrl = "http://whois.bgpview.io/whois.php";
-
+    private $whoisUrl;
     private $rir;
     private $allocationData;
     private $input;
@@ -47,6 +46,7 @@ class Whois
     public function __construct($input, $cidr = null)
     {
         $this->ipUtils = new IpUtils;
+        $this->whoisUrl = config('app.whois_query_url');
         $this->input = $this->ipUtils->normalizeInput(trim($input), $showAS = true);
         $allocation = $this->ipUtils->getAllocationEntry($this->input, $cidr);
 
