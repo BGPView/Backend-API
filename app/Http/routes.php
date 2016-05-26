@@ -33,6 +33,7 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('/asn/{as_number}/peers', ['as' => 'asn.peers', 'uses' => 'ApiV1Controller@asnPeers']);
     Route::get('/asn/{as_number}/ixs', ['as' => 'asn.ixs', 'uses' => 'ApiV1Controller@asnIxs']);
     Route::get('/asn/{as_number}/upstreams', ['as' => 'asn.upstreams', 'uses' => 'ApiV1Controller@asnUpstreams']);
+    Route::get('/asn/{as_number}/downstreams', ['as' => 'asn.downstreams', 'uses' => 'ApiV1Controller@asnDownstreams']);
     Route::get('/prefix/{ip}/{cidr}', ['as' => 'prefix', 'uses' => 'ApiV1Controller@prefix']);
     Route::get('/prefix/{ip}/{cidr}/dns', ['as' => 'prefix.dns', 'uses' => 'ApiV1Controller@prefixDns']);
     Route::get('/ip/{ip}', ['as' => 'ip', 'uses' => 'ApiV1Controller@ip']);

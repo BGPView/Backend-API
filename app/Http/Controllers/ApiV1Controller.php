@@ -127,6 +127,17 @@ class ApiV1Controller extends ApiBaseController
     }
 
     /*
+     * URI: /asn/{as_number}/downstreams
+     */
+    public function asnDownstreams($as_number)
+    {
+        $as_number  = $this->ipUtils->normalizeInput($as_number);
+        $downstreams  = ASN::getDownstreams($as_number);
+
+        return $this->sendData($downstreams);
+    }
+
+    /*
      * URI: /prefix/{ip}/{cidr}
      * Optional Params: with_raw_whois
      */
