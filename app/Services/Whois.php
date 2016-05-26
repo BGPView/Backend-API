@@ -479,7 +479,7 @@ class Whois
     {
         foreach ($emails as $key => $email) {
             $email = strtolower($email);
-            $email = trim($email, '\t\n\r\0\x0B.,-_|');
+            $email = trim($email, "\t\n\r\0\x0B.,-_|");
             $emails[$key] = $email;
         }
 
