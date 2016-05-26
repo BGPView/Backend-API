@@ -26,6 +26,7 @@ class ApiV1Controller extends ApiBaseController
      * Optional Params: with_peers
      * Optional Params: with_prefixes
      * Optional Params: with_ixs
+     * Optional Params: with_downstreams
      * Optional Params: with_upstreams
      */
     public function asn(Request $request, $as_number)
@@ -69,6 +70,9 @@ class ApiV1Controller extends ApiBaseController
         }
         if ($request->has('with_upstreams') === true) {
             $output['upstreams'] = ASN::getUpstreams($as_number);
+        }
+        if ($request->has('with_downstreams') === true) {
+            $output['downstreams'] = ASN::getDownstreams($as_number);
         }
         if ($request->has('with_raw_whois') === true) {
             $output['raw_whois'] = $asnData->raw_whois;
