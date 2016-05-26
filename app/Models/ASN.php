@@ -49,6 +49,9 @@ class ASN extends Model {
         ],
         'asn' => [
             'type' => 'string',
+	'fields' => [	'sort' => ['type' => 'long'],
+
+],
         ],
     ];
 
@@ -282,6 +285,63 @@ class ASN extends Model {
 
         $output['ipv4_upstreams'] = array_values($output['ipv4_upstreams']);
         $output['ipv6_upstreams'] = array_values($output['ipv6_upstreams']);
+
+        return $output;
+    }
+
+    public static function getDownstreams($as_number)
+    {
+        $ipv4Downstreams = IPv4BgpEntry::where('upstream_asn', $as_number)->get();
+        $ipv6Downstreams = IPv6BgpEntry::where('upstream_asn', $as_number)->get();
+
+        $output['ipv4_downstreams'] = [];
+        foreach ($ipv4Downstreams as $downstream) {
+
+            if (isset($output['ipv4_downstreams'][$downstream->asn]) === true) {
+                if (in_array($downstream->bgp_path, $output['ipv4_downstreams'][$downstream->asn]['bgp_paths']) === false) {
+                    $output['ipv4_downstreams'][$downstream->asn]['bgp_paths'][] = $downstream->bgp_path;
+                }
+                continue;
+            }
+
+            $downstreamAsn = self::where('asn', $downstream->asn)->first();
+
+            $downstreamOutput['asn']          = $downstreamAsn->asn;
+            $downstreamOutput['name']         = isset($downstreamAsn->name) ? $downstreamAsn->name : null;
+            $downstreamOutput['description']  = isset($downstreamAsn->description) ? $downstreamAsn->description : null;
+            $downstreamOutput['country_code'] = isset($downstreamAsn->counrty_code) ? $downstreamAsn->counrty_code : null;
+            $downstreamOutput['bgp_paths'][]  = $downstream->bgp_path;
+
+            $output['ipv4_downstreams'][$downstream->asn]  = $downstreamOutput;
+            $downstreamOutput = null;
+            $downstreamAsn = null;
+        }
+
+        $output['ipv6_downstreams'] = [];
+        foreach ($ipv6Downstreams as $downstream) {
+
+            if (isset($output['ipv6_downstreams'][$downstream->asn]) === true) {
+                if (in_array($downstream->bgp_path, $output['ipv6_downstreams'][$downstream->asn]['bgp_paths']) === false) {
+                    $output['ipv6_downstreams'][$downstream->asn]['bgp_paths'][] = $downstream->bgp_path;
+                }
+                continue;
+            }
+
+            $downstreamAsn = self::where('asn', $downstream->asn)->first();
+
+            $downstreamOutput['asn']          = $downstream->asn;
+            $downstreamOutput['name']         = isset($downstreamAsn->name) ? $downstreamAsn->name : null;
+            $downstreamOutput['description']  = isset($downstreamAsn->description) ? $downstreamAsn->description : null;
+            $downstreamOutput['country_code'] = isset($downstreamAsn->counrty_code) ? $downstreamAsn->counrty_code : null;
+            $downstreamOutput['bgp_paths'][]  = $downstream->bgp_path;
+
+            $output['ipv6_downstreams'][$downstream->asn]  = $downstreamOutput;
+            $downstreamOutput = null;
+            $downstreamAsn = null;
+        }
+
+        $output['ipv4_downstreams'] = array_values($output['ipv4_downstreams']);
+        $output['ipv6_downstreams'] = array_values($output['ipv6_downstreams']);
 
         return $output;
     }
