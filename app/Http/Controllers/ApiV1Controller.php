@@ -13,6 +13,7 @@ use App\Models\IPv6PrefixWhois;
 use App\Models\IX;
 use App\Models\IXMember;
 use App\Models\RirAsnAllocation;
+use App\Services\Dns;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -475,6 +476,22 @@ class ApiV1Controller extends ApiBaseController
 
             $data['ipv6_prefixes'][] = $prefixData;
         }
+
+        return $this->sendData($data);
+    }
+
+    /*
+     * URI: /dns/live/{hostname}
+     *
+     */
+    public function getLiveDns($hostname)
+    {
+        $dns = new Dns(['8.8.8.8', '8.8.4.4', 5]);
+
+        $records = $dns->getDomainRecords($hostname);
+
+        $data['hostname']     = $hostname;
+        $data['dns_records']  = $records;
 
         return $this->sendData($data);
     }
