@@ -8,7 +8,7 @@ use Net_DNS2_Resolver;
 class Dns
 {
     protected $resolvers = [
-        '45.32.3.108',
+        '8.8.8.8',
     ];
 
     protected $timeout = 1; // Seconds
@@ -26,11 +26,11 @@ class Dns
 
     private $dns;
 
-    public function __construct()
+    public function __construct($resolvers = null, $timeOut = null)
     {
         $this->dns = new Net_DNS2_Resolver([
-            'nameservers' => $this->resolvers,
-            'timeout' => $this->timeout,
+            'nameservers' => $resolvers ?: $this->resolvers,
+            'timeout' => $timeOut ?: $this->timeout,
         ]);
     }
 

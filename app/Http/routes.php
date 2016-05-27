@@ -41,6 +41,8 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('/asns/{country_code?}', ['as' => 'asns', 'uses' => 'ApiV1Controller@asns']);
 
     Route::get('/search', ['as' => 'asns', 'uses' => 'ApiV1Controller@search']);
+
+    Route::get('/dns/live/{hostname}', ['uses' => 'ApiV1Controller@getLiveDns']);
 });
 
 Route::group(['middleware' => ['web']], function () {
