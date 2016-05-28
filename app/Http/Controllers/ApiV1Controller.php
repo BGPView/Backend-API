@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\ApiBaseController;
+use Illuminate\Support\Facades\Cache;
 
 class ApiV1Controller extends ApiBaseController
 {
