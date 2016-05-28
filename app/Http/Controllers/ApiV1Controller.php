@@ -517,9 +517,9 @@ class ApiV1Controller extends ApiBaseController
                     $records['A'][$key] = $output;
                 }
             }
-            
+
             if (isset($records['AAAA']) === true) {
-                $records['AAAA'] = array_unique($records['A']);
+                $records['AAAA'] = array_unique($records['AAAA']);
                 foreach ($records['AAAA'] as $key => $address) {
                     $geoip = $ipUtils->geoip($address);
 
