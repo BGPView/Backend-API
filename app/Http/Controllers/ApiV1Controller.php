@@ -488,14 +488,13 @@ class ApiV1Controller extends ApiBaseController
     public function getLiveDns($hostname)
     {
         $hostname = strtolower($hostname);
-        $dns = new Dns(['8.8.8.8', '8.8.4.4', 2]);
 
-        $records = Cache::remember($hostname, 60*24, function() use ($hostname, $dns)
+        $records = Cache::remember($hostname, 60*24, function() use ($hostname)
         {
+            $dns = new Dns(['8.8.8.8', '8.8.4.4', 2]);
             return $dns->getDomainRecords($hostname);
         });
-
-
+        
         $data['hostname']     = $hostname;
         $data['dns_records']  = $records;
 
