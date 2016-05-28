@@ -15,6 +15,8 @@ use GeoIp2\Database\Reader;
 class IpUtils
 {
 
+    private $maxmindReader = null;
+
     public function isBogonAddress($ipAddress)
     {
         $bogons = [
@@ -451,10 +453,13 @@ class IpUtils
     public function geoip($ip)
     {
         $ip = explode('/', $ip, 2)[0];
-        $reader = new Reader(database_path() . '/GeoLite2-City.mmdb');
+
+        if (is_null($this->maxmindReader) === true) {
+            $this->maxmindReader = new Reader(database_path() . '/GeoLite2-City.mmdb');
+        }
 
         try {
-            $record = $reader->city($ip);
+            $record = $this->maxmindReader->city($ip);
         } catch (\Exception $e) {
             $record = null;
         }
