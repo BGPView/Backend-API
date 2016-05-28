@@ -34,7 +34,7 @@ class Dns
         ]);
     }
 
-    public function getDomainRecords($input)
+    public function getDomainRecords($input, $testNameserver = true)
     {
         $records = [];
         foreach ($this->recordTypes as $type => $key) {
@@ -45,7 +45,7 @@ class Dns
 
                     if (isset($record->$key) !== true) {
                         // If there is no SOA lets return nothing
-                        if ($type === 'NS') {
+                        if ($type === 'NS' && $testNameserver == true) {
                             return [];
                         }
                         continue;
@@ -62,7 +62,7 @@ class Dns
             } catch(Net_DNS2_Exception $e) {
 
                 // If there is no SOA lets return nothing
-                if ($type === 'NS') {
+                if ($type === 'NS' && $testNameserver == true) {
                     return [];
                 }
 

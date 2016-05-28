@@ -492,7 +492,7 @@ class ApiV1Controller extends ApiBaseController
         $records = Cache::remember($hostname, 60*24, function() use ($hostname)
         {
             $dns = new Dns(['8.8.8.8', '8.8.4.4', 2]);
-            $records = $dns->getDomainRecords($hostname);
+            $records = $dns->getDomainRecords($hostname, $testNameserver = false);
             ksort($records);
             return $records;
         });
