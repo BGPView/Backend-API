@@ -501,14 +501,11 @@ class ApiV1Controller extends ApiBaseController
                 foreach ($records['A'] as $key => $address) {
                     $geoip = $ipUtils->geoip($address);
 
-                    $output['maxmind']['country_code']  =
-                    $output['maxmind']['city']          = $geoip ? $geoip->city->name : null;
-
                     $output['address']      = $address;
                     $output['country_code'] = $geoip ? $geoip->country->isoCode : null;
                     if ($geoip) {
                         if ($geoip->city->name) {
-                            $output['location'] = $geoip->country->name . ', ' . $geoip->country->name;
+                            $output['location'] = $geoip->city->name . ', ' . $geoip->country->name;
                         } else {
                             $output['location'] = $geoip->country->name;
                         }
@@ -523,14 +520,11 @@ class ApiV1Controller extends ApiBaseController
                 foreach ($records['AAAA'] as $key => $address) {
                     $geoip = $ipUtils->geoip($address);
 
-                    $output['maxmind']['country_code']  =
-                    $output['maxmind']['city']          = $geoip ? $geoip->city->name : null;
-
                     $output['address']      = $address;
                     $output['country_code'] = $geoip ? $geoip->country->isoCode : null;
                     if ($geoip) {
                         if ($geoip->city->name) {
-                            $output['location'] = $geoip->country->name . ', ' . $geoip->country->name;
+                            $output['location'] = $geoip->city->name . ', ' . $geoip->city->name;
                         } else {
                             $output['location'] = $geoip->country->name;
                         }
