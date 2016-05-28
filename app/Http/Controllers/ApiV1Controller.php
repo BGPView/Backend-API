@@ -488,12 +488,58 @@ class ApiV1Controller extends ApiBaseController
     public function getLiveDns($hostname)
     {
         $hostname = strtolower($hostname);
+        $ipUtils = $this->ipUtils;
 
-        $records = Cache::remember($hostname, 60*24, function() use ($hostname)
+        $records = Cache::remember($hostname, 60*24, function() use ($ipUtils, $hostname)
         {
             $dns = new Dns(['8.8.8.8', '8.8.4.4', 2]);
             $records = $dns->getDomainRecords($hostname, $testNameserver = false);
             ksort($records);
+
+            if (isset($records['A']) === true) {
+                $records['A'] = array_unique($records['A']);
+                foreach ($records['A'] as $key => $address) {
+                    $geoip = $ipUtils->geoip($address);
+
+                    $output['maxmind']['country_code']  =
+                    $output['maxmind']['city']          = $geoip ? $geoip->city->name : null;
+
+                    $output['address']      = $address;
+                    $output['country_code'] = $geoip ? $geoip->country->isoCode : null;
+                    if ($geoip) {
+                        if ($geoip->city->name) {
+                            $output['location'] = $geoip->country->name . ', ' . $geoip->country->name;
+                        } else {
+                            $output['location'] = $geoip->country->name;
+                        }
+                    }
+
+                    $records['A'][$key] = $output;
+                }
+            }
+            
+            if (isset($records['AAAA']) === true) {
+                $records['AAAA'] = array_unique($records['A']);
+                foreach ($records['AAAA'] as $key => $address) {
+                    $geoip = $ipUtils->geoip($address);
+
+                    $output['maxmind']['country_code']  =
+                    $output['maxmind']['city']          = $geoip ? $geoip->city->name : null;
+
+                    $output['address']      = $address;
+                    $output['country_code'] = $geoip ? $geoip->country->isoCode : null;
+                    if ($geoip) {
+                        if ($geoip->city->name) {
+                            $output['location'] = $geoip->country->name . ', ' . $geoip->country->name;
+                        } else {
+                            $output['location'] = $geoip->country->name;
+                        }
+                    }
+
+                    $records['AAAA'][$key] = $output;
+                }
+            }
+
             return $records;
         });
 
