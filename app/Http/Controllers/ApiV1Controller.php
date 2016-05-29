@@ -19,6 +19,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\ApiBaseController;
 use Illuminate\Support\Facades\Cache;
+use Pdp\Parser;
+use Pdp\PublicSuffixListManager;
 
 class ApiV1Controller extends ApiBaseController
 {
@@ -487,7 +489,11 @@ class ApiV1Controller extends ApiBaseController
      */
     public function getLiveDns($hostname)
     {
+        $pslManager = new PublicSuffixListManager();
+        $domainParser = new Parser($pslManager->getList());
+
         $hostname = strtolower($hostname);
+        $baseDomain = $domainParser->getRegisterableDomain($hostname);
         $ipUtils = $this->ipUtils;
 
         $records = Cache::remember($hostname, 60*24, function() use ($ipUtils, $hostname)
@@ -537,8 +543,9 @@ class ApiV1Controller extends ApiBaseController
             return $records;
         });
 
-        $data['hostname']     = $hostname;
-        $data['dns_records']  = $records;
+        $data['hostname']       = $hostname;
+        $data['base_domain']    = $baseDomain;
+        $data['dns_records']    = $records;
 
         return $this->sendData($data);
     }
