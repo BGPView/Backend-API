@@ -55,6 +55,7 @@
             "php artisan clear-compiled"
         ],
         "post-update-cmd": [
+            "php vendor/bin/pdp-psl",
             "php artisan optimize"
         ]
     },
