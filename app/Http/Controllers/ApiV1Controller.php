@@ -530,7 +530,7 @@ class ApiV1Controller extends ApiBaseController
                     $output['country_code'] = $geoip ? $geoip->country->isoCode : null;
                     if ($geoip) {
                         if ($geoip->city->name) {
-                            $output['location'] = $geoip->city->name . ', ' . $geoip->city->name;
+                            $output['location'] = $geoip->city->name . ', ' . $geoip->country->name;
                         } else {
                             $output['location'] = $geoip->country->name;
                         }
