@@ -17,6 +17,7 @@
 	"predis/predis": "~1.0",
         "pear/net_dns2": "^1.4",
 	"elasticquent/elasticquent": "dev-master",
+        "jeremykendall/php-domain-parser": "~2.0",
         "jenssegers/mongodb": "^3.0"
     },
     "require-dev": {
