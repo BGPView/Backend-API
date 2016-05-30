@@ -524,4 +524,20 @@ class IpUtils
 
         return $records;
     }
+
+    public function getRealatedPrefixes($ip, $cidr)
+    {
+        if ($this->getInputType($ip) === 4) {
+            $ipArrayCount = $this->IPv4cidrIpCount();
+            $bgpPrefixClass = IPv4BgpPrefix::class;
+        } else {
+            $ipArrayCount = $this->IPv6cidrIpCount();
+            $bgpPrefixClass = IPv6BgpPrefix::class;
+        }
+
+        $startDec = $this->ip2dec($ip);
+        $endDec = $startDec + $ipArrayCount[$cidr] - 1;
+
+        return $bgpPrefixClass::where('ip_dec_start', '>=', $startDec)->where('ip_dec_end', '<=', $endDec)->where('cidr', '!=', $cidr)->get();
+    }
 }
