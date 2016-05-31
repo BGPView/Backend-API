@@ -19,6 +19,11 @@ class IpUtils
 
     public function isBogonAddress($ipAddress)
     {
+        // Bogons must be IPv4
+        if ($this->getInputType($ipAddress) !== 4) {
+            return false;
+        }
+
         $bogons = [
             '0.0.0.0/8',
             '10.0.0.0/8',

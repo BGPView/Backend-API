@@ -225,7 +225,7 @@ class ApiV1Controller extends ApiBaseController
             $relatedPrefixData['name']          = $relatedPrefixWhois ? $relatedPrefixWhois->name : null;
             $relatedPrefixData['description']   = $relatedPrefixWhois ? $relatedPrefixWhois->description : null;
             $relatedPrefixData['country_code']  = $relatedPrefixWhois ? $relatedPrefixWhois->counrty_code : null;
-            
+
             $output['related_prefixes'][] = $relatedPrefixData;
         }
 

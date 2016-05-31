@@ -48,7 +48,7 @@ class UpdateDNSTable extends Command
      */
     public function handle()
     {
-        $filePath = '';
+        $filePath = 'us.txt';
         $fp = fopen($filePath, 'r');
         if ($fp) {
             while (($line = fgets($fp)) !== false) {

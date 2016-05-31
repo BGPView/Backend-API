@@ -39,15 +39,18 @@ class ResolveDnsQuery extends Job implements ShouldQueue
 
         foreach ($domainRecords as $type => $records) {
             foreach ($records as $record) {
-                $dnsEntry = new DNSRecord;
+                /*
+		$dnsEntry = new DNSRecord;
                 $dnsEntry->input = $this->domain;
                 $dnsEntry->type = $type;
                 $dnsEntry->entry = $record;
-                if ($type === 'A' || $type === 'AAAA') {
-                    $dnsEntry->ip_dec = $this->ipUtils->ip2dec($dnsEntry->entry);
+                */
+		if ($type === 'A' || $type === 'AAAA') {
+                    $this->ipUtils->ip2dec($record);
                 }
-
-                $dnsEntry->save();
+		
+                dump($this->domain, $type, $record,'=======================================');
+                //$dnsEntry->save();
             }
         }
 
