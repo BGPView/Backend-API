@@ -150,9 +150,9 @@ class ApiV1Controller extends ApiBaseController
         $ipVersion = $this->ipUtils->getInputType($ip);
 
         if ($ipVersion === 4) {
-            $prefixes = IPv4BgpPrefix::where('ip', $ip)->where('cidr', $cidr)->get();
+            $prefixes = IPv4BgpEntry::where('ip', $ip)->where('cidr', $cidr)->get();
         } else if ($ipVersion === 6) {
-            $prefixes = IPv6BgpPrefix::where('ip', $ip)->where('cidr', $cidr)->get();
+            $prefixes = IPv6BgpEntry::where('ip', $ip)->where('cidr', $cidr)->get();
         } else {
             $data = $this->makeStatus('Malformed input', false);
             return $this->respond($data);
@@ -184,15 +184,39 @@ class ApiV1Controller extends ApiBaseController
         $output['ip']               = $prefix->ip;
         $output['cidr']             = $prefix->cidr;
         $output['asns']             = [];
+        $asnArray                   = [];
         foreach ($prefixes as $prefixData) {
-            $asn = ASN::where('asn', $prefixData->asn)->first();
-            $asnData['asn'] = $prefixData->asn;
+            if (isset($asnArray[$prefixData->asn]) === true) {
+                // Make sure we dont have said upstream already in our array
+                if (in_array($prefixData->upstream, $asnArray[$prefixData->asn]) !== true) {
+                    $asnArray[$prefixData->asn][] = $prefixData->upstream;
+                }
+            } else {
+                $asnArray[$prefixData->asn][] = $prefixData->upstream;
+            }
+        }
+
+        foreach ($asnArray as $baseAsn => $upstreamArray) {
+            $asn = ASN::where('asn', $baseAsn)->first();
+            $asnData['asn'] = $baseAsn;
             $asnData['name'] = $asn->name;
             $asnData['description'] = $asn->description;
             $asnData['country_code'] = $asn->counrty_code;
+            $asnData['prefix_upstreams'] = [];
+
+            foreach ($upstreamArray as $upstreamAsn) {
+                $asn = ASN::where('asn', $upstreamAsn)->first();
+                $upstreamAsnData['asn'] = $upstreamAsn;
+                $upstreamAsnData['name'] = $asn->name;
+                $upstreamAsnData['description'] = $asn->description;
+                $upstreamAsnData['country_code'] = $asn->counrty_code;
+                
+                $asnData['prefix_upstreams'][] = $upstreamAsnData;
+            }
 
             $output['asns'][] = $asnData;
         }
+
         $output['name']             = $prefixWhois ? $prefixWhois->name : null;
         $output['description_short']= $prefixWhois ? $prefixWhois->description : null;
         $output['description_full'] = $prefixWhois ? $prefixWhois->description_full : null;
