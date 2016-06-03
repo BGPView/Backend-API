@@ -188,11 +188,11 @@ class ApiV1Controller extends ApiBaseController
         foreach ($prefixes as $prefixData) {
             if (isset($asnArray[$prefixData->asn]) === true) {
                 // Make sure we dont have said upstream already in our array
-                if (in_array($prefixData->upstream, $asnArray[$prefixData->asn]) !== true) {
-                    $asnArray[$prefixData->asn][] = $prefixData->upstream;
+                if (in_array($prefixData->upstream_asn, $asnArray[$prefixData->asn]) !== true) {
+                    $asnArray[$prefixData->asn][] = $prefixData->upstream_asn;
                 }
             } else {
-                $asnArray[$prefixData->asn][] = $prefixData->upstream;
+                $asnArray[$prefixData->asn][] = $prefixData->upstream_asn;
             }
         }
 
