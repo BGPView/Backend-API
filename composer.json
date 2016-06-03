@@ -42,7 +42,9 @@
     },
     "scripts": {
         "post-root-package-install": [
-            "php -r \"copy('.env.example', '.env');\""
+            "php -r \"copy('.env.example', '.env');\"",
+            "php vendor/bin/pdp-psl",
+            "php artisan zIPLookup:update-maxmind-database"
         ],
         "post-create-project-cmd": [
             "php artisan key:generate"
@@ -56,6 +58,7 @@
         ],
         "post-update-cmd": [
             "php vendor/bin/pdp-psl",
+            "php artisan zIPLookup:update-maxmind-database",
             "php artisan optimize"
         ]
     },
