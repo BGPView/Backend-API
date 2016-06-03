@@ -19,4 +19,18 @@ class IPv6BgpEntry extends Model {
      * @var array
      */
     protected $hidden = ['id', 'created_at', 'updated_at'];
+
+    public function getWhoisAttribute()
+    {
+        return $this->whois();
+    }
+
+    public function whois()
+    {
+        if (isset($this->attributes['whois']) !== true) {
+            $this->attributes['whois'] = IPv6PrefixWhois::where('ip', $this->ip)->where('cidr', $this->cidr)->first();
+        }
+
+        return $this->attributes['whois'];
+    }
 }
