@@ -7,6 +7,7 @@ use App\Models\IPv4BgpEntry;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv4Peer;
 use App\Models\IPv4PrefixWhois;
+use App\Models\IPv6BgpEntry;
 use App\Models\IPv6BgpPrefix;
 use App\Models\IPv6Peer;
 use App\Models\IPv6PrefixWhois;
