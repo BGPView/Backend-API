@@ -202,7 +202,7 @@ class ApiV1Controller extends ApiBaseController
             $asnData['asn'] = $baseAsn;
             $asnData['name'] = $asn->name;
             $asnData['description'] = $asn->description;
-            $asnData['country_code'] = empty($asn->counrty_code) !== $asn ? $asnData->counrty_code : null;
+            $asnData['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
             $asnData['prefix_upstreams'] = [];
 
             foreach ($upstreamArray as $upstreamAsn) {
@@ -210,7 +210,7 @@ class ApiV1Controller extends ApiBaseController
                 $upstreamAsnData['asn'] = $upstreamAsn;
                 $upstreamAsnData['name'] = $asn->name;
                 $upstreamAsnData['description'] = $asn->description;
-                $upstreamAsnData['country_code'] = empty($asn->counrty_code) !== $asn ? $asnData->counrty_code : null;
+                $upstreamAsnData['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
                 
                 $asnData['prefix_upstreams'][] = $upstreamAsnData;
             }
