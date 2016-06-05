@@ -22,6 +22,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\UpdateIXs::class,
         \App\Console\Commands\UpdateIanaAssignments::class,
         \App\Console\Commands\ReindexES::class,
+        \App\Console\Commands\UpdateMaxmindDB::class,
     ];
 
     /**

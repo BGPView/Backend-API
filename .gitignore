@@ -8,3 +8,5 @@ Homestead.json
 /storage/database.sqlite-journal
 /package.xml
 database.sqlite
+database/GeoLite2-City.mmdb
+

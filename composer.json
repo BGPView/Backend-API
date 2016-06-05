@@ -49,6 +49,8 @@
         ],
         "post-install-cmd": [
             "php artisan clear-compiled",
+            "php vendor/bin/pdp-psl",
+            "php artisan zIPLookup:update-maxmind-database",
             "php artisan optimize"
         ],
         "pre-update-cmd": [
@@ -56,6 +58,7 @@
         ],
         "post-update-cmd": [
             "php vendor/bin/pdp-psl",
+            "php artisan zIPLookup:update-maxmind-database",
             "php artisan optimize"
         ]
     },

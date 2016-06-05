@@ -233,7 +233,14 @@ class Whois
 
         // Get description
         $description = $this->extractValues('descr');
-        $description = $description ?: trim(str_replace('-', ' ', $this->extractValues('netname')));
+        if (empty($description) === true) {
+            $description = $this->extractValues('org-name');
+            if (empty($description) === true) {
+                $description = trim(str_replace('-', ' ', $this->extractValues('netname')));
+            } else if (is_array($description) === true) {
+                $description = $description[0];
+            }
+        }
         if (empty($description) === true) {
             $data->description = [];
         } else if (is_array($description) === true) {
@@ -312,7 +319,14 @@ class Whois
 
         // Get description
         $description = $this->extractValues('descr');
-        $description = $description ?: trim(str_replace('-', ' ', $this->extractValues('netname')));
+        if (empty($description) === true) {
+            $description = $this->extractValues('org-name');
+            if (empty($description) === true) {
+                $description = trim(str_replace('-', ' ', $this->extractValues('netname')));
+            } else if (is_array($description) === true) {
+                $description = $description[0];
+            }
+        }
         if (empty($description) === true) {
             $data->description = [];
         } else if (is_array($description) === true) {
