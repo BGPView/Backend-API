@@ -50,7 +50,7 @@ class ApiV1Controller extends ApiBaseController
         $output['name'] = $asnData->name;
         $output['description_short'] = $asnData->description;
         $output['description_full']  = $asnData->description_full;
-        $output['country_code']         = $asnData->counrty_code;
+        $output['country_code']         = empty($asnData->counrty_code) !== true ? $asnData->counrty_code : null;
         $output['website']              = $asnData->website;
         $output['email_contacts']       = $asnData->email_contacts;
         $output['abuse_contacts']       = $asnData->abuse_contacts;
@@ -189,7 +189,7 @@ class ApiV1Controller extends ApiBaseController
             $asnData['asn'] = $prefixData->asn;
             $asnData['name'] = $asn->name;
             $asnData['description'] = $asn->description;
-            $asnData['country_code'] = $asn->counrty_code;
+            $asnData['country_code'] = empty($asn->counrty_code) !== $asn ? $asnData->counrty_code : null;
 
             $output['asns'][] = $asnData;
         }
@@ -295,7 +295,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixOutput['asn']['asn']     = $prefix->asn;
             $prefixOutput['asn']['name']    = $asn->name;
             $prefixOutput['asn']['description']     = $asn->description;
-            $prefixOutput['asn']['country_code']    = $asn->counrty_code;
+            $prefixOutput['asn']['country_code']    = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
             $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
             $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
             $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
@@ -341,7 +341,7 @@ class ApiV1Controller extends ApiBaseController
         $output['policy_email'] = $ix->policy_email;
         $output['policy_phone'] = $ix->policy_phone;
         $output['city']         = $ix->city;
-        $output['country_code'] = $ix->counrty_code;
+        $output['country_code'] = empty($ix->counrty_code) !== true ? $ix->counrty_code : null;
         $output['url_stats']    = $ix->url_stats;
 
         $members = [];
@@ -385,7 +385,7 @@ class ApiV1Controller extends ApiBaseController
             $asnData['asn']                  = $asn->asn;
             $asnData['name']                 = $asn->name;
             $asnData['description_short']    = $asn->description;
-            $asnData['country_code']         = $asn->counrty_code;
+            $asnData['country_code']         = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
 
             $output[] = $asnData;
         }
@@ -452,7 +452,7 @@ class ApiV1Controller extends ApiBaseController
             $asnData['asn']                 = $asn->asn;
             $asnData['name']                = $asn->name;
             $asnData['description']   = $asn->description;
-            $asnData['country_code']        = $asn->counrty_code;
+            $asnData['country_code']        = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
             $asnData['email_contacts']      = $asn->email_contacts;
             $asnData['abuse_contacts']      = $asn->abuse_contacts;
             $asnData['rir_name']         = $asn->rir->name;
@@ -466,8 +466,8 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['ip']       = $prefix->ip;
             $prefixData['cidr']     = $prefix->cidr;
             $prefixData['name']     = $prefix->name;
-            $prefixData['country_code']     = $prefix->counrty_code;
-            $prefixData['description']    = $prefix->description;
+            $prefixData['country_code']     = empty($prefix->counrty_code) !== true ? $prefix->counrty_code : null;
+            $prefixData['description']      = $prefix->description;
             $prefixData['email_contacts']   = $prefix->email_contacts;
             $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
             $prefixData['rir_name']         = $prefix->rir->name;
@@ -484,7 +484,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['ip']       = $prefix->ip;
             $prefixData['cidr']     = $prefix->cidr;
             $prefixData['name']     = $prefix->name;
-            $prefixData['country_code']     = $prefix->counrty_code;
+            $prefixData['country_code']     = empty($prefix->counrty_code) !== true ? $prefix->counrty_code : null;
             $prefixData['description']      = $prefix->description;
             $prefixData['email_contacts']   = $prefix->email_contacts;
             $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
