@@ -553,13 +553,13 @@ class ApiV1Controller extends ApiBaseController
                         $city_name = $geoip->city->name;
                     } else {
                         $ipDec = $this->ipUtils->ip2dec($address);
-                        $prefix = IPv4PrefixWhois::where('ip_dec_start', '<=', $ipDec)
+                        $prefix = IPv4BgpPrefix::where('ip_dec_start', '<=', $ipDec)
                             ->where('ip_dec_end', '>=',  $ipDec)
                             ->orderBy('cidr', 'asc')
                             ->first();
-                        if ($prefix) {
-                            $country_code = $prefix->counrty_code;
-                            $country_name = $prefix->counrty_code ? trans('countries.'.$prefix->counrty_code) : null;
+                        if ($prefix && $prefixWhois = $prefix->whois()) {
+                            $country_code = $prefixWhois->counrty_code;
+                            $country_name = $prefixWhois->counrty_code ? trans('countries.'.$prefixWhois->counrty_code) : null;
                             $city_name = null;
                         } else {
                             $country_code = null;
@@ -590,13 +590,13 @@ class ApiV1Controller extends ApiBaseController
                         $city_name = $geoip->city->name;
                     } else {
                         $ipDec = $this->ipUtils->ip2dec($address);
-                        $prefix = IPv4PrefixWhois::where('ip_dec_start', '<=', $ipDec)
+                        $prefix = IPv6BgpPrefix::where('ip_dec_start', '<=', $ipDec)
                             ->where('ip_dec_end', '>=',  $ipDec)
                             ->orderBy('cidr', 'asc')
                             ->first();
-                        if ($prefix) {
-                            $country_code = $prefix->counrty_code;
-                            $country_name = $prefix->counrty_code ? trans('countries.'.$prefix->counrty_code) : null;
+                        if ($prefix && $prefixWhois = $prefix->whois()) {
+                            $country_code = $prefixWhois->counrty_code;
+                            $country_name = $prefixWhois->counrty_code ? trans('countries.'.$prefixWhois->counrty_code) : null;
                             $city_name = null;
                         } else {
                             $country_code = null;
