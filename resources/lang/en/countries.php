@@ -235,7 +235,7 @@ return [
 	'UA' => 'Ukraine',
 	'UG' => 'Uganda',
 	'UM' => 'United States Minor Outlying Islands',
-	'US' => 'United States of America',
+	'US' => 'United States',
 	'UY' => 'Uruguay',
 	'UZ' => 'Uzbekistan',
 	'VA' => 'Holy See',
