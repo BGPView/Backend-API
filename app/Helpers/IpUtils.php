@@ -431,8 +431,8 @@ class IpUtils
 
         if ($type === 'asn') {
 
-            $ipv4Prefixes = IPv4BgpPrefix::where('asn', $input)->orderBy('cidr', 'desc')->get();
-            $ipv6Prefixes = IPv6BgpPrefix::where('asn', $input)->orderBy('cidr', 'desc')->get();
+            $ipv4Prefixes = IPv4BgpPrefix::where('asn', $input)->orderBy('cidr', 'asc')->get();
+            $ipv6Prefixes = IPv6BgpPrefix::where('asn', $input)->orderBy('cidr', 'asc')->get();
             return [
                 'ipv4' => $ipv4Prefixes,
                 'ipv6' => $ipv6Prefixes,

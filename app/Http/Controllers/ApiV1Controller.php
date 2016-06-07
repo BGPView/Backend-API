@@ -547,15 +547,33 @@ class ApiV1Controller extends ApiBaseController
                 $records['A'] = array_unique($records['A']);
                 foreach ($records['A'] as $key => $address) {
                     $geoip = $ipUtils->geoip($address);
+                    if ($geoip->country->isoCode) {
+                        $country_code = $geoip->country->isoCode;
+                        $country_name = $geoip->country->name;
+                        $city_name = $geoip->city->name;
+                    } else {
+                        $ipDec = $this->ipUtils->ip2dec($address);
+                        $prefix = IPv4PrefixWhois::where('ip_dec_start', '<=', $ipDec)
+                            ->where('ip_dec_end', '>=',  $ipDec)
+                            ->orderBy('cidr', 'asc')
+                            ->first();
+                        if ($prefix) {
+                            $country_code = $prefix->counrty_code;
+                            $country_name = $prefix->counrty_code ? trans('countries.'.$prefix->counrty_code) : null;
+                            $city_name = null;
+                        } else {
+                            $country_code = null;
+                            $country_name = 'Unknown';
+                            $city_name = null;
+                        }
+                    }
 
                     $output['address']      = $address;
-                    $output['country_code'] = $geoip ? $geoip->country->isoCode : null;
-                    if ($geoip) {
-                        if ($geoip->city->name) {
-                            $output['location'] = $geoip->city->name . ', ' . $geoip->country->name;
-                        } else {
-                            $output['location'] = $geoip->country->name;
-                        }
+                    $output['country_code'] = $country_code;
+                    if ($city_name) {
+                        $output['location'] = $city_name . ', ' . $country_name;
+                    } else {
+                        $output['location'] = $country_name;
                     }
 
                     $records['A'][$key] = $output;
@@ -566,15 +584,33 @@ class ApiV1Controller extends ApiBaseController
                 $records['AAAA'] = array_unique($records['AAAA']);
                 foreach ($records['AAAA'] as $key => $address) {
                     $geoip = $ipUtils->geoip($address);
+                    if ($geoip->country->isoCode) {
+                        $country_code = $geoip->country->isoCode;
+                        $country_name = $geoip->country->name;
+                        $city_name = $geoip->city->name;
+                    } else {
+                        $ipDec = $this->ipUtils->ip2dec($address);
+                        $prefix = IPv4PrefixWhois::where('ip_dec_start', '<=', $ipDec)
+                            ->where('ip_dec_end', '>=',  $ipDec)
+                            ->orderBy('cidr', 'asc')
+                            ->first();
+                        if ($prefix) {
+                            $country_code = $prefix->counrty_code;
+                            $country_name = $prefix->counrty_code ? trans('countries.'.$prefix->counrty_code) : null;
+                            $city_name = null;
+                        } else {
+                            $country_code = null;
+                            $country_name = 'Unknown';
+                            $city_name = null;
+                        }
+                    }
 
                     $output['address']      = $address;
-                    $output['country_code'] = $geoip ? $geoip->country->isoCode : null;
-                    if ($geoip) {
-                        if ($geoip->city->name) {
-                            $output['location'] = $geoip->city->name . ', ' . $geoip->country->name;
-                        } else {
-                            $output['location'] = $geoip->country->name;
-                        }
+                    $output['country_code'] = $country_code;
+                    if ($city_name) {
+                        $output['location'] = $city_name . ', ' . $country_name;
+                    } else {
+                        $output['location'] = $country_name;
                     }
 
                     $records['AAAA'][$key] = $output;
