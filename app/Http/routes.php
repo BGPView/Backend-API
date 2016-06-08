@@ -44,7 +44,7 @@ Route::group(['middleware' => ['api']], function () {
 
     // Misc Routes (Internal Use)
     Route::get('/dns/live/{hostname}', ['uses' => 'ApiV1Controller@getLiveDns']);
-    Route::get('/sitemap/asns', ['uses' => 'ApiV1Controller@siteMapAsn']);
+    Route::get('/sitemap', ['uses' => 'ApiV1Controller@sitemapUrls']);
 
 });
 
