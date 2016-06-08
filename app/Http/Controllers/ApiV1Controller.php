@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\ApiBaseController;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Pdp\Parser;
 use Pdp\PublicSuffixListManager;
 
@@ -624,6 +625,16 @@ class ApiV1Controller extends ApiBaseController
         $data['base_domain']    = $baseDomain;
         $data['dns_records']    = $records;
 
+        return $this->sendData($data);
+    }
+
+    /*
+     * URI: /sitemap/asn
+     *
+     */
+    public function siteMapAsn()
+    {
+        $data['asns'] = DB::table('asns')->pluck('asn');
         return $this->sendData($data);
     }
 }

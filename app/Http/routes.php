@@ -42,7 +42,10 @@ Route::group(['middleware' => ['api']], function () {
 
     Route::get('/search', ['as' => 'asns', 'uses' => 'ApiV1Controller@search']);
 
+    // Misc Routes (Internal Use)
     Route::get('/dns/live/{hostname}', ['uses' => 'ApiV1Controller@getLiveDns']);
+    Route::get('/sitemap/asns', ['uses' => 'ApiV1Controller@siteMapAsn']);
+
 });
 
 Route::group(['middleware' => ['web']], function () {
