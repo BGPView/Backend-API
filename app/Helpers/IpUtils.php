@@ -351,8 +351,12 @@ class IpUtils
     public function getIanaAssignmentEntry($input)
     {
         $type = $this->getInputType($input);
-
         $input = $this->normalizeInput($input);
+
+        // If the input is an IP address lets convert it to dec
+        if ($type === 4 || $type === 6) {
+            $input = $this->ip2dec($input);
+        }
 
         return IanaAssignment::where('type', $type)->where('start', '<=', $input)->where('end', '>=', $input)->first();
     }

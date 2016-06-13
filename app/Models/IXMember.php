@@ -44,6 +44,7 @@ class IXMember extends Model {
             $ix_data['name']            = $ixInfo->name;
             $ix_data['name_full']       = $ixInfo->name_full;
             $ix_data['country_code']    = $ixInfo->counrty_code;
+            $ix_data['city']            = $ixInfo->city;
             $ix_data['ipv4_address']    = $ixMember->ipv4_address;
             $ix_data['ipv6_address']    = $ixMember->ipv6_address;
             $ix_data['speed']           = $ixMember->speed;

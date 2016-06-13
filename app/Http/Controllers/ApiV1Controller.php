@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\ApiBaseController;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Pdp\Parser;
 use Pdp\PublicSuffixListManager;
 
@@ -623,6 +624,37 @@ class ApiV1Controller extends ApiBaseController
         $data['hostname']       = $hostname;
         $data['base_domain']    = $baseDomain;
         $data['dns_records']    = $records;
+
+        return $this->sendData($data);
+    }
+
+    /*
+     * URI: /sitemap/asn
+     *
+     */
+    public function sitemapUrls()
+    {
+        $data['urls'] = [];
+
+        $asns = DB::table('asns')->pluck('asn');
+        foreach($asns as $asn) {
+            $data['urls'][] = '/asn/' . $asn;
+        }
+
+        $ipv4Prefixes = DB::table('ipv4_prefix_whois')->select('ip', 'cidr')->get();
+        foreach($ipv4Prefixes as $prefix) {
+            $data['urls'][] = '/prefix/' . $prefix->ip . '/' . $prefix->cidr;
+        }
+
+        $ipv6Prefixes = DB::table('ipv6_prefix_whois')->select('ip', 'cidr')->get();
+        foreach($ipv6Prefixes as $prefix) {
+            $data['urls'][] = '/prefix/' . $prefix->ip . '/' . $prefix->cidr;
+        }
+
+        $ixs = DB::table('ixs')->pluck('id');
+        foreach($ixs as $ix) {
+            $data['urls'][] = '/ix/' . $ix;
+        }
 
         return $this->sendData($data);
     }
