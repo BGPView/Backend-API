@@ -209,7 +209,7 @@ class ApiV1Controller extends ApiBaseController
             foreach ($upstreamArray as $upstreamAsn) {
                 $asn = ASN::where('asn', $upstreamAsn)->first();
                 $upstreamAsnData['asn'] = $upstreamAsn;
-                $upstreamAsnData['name'] = $asn->name;
+                $upstreamAsnData['name'] = isset($asn->name) ? $asn->name : null;
                 $upstreamAsnData['description'] = isset($asn->description) ? $asn->description : null;
                 $upstreamAsnData['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
                 
