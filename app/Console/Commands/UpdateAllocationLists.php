@@ -149,14 +149,15 @@ class UpdateAllocationLists extends Command
         foreach ($lines as $line) {
             $data = explode('|', $line);
 
+            // if it doesnt have 8 parts, skip
+            if (count($data) !== 8) {
+                continue;
+            }
+
             // Only take allocated resources
-            if (isset($data[2]) === true && isset($data[6]) === true && ($data[6] === 'allocated' || $data[6] === 'assigned')) {
+            if (empty($data[2]) !== true && empty($data[6]) !== true && empty($data[3]) !== true) {
 
                 $resourceType = $data[2];
-
-                if (empty($data[5])) {
-                    $data[5] = "2000101";
-                }
 
                 if ($resourceType === 'asn') {
 
@@ -167,8 +168,8 @@ class UpdateAllocationLists extends Command
                     $this->seenAsnAllocation[$data[3]] = [
                         'rir_id' => $rir->id,
                         'asn' => $data[3],
-                        'counrty_code' => $data[1],
-                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                        'counrty_code' => $data[1] ?: null,
+                        'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
                     ];
 
                 } else if ($resourceType === 'ipv4') {
@@ -185,8 +186,8 @@ class UpdateAllocationLists extends Command
                             'cidr' => $roundedCidr,
                             'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
                             'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $roundedAmount - 1,
-                            'counrty_code' => $data[1],
-                            'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                            'counrty_code' => $data[1] ?: null,
+                            'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
                         ];
 
                         // Deal with the remainder
@@ -200,8 +201,8 @@ class UpdateAllocationLists extends Command
                             'cidr' => $remainCidr,
                             'ip_dec_start' => $startIpDec,
                             'ip_dec_end' => $startIpDec + $remainingIps - 1,
-                            'counrty_code' => $data[1],
-                            'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                            'counrty_code' => $data[1] ?: null,
+                            'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
                         ];
 
                         continue;
@@ -218,8 +219,8 @@ class UpdateAllocationLists extends Command
                         'cidr' => $cidr,
                         'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
                         'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4] - 1,
-                        'counrty_code' => $data[1],
-                        'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                        'counrty_code' => $data[1] ?: null,
+                        'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
                     ];
 
                 } else if ($resourceType === 'ipv6') {
@@ -239,8 +240,8 @@ class UpdateAllocationLists extends Command
                         'cidr' => $data[4],
                         'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
                         'ip_dec_end' => ($this->ipUtils->ip2dec($data[3]) + $ipv6AmountCidrArray[$data[4]] - 1),
-                        'counrty_code' => $data[1],
-                        'date_allocated' => substr($data[5], 0, 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                        'counrty_code' => $data[1] ?: null,
+                        'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
                     ];
 
                 }
