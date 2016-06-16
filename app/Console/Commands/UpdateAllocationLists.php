@@ -59,6 +59,10 @@ class UpdateAllocationLists extends Command
         $this->cli->br()->comment('Updating the IPv4, IPv6 and ASN RIR allocated resources');
 
         foreach (Rir::all() as $rir) {
+            if ($rir->name != 'RIPE') {
+                continue;
+            }
+
             $this->bench->start();
             $this->cli->br()->comment('===================================================');
             $this->cli->br()->comment('Downloading ' . $rir->name . ' allocation list');
@@ -151,6 +155,7 @@ class UpdateAllocationLists extends Command
 
             // Only take allocated resources
             if (isset($data[2]) === true && isset($data[6]) === true && ($data[6] === 'allocated' || $data[6] === 'assigned')) {
+
                 $resourceType = $data[2];
 
                 if (empty($data[5])) {
@@ -172,8 +177,37 @@ class UpdateAllocationLists extends Command
 
                 } else if ($resourceType === 'ipv4') {
 
-                    // If the amount of IP address are unknown, then lets continue...
+                    // Since some RIRs allocate random non CIDR addresses
+                    // We shall split them up into the best CIDR that we can
+                    // Really unhappy with this :/
                     if (isset($ipv4AmountCidrArray[$data[4]]) !== true) {
+                        $roundedCidr = 32 - intval(log($data[4])/log(2));
+                        $roundedAmount = pow(2, (32 - $roundedCidr));
+                        $this->seenIpv4Allocation[$data[3].'/'.$roundedCidr] = [
+                            'rir_id' => $rir->id,
+                            'ip' => $data[3],
+                            'cidr' => $roundedCidr,
+                            'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
+                            'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $roundedAmount - 1,
+                            'counrty_code' => $data[1],
+                            'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                        ];
+
+                        // Deal with the remainder
+                        $remainingIps = $data[4] - $roundedAmount;
+                        $remainCidr = 32 - intval(log($remainingIps)/log(2));
+                        $startIpDec = $this->ipUtils->ip2dec($data[3]) + $roundedAmount;
+                        $startIp = $this->ipUtils->dec2ip($startIpDec);
+                        $this->seenIpv4Allocation[$data[3].'/'.$remainCidr] = [
+                            'rir_id' => $rir->id,
+                            'ip' => $startIp,
+                            'cidr' => $remainCidr,
+                            'ip_dec_start' => $startIpDec,
+                            'ip_dec_end' => $startIpDec + $remainingIps - 1,
+                            'counrty_code' => $data[1],
+                            'date_allocated' => substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2),
+                        ];
+
                         continue;
                     }
 
