@@ -50,7 +50,7 @@ class UpdateDNSTable extends Command
     public function handle()
     {
         $this->bench->start();
-        
+
         // Setting a brand new index name
         $entityIndexName = config('elasticquent.default_index') . '_dns';
         $versionedIndex = $entityIndexName . '_' . time();
@@ -76,6 +76,11 @@ class UpdateDNSTable extends Command
                 }
 
                 $parts = explode(',', $line, 3);
+
+                if (count($parts) !== 3) {
+                    $this->error('Error processing the following line:');
+                    dump($line);
+                }
 
                 $data = [
                     'input' => $parts[0],
