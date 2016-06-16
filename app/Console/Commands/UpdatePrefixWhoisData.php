@@ -73,7 +73,7 @@ class UpdatePrefixWhoisData extends Command
         $this->cli->br()->comment('Getting all the IPv' . $ipVersion . 'prefixes from the BGP table');
 
         $className = 'App\Models\RirIPv' . $ipVersion . 'Allocation';
-        $sourcePrefixes['rir_prefixes'] = $className::all()->shuffle();
+        $sourcePrefixes['rir_prefixes'] = $className::where('status', 'allocated')->orWhere('status', 'assigned')->shuffle();
 
         $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
         $sourcePrefixes['bgp_prefixes'] = $className::all()->shuffle();
