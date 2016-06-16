@@ -49,9 +49,9 @@ class ASN extends Model {
         ],
         'asn' => [
             'type' => 'string',
-	'fields' => [	'sort' => ['type' => 'long'],
-
-],
+	        'fields' => [
+                'sort' => ['type' => 'long'],
+            ],
         ],
     ];
 
