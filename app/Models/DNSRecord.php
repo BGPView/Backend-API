@@ -2,26 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Jenssegers\Mongodb\Eloquent\Model as Moloquent;
+use App\Helpers\IpUtils;
+use Elasticquent\ElasticquentTrait;
 
-class DNSRecord extends Moloquent {
+class DNSRecord {
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
-    protected $table = 'dns_records';
-    protected $collection = 'dns_records';
-    protected $connection = 'mongodb';
-
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
-    protected $hidden = ['id', 'created_at', 'updated_at'];
-
+    use ElasticquentTrait;
 
 }

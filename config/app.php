@@ -160,7 +160,6 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         Barryvdh\Debugbar\ServiceProvider::class,
-        Jenssegers\Mongodb\MongodbServiceProvider::class,
         Elasticquent\ElasticquentServiceProvider::class,
 
     ],
