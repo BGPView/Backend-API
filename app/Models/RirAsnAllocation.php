@@ -20,7 +20,7 @@ class RirAsnAllocation extends Model {
      */
     protected $hidden = ['id', 'rir_id', 'created_at', 'updated_at'];
 
-    protected $fillable = ['rir_id', 'asn', 'counrty_code', 'date_allocated'];
+    protected $fillable = ['rir_id', 'asn', 'counrty_code', 'date_allocated', 'status'];
 
     public function rir()
     {

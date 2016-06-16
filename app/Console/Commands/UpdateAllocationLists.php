@@ -103,24 +103,30 @@ class UpdateAllocationLists extends Command
 
         $asnInsertLine = '';
         foreach ($this->seenAsnAllocation as $asn) {
-            $asnInsertLine .= '('.$asn['rir_id'].','.$asn['asn'].',"'.$asn['counrty_code'].'","'.$asn['date_allocated'].'", "'.$mysqlTime.'", "'.$mysqlTime.'"),';
+            $date_allocated = $asn['date_allocated'] ? '"'.$asn['date_allocated'].'"' : 'null';
+            $counrty_code = $asn['counrty_code'] ? '"'.$asn['counrty_code'].'"' : 'null';
+            $asnInsertLine .= '('.$asn['rir_id'].','.$asn['asn'].','.$counrty_code.','.$date_allocated.',"'.$asn['status'].'","'.$mysqlTime.'", "'.$mysqlTime.'"),';
         }
         $asnInsertLine= rtrim($asnInsertLine, ',').';';
-        DB::statement('INSERT INTO rir_asn_allocations_temp (rir_id,asn,counrty_code,date_allocated,updated_at,created_at) VALUES '.$asnInsertLine);
+        DB::statement('INSERT INTO rir_asn_allocations_temp (rir_id,asn,counrty_code,date_allocated,status,updated_at,created_at) VALUES '.$asnInsertLine);
 
         $ipv4InsertLine = '';
         foreach ($this->seenIpv4Allocation as $ipv4) {
-            $ipv4InsertLine .= '('.$ipv4['rir_id'].',"'.$ipv4['ip'].'",'.$ipv4['cidr'].','.$ipv4['ip_dec_start'].','.$ipv4['ip_dec_end'].',"'.$ipv4['counrty_code'].'","'.$ipv4['date_allocated'].'", "'.$mysqlTime.'", "'.$mysqlTime.'"),';
+            $date_allocated = $ipv4['date_allocated'] ? '"'.$ipv4['date_allocated'].'"' : 'null';
+            $counrty_code = $ipv4['counrty_code'] ? '"'.$ipv4['counrty_code'].'"' : 'null';
+            $ipv4InsertLine .= '('.$ipv4['rir_id'].',"'.$ipv4['ip'].'",'.$ipv4['cidr'].','.$ipv4['ip_dec_start'].','.$ipv4['ip_dec_end'].','.$counrty_code.','.$date_allocated.',"'.$ipv4['status'].'","'.$mysqlTime.'", "'.$mysqlTime.'"),';
         }
         $ipv4InsertLine= rtrim($ipv4InsertLine, ',').';';
-        DB::statement('INSERT INTO rir_ipv4_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,updated_at,created_at) VALUES '.$ipv4InsertLine);
+        DB::statement('INSERT INTO rir_ipv4_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,status,updated_at,created_at) VALUES '.$ipv4InsertLine);
 
         $ipv6InsertLine = '';
         foreach ($this->seenIpv6Allocation as $ipv6) {
-            $ipv6InsertLine .= '('.$ipv6['rir_id'].',"'.$ipv6['ip'].'",'.$ipv6['cidr'].','.$ipv6['ip_dec_start'].','.$ipv6['ip_dec_end'].',"'.$ipv6['counrty_code'].'","'.$ipv6['date_allocated'].'", "'.$mysqlTime.'", "'.$mysqlTime.'"),';
+            $date_allocated = $ipv6['date_allocated'] ? '"'.$ipv6['date_allocated'].'"' : 'null';
+            $counrty_code = $ipv6['counrty_code'] ? '"'.$ipv6['counrty_code'].'"' : 'null';
+            $ipv6InsertLine .= '('.$ipv6['rir_id'].',"'.$ipv6['ip'].'",'.$ipv6['cidr'].','.$ipv6['ip_dec_start'].','.$ipv6['ip_dec_end'].','.$counrty_code.','.$date_allocated.',"'.$ipv6['status'].'", "'.$mysqlTime.'", "'.$mysqlTime.'"),';
         }
         $ipv6InsertLine= rtrim($ipv6InsertLine, ',').';';
-        DB::statement('INSERT INTO rir_ipv6_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,updated_at,created_at) VALUES '.$ipv6InsertLine);
+        DB::statement('INSERT INTO rir_ipv6_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,status,updated_at,created_at) VALUES '.$ipv6InsertLine);
 
         DB::statement('RENAME TABLE rir_ipv4_allocations TO backup_rir_ipv4_allocations, rir_ipv4_allocations_temp TO rir_ipv4_allocations;');
         DB::statement('RENAME TABLE rir_ipv6_allocations TO backup_rir_ipv6_allocations, rir_ipv6_allocations_temp TO rir_ipv6_allocations;');
@@ -159,6 +165,9 @@ class UpdateAllocationLists extends Command
 
                 $resourceType = $data[2];
 
+                // Replace 'ZZ' with null country code
+                $data[1] = $data[1] == 'ZZ' ? null : $data[1];
+
                 if ($resourceType === 'asn') {
 
                     if (isset($this->seenAsnAllocation[$data[3]]) === true) {
@@ -170,6 +179,7 @@ class UpdateAllocationLists extends Command
                         'asn' => $data[3],
                         'counrty_code' => $data[1] ?: null,
                         'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
+                        'status' => $data[6],
                     ];
 
                 } else if ($resourceType === 'ipv4') {
@@ -188,6 +198,7 @@ class UpdateAllocationLists extends Command
                             'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $roundedAmount - 1,
                             'counrty_code' => $data[1] ?: null,
                             'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
+                            'status' => $data[6],
                         ];
 
                         // Deal with the remainder
@@ -203,6 +214,7 @@ class UpdateAllocationLists extends Command
                             'ip_dec_end' => $startIpDec + $remainingIps - 1,
                             'counrty_code' => $data[1] ?: null,
                             'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
+                            'status' => $data[6],
                         ];
 
                         continue;
@@ -221,6 +233,7 @@ class UpdateAllocationLists extends Command
                         'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4] - 1,
                         'counrty_code' => $data[1] ?: null,
                         'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
+                        'status' => $data[6],
                     ];
 
                 } else if ($resourceType === 'ipv6') {
@@ -242,6 +255,7 @@ class UpdateAllocationLists extends Command
                         'ip_dec_end' => ($this->ipUtils->ip2dec($data[3]) + $ipv6AmountCidrArray[$data[4]] - 1),
                         'counrty_code' => $data[1] ?: null,
                         'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
+                        'status' => $data[6],
                     ];
 
                 }
