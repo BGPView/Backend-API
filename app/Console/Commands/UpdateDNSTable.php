@@ -80,6 +80,7 @@ class UpdateDNSTable extends Command
                 if (count($parts) !== 3) {
                     $this->error('Error processing the following line:');
                     dump($line);
+                    continue;
                 }
 
                 $data = [
