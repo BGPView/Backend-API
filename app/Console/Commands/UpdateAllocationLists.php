@@ -156,7 +156,7 @@ class UpdateAllocationLists extends Command
             $data = explode('|', $line);
 
             // if it doesnt have 8 parts, skip
-            if (count($data) !== 8) {
+            if (count($data) !== 8 && $data[6] != 'available' && $data[6] != 'reserved') {
                 continue;
             }
 
