@@ -59,10 +59,6 @@ class UpdateAllocationLists extends Command
         $this->cli->br()->comment('Updating the IPv4, IPv6 and ASN RIR allocated resources');
 
         foreach (Rir::all() as $rir) {
-            if ($rir->name != 'RIPE') {
-                continue;
-            }
-
             $this->bench->start();
             $this->cli->br()->comment('===================================================');
             $this->cli->br()->comment('Downloading ' . $rir->name . ' allocation list');
