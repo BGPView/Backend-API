@@ -14,7 +14,7 @@ class UpdateDNSTable extends Command
 {
     use DispatchesJobs;
 
-    protected $batchAmount = 50000;
+    protected $batchAmount = 500000;
     protected $bench;
     protected $ipUtils;
 
@@ -78,8 +78,10 @@ class UpdateDNSTable extends Command
                 $parts = explode(',', $line, 3);
 
                 if (count($parts) !== 3) {
+                    $this->warn('====================================');
                     $this->error('Error processing the following line:');
                     dump($line);
+                    $this->warn('====================================');
                     continue;
                 }
 
@@ -107,7 +109,7 @@ class UpdateDNSTable extends Command
                 if ($currentCount > $this->batchAmount) {
                     // Get our document body data.
                     $client->bulk($params);
-                    $this->info('Inserted 50,000 records');
+                    $this->info('Inserted ' . number_format($this->batchAmount) . ' DNS records');
 
                     // Reset the batching
                     $currentCount = 0;
