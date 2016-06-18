@@ -10,6 +10,7 @@ use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
 use App\Models\ROA;
+use Elasticsearch\ClientBuilder;
 use GeoIp2\Database\Reader;
 
 class IpUtils
@@ -510,29 +511,59 @@ class IpUtils
         return 0;
     }
 
-    public function getPrefixDns($prefix)
+    public function getPrefixDns($prefix, $count = false)
     {
+        $client = ClientBuilder::create()->build();
         $prefixParts = explode('/', $prefix);
+
         if ($this->getInputType($prefixParts[0]) === 4) {
-            $ipArrayCount = $this->IPv4cidrIpCount();
+            $startIpDec = $this->ip2dec($prefixParts[0]);
+            $endIpDec = $startIpDec + $this->IPv4cidrIpCount()[$prefixParts[1]];
         } else {
-            $ipArrayCount = $this->IPv6cidrIpCount();
+            $startIpDec = number_format($this->ip2dec($prefixParts[0]), 0 , '', '');
+            $endIpDec = $startIpDec + $this->IPv6cidrIpCount()[$prefixParts[1]];
+            $endIpDec = number_format($endIpDec, 0 , '', '');
         }
 
-        $startDec = $this->ip2dec($prefixParts[0]);
-        $endDec = $startDec + $ipArrayCount[$prefixParts[1]] - 1;
+        $searchParams = [
+            'index' => 'main_index_dns',
+            'type' => 'dns_records',
+            'body' => [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            [
+                                'range' => [
+                                    'ip_dec' => [
+                                        'gte' => $startIpDec
+                                    ],
+                                ]
+                            ],
+                            [
+                                'range' => [
+                                    'ip_dec' => [
+                                        'lte' => $endIpDec
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $dnsRecords = DNSRecord::whereBetween('ip_dec', [(string)$startDec, (string)$endDec])->get(['input', 'entry']);
+        $searchResults = $client->search($searchParams);
 
-        $records = [];
-        foreach ($dnsRecords as $dnsRecord) {
-            $records[] = [
-                'domain' => $dnsRecord->input,
-                'record' => $dnsRecord->entry,
-            ];
+        if ($count === true) {
+            return $searchResults['hits']['total'];
         }
 
-        return $records;
+        $data = collect([]);
+        foreach ($searchResults['hits']['hits'] as $searchResult) {
+            $data->push($searchResult['_source']);
+        }
+
+        return $data;
     }
 
     public function getRealatedPrefixes($ip, $cidr)
