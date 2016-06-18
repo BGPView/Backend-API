@@ -79,17 +79,17 @@ class UpdateDNSTable extends Command
 
                 $parts = explode(',', $line, 3);
 
-                // ######## TEMPORARY ########
-                // Only caring to index A and AAA records at this point
-                if ($parts[1] != 'A' && $parts[1] != 'AAAA') {
-                    continue;
-                }
-
                 if (count($parts) !== 3) {
                     $this->warn('====================================');
                     $this->error('Error processing the following line:');
                     dump($line);
                     $this->warn('====================================');
+                    continue;
+                }
+
+                // ######## TEMPORARY ########
+                // Only caring to index A and AAA records at this point
+                if ($parts[1] != 'A' && $parts[1] != 'AAAA') {
                     continue;
                 }
 
