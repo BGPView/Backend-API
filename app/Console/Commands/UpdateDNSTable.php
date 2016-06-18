@@ -14,7 +14,7 @@ class UpdateDNSTable extends Command
 {
     use DispatchesJobs;
 
-    protected $batchAmount = 500000;
+    protected $batchAmount = 100000;
     protected $bench;
     protected $ipUtils;
 
@@ -60,12 +60,14 @@ class UpdateDNSTable extends Command
         DNSRecord::createIndex();
 
         $currentCount = 0;
+        $idCounter = 0;
         $filePath = 'final_output.csv';
 
         $dnsModel = new DNSRecord;
         $name = $dnsModel->getTable();
         $params = ['body' => []];
         $client = $dnsModel->getElasticSearchClient();
+        $rrTypes = DNSRecord::$rrTypes;
 
         $fp = fopen($filePath, 'r');
         if ($fp) {
@@ -85,9 +87,19 @@ class UpdateDNSTable extends Command
                     continue;
                 }
 
+                // Make sure the type is something we know/have
+                $parts[1] = strtoupper($parts[1]);
+                if (isset($rrTypes[$parts[1]]) !== true) {
+                    $this->warn('====================================');
+                    $this->error('Unkonw rrType: '.$parts[1]);
+                    dump($line);
+                    $this->warn('====================================');
+                    continue;
+                }
+
                 $data = [
                     'input' => $parts[0],
-                    'type'  => $parts[1],
+                    'type'  => $rrTypes[$parts[1]],
                     'entry' => $parts[2],
                 ];
 
@@ -101,6 +113,7 @@ class UpdateDNSTable extends Command
                     'index' => [
                         '_index' => $versionedIndex,
                         '_type' => $name,
+                        '_id' => $idCounter++,
                     ]
                 ];
                 $params['body'][] = $data;
