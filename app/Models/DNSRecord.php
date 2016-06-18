@@ -75,11 +75,19 @@ class DNSRecord {
     {
         $this->ipUtils = new IpUtils();
         $client = ClientBuilder::create()->build();
-
         $prefixParts = explode('/', $prefix);
-        $startIpDec = (int)$this->ipUtils->ip2dec($prefixParts[0]);
-        $endIpDec = $startIpDec + 255; //Hard coded for now
-        
+
+
+
+        if ($this->ipUtils->getInputType($prefixParts[0]) === 4) {
+            $startIpDec = $this->ipUtils->ip2dec($prefixParts[0]);
+            $endIpDec = $startIpDec + $this->ipUtils->IPv4cidrIpCount()[$prefixParts[1]];
+        } else {
+            $startIpDec = number_format($this->ipUtils->ip2dec($prefixParts[0]), 0 , '', '');
+            $endIpDec = $startIpDec + $this->ipUtils->IPv6cidrIpCount()[$prefixParts[1]];
+            $endIpDec = number_format($endIpDec, 0 , '', '');
+        }
+
         $searchParams = [
             'index' => 'main_index_dns',
             'type' => 'dns_records',
@@ -90,14 +98,14 @@ class DNSRecord {
                             [
                                 'range' => [
                                     'ip_dec' => [
-                                        'gt' => $startIpDec
+                                        'gte' => $startIpDec
                                     ],
                                 ]
                             ],
                             [
                                 'range' => [
                                     'ip_dec' => [
-                                        'lt' => $endIpDec
+                                        'lte' => $endIpDec
                                     ],
                                 ],
                             ],
