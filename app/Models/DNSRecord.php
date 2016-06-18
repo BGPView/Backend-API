@@ -77,43 +77,43 @@ class DNSRecord {
         $client = ClientBuilder::create()->build();
 
         $prefixParts = explode('/', $prefix);
-        $startIpDec = $this->ipUtils->ip2dec($prefixParts[0]);
+        $startIpDec = (int)$this->ipUtils->ip2dec($prefixParts[0]);
         $endIpDec = $startIpDec + 255; //Hard coded for now
-
-
+        
         $searchParams = [
             'index' => 'main_index_dns',
             'type' => 'dns_records',
             'body' => [
                 'query' => [
-                    'filtered' => [
-                        'filter' => [
-                            'bool' => [
-                                'must' => [
-                                    [
-                                        'range' => [
-                                            'ip_dec_end' => [
-                                                'gte' => $startIpDec
-                                            ]
-                                        ]
+                    'bool' => [
+                        'must' => [
+                            [
+                                'range' => [
+                                    'ip_dec' => [
+                                        'gt' => $startIpDec
                                     ],
-                                    [
-                                        'range' => [
-                                            'ip_dec_end' => [
-                                                'lte' => $endIpDec
-                                            ]
-                                        ]
-                                    ]
                                 ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                            ],
+                            [
+                                'range' => [
+                                    'ip_dec' => [
+                                        'lt' => $endIpDec
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
-echo json_encode($searchParams);
 
-        return $client->get($searchParams);
+        $searchResults = $client->search($searchParams)['hits']['hits'];
 
+        $data = collect([]);
+        foreach ($searchResults as $searchResult) {
+            $data->push($searchResult['_source']);
+        }
+
+        return $data;
     }
 }
