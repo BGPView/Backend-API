@@ -513,6 +513,9 @@ class IpUtils
 
     public function getPrefixDns($prefix, $count = false)
     {
+        $dnsModel = new DNSRecord;
+        $rrTypes = array_flip($dnsModel::$rrTypes);
+
         $client = ClientBuilder::create()->build();
         $prefixParts = explode('/', $prefix);
 
@@ -526,8 +529,8 @@ class IpUtils
         }
 
         $searchParams = [
-            'index' => 'main_index_dns',
-            'type' => 'dns_records',
+            'index' => config('elasticquent.default_index') . '_dns',
+            'type' => $dnsModel->getTable(),
             'body' => [
                 'query' => [
                     'bool' => [
@@ -560,7 +563,11 @@ class IpUtils
 
         $data = collect([]);
         foreach ($searchResults['hits']['hits'] as $searchResult) {
-            $data->push($searchResult['_source']);
+            $data->push([
+                'domain'    => $searchResult['_source']['input'],
+                'rr_type'   => $rrTypes[$searchResult['_source']['type']],
+                'record'    => $searchResult['_source']['entry'],
+            ]);
         }
 
         return $data;

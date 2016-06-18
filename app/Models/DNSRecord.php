@@ -8,8 +8,6 @@ use Elasticquent\ElasticquentTrait;
 
 class DNSRecord {
 
-    private $ipUtils;
-
     use ElasticquentTrait;
 
     /**
