@@ -11,6 +11,7 @@ use App\Models\RirAsnAllocation;
 use App\Services\Whois;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use League\CLImate\CLImate;
 
 class UpdateASNWhoisInfo extends Command
@@ -114,9 +115,12 @@ class UpdateASNWhoisInfo extends Command
             }
         }
 
+        $seenAsns = DB::table('asns')->pluck('asn');
+        $seenAsns = array_flip($seenAsns);
+
         foreach ($asns as $as_number => $rir_id) {
             // Lets check if the ASN has already been looked at in the past
-            if (ASN::where('asn', $as_number)->first() === null) {
+            if (isset($seenAsns[$as_number]) !== true) {
                 $this->cli->br()->comment('Looking up and adding: AS' . $as_number);
 
                 $asnWhois = new Whois($as_number);
