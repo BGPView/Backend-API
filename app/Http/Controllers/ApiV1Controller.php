@@ -658,4 +658,26 @@ class ApiV1Controller extends ApiBaseController
 
         return $this->sendData($data);
     }
+
+    /*
+     * URI: /as-summery
+     *
+     */
+    public function asnSummery()
+    {
+        $asns = DB::table('asns')->select(array('asn', 'name', 'description_full'))->get();
+
+        $data['count'] = count($asns);
+        $data['asns'] = [];
+
+        foreach ($asns as $asn) {
+            $data['asn'][] = [
+                'asn' => $asn->asn,
+                'name' => $asn->name,
+                'description' => json_decode($asn->description_full) ?: [],
+            ];
+        }
+
+        return $this->sendData($data);
+    }
 }
