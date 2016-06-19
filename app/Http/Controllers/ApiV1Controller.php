@@ -667,11 +667,11 @@ class ApiV1Controller extends ApiBaseController
     {
         $asns = DB::table('asns')->select(array('asn', 'name', 'description_full'))->get();
 
-        $data['count'] = count($asns);
+        $data['results_count'] = count($asns);
         $data['asns'] = [];
 
         foreach ($asns as $asn) {
-            $data['asn'][] = [
+            $data['asns'][] = [
                 'asn' => $asn->asn,
                 'name' => $asn->name,
                 'description' => json_decode($asn->description_full) ?: [],
