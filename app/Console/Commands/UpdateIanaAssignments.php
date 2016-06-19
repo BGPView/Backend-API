@@ -149,7 +149,7 @@ class UpdateIanaAssignments extends Command
                 }
 
                 // Who the hell names these keys :/
-                $date = $assignment['Registration\n        Date'];
+                $date = $assignment["Registration\n        Date"];
 
                 $ianaAssignment = new IanaAssignment();
                 $ianaAssignment->type = 'asn';
