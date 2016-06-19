@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\IpUtils;
+use Elasticsearch\ClientBuilder;
 use Elasticquent\ElasticquentTrait;
 
 class DNSRecord {
@@ -42,10 +43,29 @@ class DNSRecord {
             'type' => 'string',
             'analyzer' => 'string_lowercase'
         ],
+        'ip_dec' => [
+            'type' => 'double',
+        ],
+    ];
+
+    // To save on space we will use the ints instead of a char byte on ES storage
+    public static $rrTypes = [
+        'A' => 1,
+        'AAAA' => 2,
+        'CNAME' => 3,
+        'NS' => 4,
+        'MX' => 5,
+        'SOA' => 6,
+        'TXT' => 7,
     ];
 
     public function getTable()
     {
         return 'dns_records';
+    }
+
+    public function getKey()
+    {
+        return $this->getTable();
     }
 }

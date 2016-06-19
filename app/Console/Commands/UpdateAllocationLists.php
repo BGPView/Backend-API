@@ -147,7 +147,7 @@ class UpdateAllocationLists extends Command
     private function updateDb($rir, $list)
     {
         $lines = explode("\n", $list);
-        $this->cli->br()->comment('Collection and parsing all resources from ' . $rir->name . ' allocation list ('.count($lines).' entries)');
+        $this->cli->br()->comment('Collection and parsing all resources from ' . $rir->name . ' allocation list ('.number_format(count($lines)).' entries)');
 
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount($reverse = true);
         $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
@@ -188,25 +188,34 @@ class UpdateAllocationLists extends Command
                     // We shall split them up into the best CIDR that we can
                     // Really unhappy with this :/
                     if (isset($ipv4AmountCidrArray[$data[4]]) !== true) {
+                        $roundedCidr = 32 - intval(log($data[4])/log(2));
+                        $roundedAmount = pow(2, (32 - $roundedCidr));
+                        $this->seenIpv4Allocation[$data[3].'/'.$roundedCidr] = [
+                            'rir_id' => $rir->id,
+                            'ip' => $data[3],
+                            'cidr' => $roundedCidr,
+                            'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
+                            'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $roundedAmount - 1,
+                            'counrty_code' => $data[1] ?: null,
+                            'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
+                            'status' => $data[6],
+                        ];
 
-                        // Number of /24's in the prefix
-                        $slash24sCount = floor($data[4]/256);
-                        $initialIpDec =  $this->ipUtils->ip2dec($data[3]);
-
-                        for ($i=0; $i < $slash24sCount; $i++) {
-                            $startIpDec = $initialIpDec + ($i * 256);
-
-                            $this->seenIpv4Allocation[$this->ipUtils->dec2ip($startIpDec).'/24'] = [
-                                'rir_id' => $rir->id,
-                                'ip' => $this->ipUtils->dec2ip($startIpDec),
-                                'cidr' => 24,
-                                'ip_dec_start' => $startIpDec,
-                                'ip_dec_end' => $startIpDec + 256 - 1,
-                                'counrty_code' => $data[1] ?: null,
-                                'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
-                                'status' => $data[6],
-                            ];
-                        }
+                        // Deal with the remainder
+                        $remainingIps = $data[4] - $roundedAmount;
+                        $remainCidr = 32 - intval(log($remainingIps)/log(2));
+                        $startIpDec = $this->ipUtils->ip2dec($data[3]) + $roundedAmount;
+                        $startIp = $this->ipUtils->dec2ip($startIpDec);
+                        $this->seenIpv4Allocation[$data[3].'/'.$remainCidr] = [
+                            'rir_id' => $rir->id,
+                            'ip' => $startIp,
+                            'cidr' => $remainCidr,
+                            'ip_dec_start' => $startIpDec,
+                            'ip_dec_end' => $startIpDec + $remainingIps - 1,
+                            'counrty_code' => $data[1] ?: null,
+                            'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
+                            'status' => $data[6],
+                        ];
 
                         continue;
                     }
