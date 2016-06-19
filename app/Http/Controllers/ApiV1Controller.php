@@ -671,7 +671,7 @@ class ApiV1Controller extends ApiBaseController
         $data['asns'] = [];
 
         foreach ($asns as $asn) {
-            $description = json_decode($asn->description_full)
+            $description = json_decode($asn->description_full);
             $data['asns'][] = [
                 'asn' => $asn->asn,
                 'name' => $asn->name,
