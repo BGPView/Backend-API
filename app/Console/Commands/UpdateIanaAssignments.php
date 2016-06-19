@@ -84,7 +84,7 @@ class UpdateIanaAssignments extends Command
                 $ianaAssignment->end = $end;
                 $ianaAssignment->whois_server = $assignment['WHOIS'];
                 $ianaAssignment->description = $assignment['Designation'];
-                $ianaAssignment->status = strtolower($assignment['Status']);
+                $ianaAssignment->status = strtolower($assignment['Status [1]']);
                 $ianaAssignment->date_allocated = $assignment['Date'] ? substr($assignment['Date'], 0 , 4) . "-" . substr($assignment['Date'], 4, 2) . "-" . substr($assignment['Date'], 6, 2) : null;
                 $ianaAssignment->save();
             }
@@ -148,6 +148,9 @@ class UpdateIanaAssignments extends Command
                     $status = 'unknown';
                 }
 
+                // Who the hell names these keys :/
+                $date = $assignment['Registration\n        Date'];
+
                 $ianaAssignment = new IanaAssignment();
                 $ianaAssignment->type = 'asn';
                 $ianaAssignment->start = $start;
@@ -155,7 +158,7 @@ class UpdateIanaAssignments extends Command
                 $ianaAssignment->whois_server = $assignment['WHOIS'];
                 $ianaAssignment->description = $description;
                 $ianaAssignment->status = $status;
-                $ianaAssignment->date_allocated = $assignment['Registration Date'] ? substr($assignment['Registration Date'], 0 , 4) . "-" . substr($assignment['Registration Date'], 4, 2) . "-" . substr($assignment['Registration Date'], 6, 2) : null;
+                $ianaAssignment->date_allocated = $date ? substr($date, 0 , 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2) : null;
                 $ianaAssignment->save();
             }
         }
