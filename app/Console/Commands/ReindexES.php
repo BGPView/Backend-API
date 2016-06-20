@@ -90,7 +90,7 @@ class ReindexES extends Command
 
     private function hotSwapIndices($versionedIndex, $entityIndexName)
     {
-        $client = ClientBuilder::create()->build();
+        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
 
         $indexExists       = $client->indices()->exists(['index' => $entityIndexName]);
         $previousIndexName = null;
