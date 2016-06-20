@@ -516,7 +516,7 @@ class IpUtils
         $dnsModel = new DNSRecord;
         $rrTypes = array_flip($dnsModel::$rrTypes);
 
-        $client = ClientBuilder::create()->build();
+        $client = ClientBuilder::create(config('elasticquent.config.hosts'))->build();
         $prefixParts = explode('/', $prefix);
 
         if ($this->getInputType($prefixParts[0]) === 4) {
