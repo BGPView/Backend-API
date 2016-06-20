@@ -14,7 +14,7 @@ return array(
     */
 
     'config' => [
-        'hosts'     => ['localhost:9200'],
+        'hosts'     => [env('ES_HOST', 'localhost').':'.env('ES_PORT', 9200)],
         'retries'   => 1,
     ],
 

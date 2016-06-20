@@ -83,6 +83,9 @@ class UpdateIanaAssignments extends Command
                 $ianaAssignment->start = $start;
                 $ianaAssignment->end = $end;
                 $ianaAssignment->whois_server = $assignment['WHOIS'];
+                $ianaAssignment->description = $assignment['Designation'];
+                $ianaAssignment->status = strtolower($assignment['Status [1]']);
+                $ianaAssignment->date_allocated = $assignment['Date'] ? substr($assignment['Date'], 0 , 4) . "-" . substr($assignment['Date'], 4, 2) . "-" . substr($assignment['Date'], 6, 2) : null;
                 $ianaAssignment->save();
             }
         }
@@ -109,6 +112,9 @@ class UpdateIanaAssignments extends Command
                 $ianaAssignment->start = $start;
                 $ianaAssignment->end = $end;
                 $ianaAssignment->whois_server = $assignment['WHOIS'];
+                $ianaAssignment->description = $assignment['Designation'];
+                $ianaAssignment->status = strtolower($assignment['Status']);
+                $ianaAssignment->date_allocated = $assignment['Date'] ? substr($assignment['Date'], 0 , 4) . "-" . substr($assignment['Date'], 4, 2) . "-" . substr($assignment['Date'], 6, 2) : null;
                 $ianaAssignment->save();
             }
         }
@@ -129,11 +135,30 @@ class UpdateIanaAssignments extends Command
                 $start = trim($parts[0]);
                 $end = isset($parts[1]) ? trim($parts[1]) : trim($parts[0]);
 
+                $description = $assignment['Description'];
+                if (empty(trim($assignment['Reference'])) !== true) {
+                    $description .= ' '.trim($assignment['Reference']);
+                }
+
+                if (stripos($assignment['Description'], 'reserved') !== false) {
+                    $status = 'reserved';
+                } else if (stripos($assignment['Description'], 'assigned') !== false) {
+                    $status = 'assigned';
+                } else {
+                    $status = 'unknown';
+                }
+
+                // Who the hell names these keys :/
+                $date = $assignment["Registration\n        Date"];
+
                 $ianaAssignment = new IanaAssignment();
                 $ianaAssignment->type = 'asn';
                 $ianaAssignment->start = $start;
                 $ianaAssignment->end = $end;
                 $ianaAssignment->whois_server = $assignment['WHOIS'];
+                $ianaAssignment->description = $description;
+                $ianaAssignment->status = $status;
+                $ianaAssignment->date_allocated = $date ? substr($date, 0 , 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2) : null;
                 $ianaAssignment->save();
             }
         }
