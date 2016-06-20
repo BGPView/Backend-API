@@ -561,13 +561,9 @@ class IpUtils
             return $searchResults['hits']['total'];
         }
 
-        $data = collect([]);
+        $data = [];
         foreach ($searchResults['hits']['hits'] as $searchResult) {
-            $data->push([
-                'domain'    => $searchResult['_source']['input'],
-                'rr_type'   => $rrTypes[$searchResult['_source']['type']],
-                'record'    => $searchResult['_source']['entry'],
-            ]);
+            $data[$searchResult['_source']['entry']][] = $searchResult['_source']['input'];
         }
 
         return $data;
