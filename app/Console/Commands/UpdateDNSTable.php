@@ -87,12 +87,6 @@ class UpdateDNSTable extends Command
                     continue;
                 }
 
-                // ######## TEMPORARY ########
-                // Only caring to index A and AAA records at this point
-                if ($parts[1] != 'A' && $parts[1] != 'AAAA') {
-                    continue;
-                }
-
                 // Make sure the type is something we know/have
                 $parts[1] = strtoupper($parts[1]);
                 if (isset($rrTypes[$parts[1]]) !== true) {
@@ -161,7 +155,7 @@ class UpdateDNSTable extends Command
 
     private function hotSwapIndices($versionedIndex, $entityIndexName)
     {
-        $client = ClientBuilder::create()->build();
+        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
 
         $indexExists       = $client->indices()->exists(['index' => $entityIndexName]);
         $previousIndexName = null;
