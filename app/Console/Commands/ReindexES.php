@@ -56,7 +56,7 @@ class ReindexES extends Command
         // create new index
         ASN::createIndex();
 
-        $this->reindexClass(IPv4PrefixWhois::class);
+//        $this->reindexClass(IPv4PrefixWhois::class);
         $this->reindexClass(IPv6PrefixWhois::class);
         $this->reindexClass(IX::class);
         $this->reindexClass(ASN::class);
