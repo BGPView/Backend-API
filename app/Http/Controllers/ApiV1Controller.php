@@ -472,6 +472,7 @@ class ApiV1Controller extends ApiBaseController
         $asns = ASN::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 100, $offset = null, $asnSort);
         $ipv4Prefixes = IPv4PrefixWhois::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 200, $offset = null, $ipSort);
         $ipv6Prefixes = IPv6PrefixWhois::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 200, $offset = null, $ipSort);
+        $ixs          = IX::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 200, $offset = null, $ipSort);
 
         $data['asns'] = [];
         foreach ($asns as $asn) {
@@ -520,6 +521,17 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['parent_cidr']      = $prefix->parent_cidr;
 
             $data['ipv6_prefixes'][] = $prefixData;
+        }
+
+        $data['internet_exchanges'] = [];
+        foreach ($ixs as $ix) {
+            $ixData['ix_id']            = $ix->id;
+            $ixData['name']             = $ix->name;
+            $ixData['name_full']        = $ix->name_full;
+            $ixData['country_code']     = $ix->country_code;
+            $ixData['city']             = $ix->city;
+
+            $data['internet_exchanges'][] = $ixData;
         }
 
         return $this->sendData($data);
