@@ -42,7 +42,7 @@ class IX extends Model {
             'type' => 'string',
             'analyzer' => 'string_lowercase'
         ],
-        'name_full  ' => [
+        'name_full' => [
             'type' => 'string',
             'analyzer' => 'string_lowercase'
         ],
