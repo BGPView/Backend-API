@@ -58,7 +58,7 @@ class ReindexES extends Command
 
         $this->reindexClass(IPv4PrefixWhois::class);
         $this->reindexClass(IPv6PrefixWhois::class);
-        $this->reindexClass(IX::class);
+        $this->reindexClass(IX::class, $withRelated = true);
         $this->reindexClass(ASN::class);
 
         $this->hotSwapIndices($versionedIndex, $entityIndexName);
@@ -73,7 +73,7 @@ class ReindexES extends Command
 
     }
 
-    private function reindexClass($class)
+    private function reindexClass($class, $withRelated = true)
     {
         $class::putMapping($ignoreConflicts = true);
 
@@ -86,7 +86,12 @@ class ReindexES extends Command
 
         for ($i = 0; $i <= $batches; $i++) {
             $this->info('Indexing Batch number ' . $i . ' on ' . $class);
-            $class::with('emails')->with('rir')->offset($i*$this->batchAmount)->limit($this->batchAmount)->get()->addToIndex();
+
+            if ($withRelated === true) {
+                $class::with('emails')->with('rir')->offset($i*$this->batchAmount)->limit($this->batchAmount)->get()->addToIndex();
+            } else {
+                $class::offset($i*$this->batchAmount)->limit($this->batchAmount)->get()->addToIndex();
+            }
         }
     }
 
