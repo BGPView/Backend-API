@@ -58,7 +58,7 @@ class ReindexES extends Command
 
         $this->reindexClass(IPv4PrefixWhois::class);
         $this->reindexClass(IPv6PrefixWhois::class);
-        $this->reindexClass(IX::class, $withRelated = true);
+        $this->reindexClass(IX::class, $withRelated = false);
         $this->reindexClass(ASN::class);
 
         $this->hotSwapIndices($versionedIndex, $entityIndexName);
