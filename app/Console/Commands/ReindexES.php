@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\ASN;
 use App\Models\IPv4PrefixWhois;
 use App\Models\IPv6PrefixWhois;
+use App\Models\IX;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
@@ -57,6 +58,7 @@ class ReindexES extends Command
 
         $this->reindexClass(IPv4PrefixWhois::class);
         $this->reindexClass(IPv6PrefixWhois::class);
+        $this->reindexClass(IX::class);
         $this->reindexClass(ASN::class);
 
         $this->hotSwapIndices($versionedIndex, $entityIndexName);
