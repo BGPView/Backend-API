@@ -528,7 +528,7 @@ class ApiV1Controller extends ApiBaseController
             $ixData['ix_id']            = $ix->id;
             $ixData['name']             = $ix->name;
             $ixData['name_full']        = $ix->name_full;
-            $ixData['country_code']     = $ix->country_code;
+            $ixData['country_code']     = $ix->counrty_code;
             $ixData['city']             = $ix->city;
 
             $data['internet_exchanges'][] = $ixData;
