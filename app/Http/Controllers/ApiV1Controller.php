@@ -441,10 +441,16 @@ class ApiV1Controller extends ApiBaseController
                     ['wildcard' => [
                         'name' => [
                             'value' => '*'.$queryTerm.'*',
+                            'boost' => 2,
                         ]
                     ]],
                     ['wildcard' => [
                         'description' => [
+                            'value' => '*'.$queryTerm.'*',
+                        ]
+                    ]],
+                    ['wildcard' => [
+                        'name_full' => [
                             'value' => '*'.$queryTerm.'*',
                         ]
                     ]],
