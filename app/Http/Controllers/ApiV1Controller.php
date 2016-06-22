@@ -64,6 +64,7 @@ class ApiV1Controller extends ApiBaseController
         $output['rir_allocation']['rir_name']           = empty($allocation->rir_id) !== true ? $allocation->rir->name : null;
         $output['rir_allocation']['country_code']       = isset($allocation->counrty_code) ? $allocation->counrty_code : null;
         $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
+        $output['rir_allocation']['allocation_status']  = isset($allocation->status) ? $allocation->status : 'unknown';
 
         if ($request->has('with_ixs') === true) {
             $output['internet_exchanges'] = IXMember::getMembers($asnData->asn);
@@ -236,6 +237,7 @@ class ApiV1Controller extends ApiBaseController
         $output['rir_allocation']['cidr']               = isset($allocation->cidr) ? $allocation->cidr : null;
         $output['rir_allocation']['prefix']             = isset($allocation->ip) && isset($allocation->cidr) ? $allocation->ip . '/' . $allocation->cidr : null;
         $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
+        $output['rir_allocation']['allocation_status']  = isset($allocation->status) ? $allocation->status : 'unknown';
 
         $output['maxmind']['country_code']  = $geoip ? $geoip->country->isoCode : null;
         $output['maxmind']['city']          = $geoip ? $geoip->city->name : null;
@@ -340,6 +342,7 @@ class ApiV1Controller extends ApiBaseController
         $output['rir_allocation']['cidr']               = $rirCidr;
         $output['rir_allocation']['prefix']             = $rirPrefix;
         $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00': null;
+        $output['rir_allocation']['allocation_status']  = isset($allocation->status) ? $allocation->status : 'unknown';
 
         $output['maxmind']['country_code']  = $geoip ? $geoip->country->isoCode : null;
         $output['maxmind']['city']          = $geoip ? $geoip->city->name : null;

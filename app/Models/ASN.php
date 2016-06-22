@@ -200,6 +200,7 @@ class ASN extends Model {
             $prefixOutput['parent']['ip']       = empty($prefixWhois->parent_ip) !== true ? $prefixWhois->parent_ip : null;
             $prefixOutput['parent']['cidr']     = empty($prefixWhois->parent_cidr) !== true ? $prefixWhois->parent_cidr : null;
             $prefixOutput['parent']['rir_name'] = empty($prefixWhois->rir_id) !== true ? $rirNames[$prefixWhois->rir_id] : null;
+            $prefixOutput['parent']['allocation_status']    = empty($prefixWhois->status) !== true ? $prefixWhois->status : 'unknown';
 
             $output['ipv4_prefixes'][]  = $prefixOutput;
             $prefixOutput = null;
@@ -223,6 +224,7 @@ class ASN extends Model {
             $prefixOutput['parent']['ip']       = empty($prefixWhois->parent_ip) !== true ? $prefixWhois->parent_ip : null;
             $prefixOutput['parent']['cidr']     = empty($prefixWhois->parent_cidr) !== true ? $prefixWhois->parent_cidr : null;
             $prefixOutput['parent']['rir_name'] = empty($prefixWhois->rir_id) !== true ? $rirNames[$prefixWhois->rir_id] : null;
+            $prefixOutput['parent']['allocation_status']    = empty($prefixWhois->status) !== true ? $prefixWhois->status : 'unknown';
 
             $output['ipv6_prefixes'][]  = $prefixOutput;
             $prefixOutput = null;
