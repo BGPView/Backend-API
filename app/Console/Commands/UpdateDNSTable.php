@@ -57,7 +57,7 @@ class UpdateDNSTable extends Command
         Config::set('elasticquent.default_index', $versionedIndex);
 
         // create new index
-        DNSRecord::createIndex();
+        DNSRecord::createIndex(8);
 
         $currentCount = 0;
         $idCounter = 0;
