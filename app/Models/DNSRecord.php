@@ -16,6 +16,12 @@ class DNSRecord {
      * @var array
      */
     protected $indexSettings = [
+        'settings' => [
+            'index' => [
+                'number_of_replicas' => 0,
+                'number_of_shards' => 8,
+            ],
+        ],
         'analysis' => [
             'analyzer' => [
                 'string_lowercase' => [
