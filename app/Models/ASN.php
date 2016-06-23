@@ -236,8 +236,8 @@ class ASN extends Model {
 
     public static function getUpstreams($as_number)
     {
-        $ipv4Upstreams = IPv4BgpEntry::where('asn', $as_number)->orderBy('asn', 'asc')->get();
-        $ipv6Upstreams = IPv6BgpEntry::where('asn', $as_number)->orderBy('asn', 'asc')->get();
+        $ipv4Upstreams = IPv4BgpEntry::where('asn', $as_number)->orderBy('upstream_asn', 'asc')->get();
+        $ipv6Upstreams = IPv6BgpEntry::where('asn', $as_number)->orderBy('upstream_asn', 'asc')->get();
 
         $output['ipv4_upstreams'] = [];
         foreach ($ipv4Upstreams as $upstream) {
@@ -293,8 +293,8 @@ class ASN extends Model {
 
     public static function getDownstreams($as_number)
     {
-        $ipv4Downstreams = IPv4BgpEntry::where('upstream_asn', $as_number)->orderBy('upstream_asn', 'asc')->get();
-        $ipv6Downstreams = IPv6BgpEntry::where('upstream_asn', $as_number)->orderBy('upstream_asn', 'asc')->get();
+        $ipv4Downstreams = IPv4BgpEntry::where('upstream_asn', $as_number)->orderBy('asn', 'asc')->get();
+        $ipv6Downstreams = IPv6BgpEntry::where('upstream_asn', $as_number)->orderBy('asn', 'asc')->get();
 
         $output['ipv4_downstreams'] = [];
         foreach ($ipv4Downstreams as $downstream) {
