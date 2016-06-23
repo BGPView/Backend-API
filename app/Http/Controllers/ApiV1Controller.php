@@ -179,7 +179,7 @@ class ApiV1Controller extends ApiBaseController
             return $this->respond($data);
         }
 
-        $allocation = $this->ipUtils->getAllocationEntry($prefix->ip);
+        $allocation = $this->ipUtils->getAllocationEntry($prefix->ip, $prefix->cidr);
         $geoip = $this->ipUtils->geoip($prefix->ip);
         $relatedPrefixes = $this->ipUtils->getRealatedPrefixes($prefix->ip, $prefix->cidr);
 
