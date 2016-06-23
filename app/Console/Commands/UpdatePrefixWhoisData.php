@@ -101,7 +101,7 @@ class UpdatePrefixWhoisData extends Command
             }
             // Since we dont have the prefix in DB lets create it.
 
-            $ipAllocation = $this->ipUtils->getAllocationEntry($ipPrefix->ip);
+            $ipAllocation = $this->ipUtils->getAllocationEntry($ipPrefix->ip, $ipPrefix->cidr);
 
             // Skip non allocated
             if (is_null($ipAllocation) === true) {
