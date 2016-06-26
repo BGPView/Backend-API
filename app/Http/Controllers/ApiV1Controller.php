@@ -686,7 +686,7 @@ class ApiV1Controller extends ApiBaseController
      */
     public function asnSummery()
     {
-        $asns = DB::table('asns')->select(array('asn', 'name', 'description_full'))->get();
+        $asns = DB::table('asns')->select(array('asn', 'name', 'description_full', 'counrty_code'))->get();
 
         $data['results_count'] = count($asns);
         $data['asns'] = [];
