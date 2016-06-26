@@ -703,6 +703,7 @@ class ApiV1Controller extends ApiBaseController
                 'asn' => $asn->asn,
                 'name' => $asn->name,
                 'description' =>  $description,
+                'country_code' => $asn->counrty_code,
             ];
         }
 
