@@ -73,21 +73,23 @@ class UpdateIanaAssignments extends Command
         }
 
         foreach ($assignments as $assignment) {
-            if (empty($assignment['WHOIS']) === false) {
-                $parts = explode('/', $assignment['Prefix']);
-                $start = $this->ipUtils->ip2dec(((int)$parts[0]) . '.0.0.0');
-                $end = $start + $ipv4CountInPrefix[$parts[1]] - 1; // Adding a /8 worth
-
-                $ianaAssignment = new IanaAssignment();
-                $ianaAssignment->type = 4;
-                $ianaAssignment->start = $start;
-                $ianaAssignment->end = $end;
-                $ianaAssignment->whois_server = $assignment['WHOIS'];
-                $ianaAssignment->description = $assignment['Designation'];
-                $ianaAssignment->status = strtolower($assignment['Status [1]']);
-                $ianaAssignment->date_allocated = $assignment['Date'] ? substr($assignment['Date'], 0 , 4) . "-" . substr($assignment['Date'], 4, 2) . "-" . substr($assignment['Date'], 6, 2) : null;
-                $ianaAssignment->save();
+            if (empty($assignment['WHOIS']) === true) {
+                $assignment['WHOIS'] = 'whois.iana.org';
             }
+            
+            $parts = explode('/', $assignment['Prefix']);
+            $start = $this->ipUtils->ip2dec(((int)$parts[0]) . '.0.0.0');
+            $end = $start + $ipv4CountInPrefix[$parts[1]] - 1; // Adding a /8 worth
+
+            $ianaAssignment = new IanaAssignment();
+            $ianaAssignment->type = 4;
+            $ianaAssignment->start = $start;
+            $ianaAssignment->end = $end;
+            $ianaAssignment->whois_server = $assignment['WHOIS'];
+            $ianaAssignment->description = $assignment['Designation'];
+            $ianaAssignment->status = strtolower($assignment['Status [1]']);
+            $ianaAssignment->date_allocated = $assignment['Date'] ? substr($assignment['Date'], 0 , 4) . "-" . substr($assignment['Date'], 4, 2) . "-" . substr($assignment['Date'], 6, 2) : null;
+            $ianaAssignment->save();
         }
     }
 
@@ -102,21 +104,23 @@ class UpdateIanaAssignments extends Command
         }
 
         foreach ($assignments as $assignment) {
-            if (empty($assignment['WHOIS']) === false) {
-                $parts = explode('/', $assignment['Prefix']);
-                $start = $this->ipUtils->ip2dec($parts[0]);
-                $end = $start + $ipv6CountInPrefix[$parts[1]] - 1;
-
-                $ianaAssignment = new IanaAssignment();
-                $ianaAssignment->type = 6;
-                $ianaAssignment->start = $start;
-                $ianaAssignment->end = $end;
-                $ianaAssignment->whois_server = $assignment['WHOIS'];
-                $ianaAssignment->description = $assignment['Designation'];
-                $ianaAssignment->status = strtolower($assignment['Status']);
-                $ianaAssignment->date_allocated = $assignment['Date'] ? substr($assignment['Date'], 0 , 4) . "-" . substr($assignment['Date'], 4, 2) . "-" . substr($assignment['Date'], 6, 2) : null;
-                $ianaAssignment->save();
+           if (empty($assignment['WHOIS']) === true) {
+                $assignment['WHOIS'] = 'whois.iana.org';
             }
+            
+            $parts = explode('/', $assignment['Prefix']);
+            $start = $this->ipUtils->ip2dec($parts[0]);
+            $end = $start + $ipv6CountInPrefix[$parts[1]] - 1;
+
+            $ianaAssignment = new IanaAssignment();
+            $ianaAssignment->type = 6;
+            $ianaAssignment->start = $start;
+            $ianaAssignment->end = $end;
+            $ianaAssignment->whois_server = $assignment['WHOIS'];
+            $ianaAssignment->description = $assignment['Designation'];
+            $ianaAssignment->status = strtolower($assignment['Status']);
+            $ianaAssignment->date_allocated = $assignment['Date'] ? substr($assignment['Date'], 0 , 4) . "-" . substr($assignment['Date'], 4, 2) . "-" . substr($assignment['Date'], 6, 2) : null;
+            $ianaAssignment->save();
         }
     }
 
@@ -130,37 +134,38 @@ class UpdateIanaAssignments extends Command
         }
 
         foreach ($assignments as $assignment) {
-            if (empty($assignment['WHOIS']) === false) {
-                $parts = explode('-', $assignment['Number']);
-                $start = trim($parts[0]);
-                $end = isset($parts[1]) ? trim($parts[1]) : trim($parts[0]);
-
-                $description = $assignment['Description'];
-                if (empty(trim($assignment['Reference'])) !== true) {
-                    $description .= ' '.trim($assignment['Reference']);
-                }
-
-                if (stripos($assignment['Description'], 'reserved') !== false) {
-                    $status = 'reserved';
-                } else if (stripos($assignment['Description'], 'assigned') !== false) {
-                    $status = 'assigned';
-                } else {
-                    $status = 'unknown';
-                }
-
-                // Who the hell names these keys :/
-                $date = $assignment["Registration\n        Date"];
-
-                $ianaAssignment = new IanaAssignment();
-                $ianaAssignment->type = 'asn';
-                $ianaAssignment->start = $start;
-                $ianaAssignment->end = $end;
-                $ianaAssignment->whois_server = $assignment['WHOIS'];
-                $ianaAssignment->description = $description;
-                $ianaAssignment->status = $status;
-                $ianaAssignment->date_allocated = $date ? substr($date, 0 , 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2) : null;
-                $ianaAssignment->save();
+            if (empty($assignment['WHOIS']) === true) {
+                $assignment['WHOIS'] = 'whois.iana.org';
             }
+            $parts = explode('-', $assignment['Number']);
+            $start = trim($parts[0]);
+            $end = isset($parts[1]) ? trim($parts[1]) : trim($parts[0]);
+
+            $description = $assignment['Description'];
+            if (empty(trim($assignment['Reference'])) !== true) {
+                $description .= ' '.trim($assignment['Reference']);
+            }
+
+            if (stripos($assignment['Description'], 'reserved') !== false) {
+                $status = 'reserved';
+            } else if (stripos($assignment['Description'], 'assigned') !== false) {
+                $status = 'assigned';
+            } else {
+                $status = 'unknown';
+            }
+
+            // Who the hell names these keys :/
+            $date = $assignment["Registration\n        Date"];
+
+            $ianaAssignment = new IanaAssignment();
+            $ianaAssignment->type = 'asn';
+            $ianaAssignment->start = $start;
+            $ianaAssignment->end = $end;
+            $ianaAssignment->whois_server = $assignment['WHOIS'];
+            $ianaAssignment->description = $description;
+            $ianaAssignment->status = $status;
+            $ianaAssignment->date_allocated = $date ? substr($date, 0 , 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2) : null;
+            $ianaAssignment->save();
         }
 
     }
