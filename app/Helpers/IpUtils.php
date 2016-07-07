@@ -611,7 +611,7 @@ class IpUtils
         }
 
         if ($type === 'asn') {
-            $resource = str_ireplace('as', '' $resource);
+            $resource = str_ireplace('as', '', $resource);
             $resourceData = $class::where('asn', $resource)->first();
         } else {
             $ipDec = $this->ip2dec($resource);
