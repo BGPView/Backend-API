@@ -67,7 +67,7 @@ class UpdateRoaTable extends Command
             } else {
                 $ipAmount = $ipv6AmountCidrArray[$roaCidr];
             }
-            $endDec = number_format(($startDec + $ipAmount -1), 0, '', '');
+            $endDec = bcsub(bcadd($startDec, $ipAmount), 1);
 
             $roaInsert .= '("'.$roaIP.'",'.$roaCidr.','.$startDec.','.$endDec.','.$roaAsn.','.$roa->maxLength.','.$mysqlTime.','.$mysqlTime.'),';
         }
