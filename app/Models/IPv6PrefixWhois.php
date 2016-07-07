@@ -60,7 +60,7 @@ class IPv6PrefixWhois extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id', 'rir_id', 'bgp_prefix_id', 'raw_whois', 'created_at', 'updated_at'];
+    protected $hidden = ['id', 'rir_id', 'bgp_prefix_id', 'raw_whois', 'created_at', 'updated_at', 'ip_dec_start', 'ip_dec_end'];
 
 
     public function rir()
