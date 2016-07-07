@@ -2,10 +2,13 @@
 
 namespace App\Helpers;
 
+use App\Models\ASN;
 use App\Models\DNSRecord;
 use App\Models\IanaAssignment;
 use App\Models\IPv4BgpPrefix;
+use App\Models\IPv4PrefixWhois;
 use App\Models\IPv6BgpPrefix;
+use App\Models\IPv6PrefixWhois;
 use App\Models\RirAsnAllocation;
 use App\Models\RirIPv4Allocation;
 use App\Models\RirIPv6Allocation;
@@ -498,7 +501,7 @@ class IpUtils
         } else {
             $ipAmount = $this->IPv6cidrIpCount()[$cidr];
         }
-        $ipDecEnd = number_format(($ipDecStart + $ipAmount -1), 0, '', '');
+        $ipDecEnd = bcsub(bcadd($ipDecStart, $ipAmount), 1);
 
         // Let look for any valid ROA range
         $roas = ROA::where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '>=', $ipDecEnd)->get();
@@ -596,12 +599,26 @@ class IpUtils
     public function getContacts($resource)
     {
         $resource = explode('/', $resource, 2)[0];
+        $type = $this->getInputType($resource);
 
-        if ($this->getInputType($resource) === 'asn') {
-            $resourceData = ASN::where('asn', $resource)->first();
+
+        if ($type === 4) {
+            $class = IPv4PrefixWhois::class;
+        } else if ($type === 6) {
+            $class = IPv6PrefixWhois::class;
         } else {
-            $prefixes = $this->getBgpPrefixes($resource)->first();
-            $resourceData = $prefixes ? $prefixes->whois : null;
+            $class = ASN::class;
+        }
+
+        if ($type === 'asn') {
+            $resourceData = $class::where('asn', $resource)->first();
+        } else {
+            $ipDec = $this->ip2dec($resource);
+
+            $resourceData = $class::where('ip_dec_start', '<=', $ipDec)
+                ->where('ip_dec_end', '>=',  $ipDec)
+                ->orderBy('cidr', 'asc')
+                ->first();
         }
 
         return [
