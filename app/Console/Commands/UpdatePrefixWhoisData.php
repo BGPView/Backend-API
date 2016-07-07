@@ -141,7 +141,7 @@ class UpdatePrefixWhoisData extends Command
             } else {
                 $ipCount = $ipv6Cidrs[$newPrefixWhois->cidr];
             }
-            $newPrefixWhois->ip_dec_end = number_format($ipCount + $newPrefixWhois->ip_dec_start - 1, 0, '', '');
+            $newPrefixWhois->ip_dec_end = bcsub(bcadd($ipCount, $newPrefixWhois->ip_dec_start), 1);
 
             $newPrefixWhois->parent_ip = $ipAllocation->ip;
             $newPrefixWhois->parent_cidr = $ipAllocation->cidr;
