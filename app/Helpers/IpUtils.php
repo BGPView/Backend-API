@@ -592,4 +592,21 @@ class IpUtils
 
         return $bgpPrefixClass::where('ip_dec_start', '>=', $startDec)->where('ip_dec_end', '<=', $endDec)->where('cidr', '!=', $cidr)->get();
     }
+
+    public function getContacts($resource)
+    {
+        $resource = explode('/', $resource, 2)[0];
+
+        if ($this->getInputType($resource) === 'asn') {
+            $resourceData = ASN::where('asn', $resource)->first();
+        } else {
+            $prefixes = $this->getBgpPrefixes($resource)->first();
+            $resourceData = $prefixes ? $prefixes->whois : null;
+        }
+
+        return [
+            'email_contacts' => $resourceData ? $resourceData->email_contacts : [],
+            'abuse_contacts' => $resourceData ? $resourceData->abuse_contacts : [],
+        ];
+    }
 }
