@@ -712,7 +712,7 @@ class ApiV1Controller extends ApiBaseController
 
     public function getContacts($resource, $cidr = null)
     {
-        $data = $this->ipUtils->getInputType($resource);
+        $data = $this->ipUtils->getContacts($resource);
 
         return $this->sendData($data);
     }
