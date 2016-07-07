@@ -69,6 +69,8 @@ class UpdatePrefixWhoisData extends Command
         $this->bench->start();
         $this->cli->br()->comment('===================================================');
         $threeWeeksAgo = Carbon::now()->subWeeks(3)->timestamp;
+        $ipv4Cidrs = $this->ipUtils->IPv4cidrIpCount();
+        $ipv6Cidrs = $this->ipUtils->IPv6cidrIpCount();
 
         $this->cli->br()->comment('Getting all the IPv' . $ipVersion . 'prefixes from the BGP table');
 
@@ -132,6 +134,15 @@ class UpdatePrefixWhoisData extends Command
             $newPrefixWhois->rir_id = $ipAllocation->rir_id;
             $newPrefixWhois->ip = $ipPrefix->ip;
             $newPrefixWhois->cidr = $ipPrefix->cidr;
+
+            $newPrefixWhois->ip_dec_start = $this->ipUtils->ip2dec($newPrefixWhois->ip);
+            if ($this->ipUtils->getInputType($newPrefixWhois->ip) === 4) {
+                $ipCount = $ipv4Cidrs[$newPrefixWhois->cidr];
+            } else {
+                $ipCount = $ipv6Cidrs[$newPrefixWhois->cidr];
+            }
+            $newPrefixWhois->ip_dec_end = number_format($ipCount + $newPrefixWhois->ip_dec_start - 1, 0, '', '');
+
             $newPrefixWhois->parent_ip = $ipAllocation->ip;
             $newPrefixWhois->parent_cidr = $ipAllocation->cidr;
             $newPrefixWhois->name = $parsedWhois->name;
