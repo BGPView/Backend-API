@@ -612,11 +612,11 @@ class IpUtils
 
         if ($type === 'asn') {
             $resource = str_ireplace('as', '', $resource);
-            $resourceData = $class::where('asn', $resource)->first();
+            $resourceData = $class::with('rir')->where('asn', $resource)->first();
         } else {
             $ipDec = $this->ip2dec($resource);
 
-            $resourceData = $class::where('ip_dec_start', '<=', $ipDec)
+            $resourceData = $class::with('rir')->where('ip_dec_start', '<=', $ipDec)
                 ->where('ip_dec_end', '>=',  $ipDec)
                 ->orderBy('cidr', 'asc')
                 ->first();
@@ -625,6 +625,7 @@ class IpUtils
         return [
             'email_contacts' => $resourceData ? $resourceData->email_contacts : [],
             'abuse_contacts' => $resourceData ? $resourceData->abuse_contacts : [],
+            'source'         => $resourceData ? $resourceData->rir->name : null,
         ];
     }
 }
