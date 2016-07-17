@@ -59,6 +59,19 @@ class UpdateResourceStaticData extends Command
     }
 
     private function processRipeAsn() {
+        $url = 'http://ftp.ripe.net/ripe/dbase/split/ripe.db.organisation.gz';
+        $this->info('Downloading RIPE ' . $url);
+        $gzipContents = file_get_contents($url);
+        $contents = gzdecode($gzipContents);
+        $ripeOrgs = explode("\n\n", $contents);
+        $orgs = [];
+
+        foreach ($ripeOrgs as $org) {
+            $organisation = $this->extractValues($org, 'organisation');
+            $name = $this->extractValues($org, 'name');
+            $orgs[$organisation] = $name;
+        }
+        
         $url = 'http://ftp.ripe.net/ripe/dbase/split/ripe.db.aut-num.gz';
         $this->info('Downloading RIPE ' . $url);
         $gzipContents = file_get_contents($url);
@@ -73,6 +86,7 @@ class UpdateResourceStaticData extends Command
                 $name = $this->extractValues($asn, 'as-name');
                 $description = $this->extractValues($asn, 'descr');
                 $description = is_array($description) === true ? $description : empty($description) ? null : [$description];
+                $org = $this->extractValues($org, 'org');
 
                 $newData = [
                     'name' => $name,
@@ -81,6 +95,9 @@ class UpdateResourceStaticData extends Command
                 if (is_null($description) !== true) {
                     $newData['description'] =  isset($description[0]) === true ? $description[0] : $description;
                     $newData['description_full'] = json_encode($description);
+                } elseif (is_null($org) !== true && isset($orgs[$org]) === true) {
+                    $newData['description'] =  $orgs[$org];
+                    $newData['description_full'] = json_encode([$orgs[$org]]);
                 }
 
                 // dump('AS' . $asNumber, $newData);
