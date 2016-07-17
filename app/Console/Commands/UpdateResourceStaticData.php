@@ -102,9 +102,8 @@ class UpdateResourceStaticData extends Command
                     $newData['name'] = $name;
                 }
 
-                // dump('AS' . $asNumber, $newData);
+                // dump('AS' . $asNumber, $newData, '=========');
                 ASN::where('asn', $asNumber)->update($newData);
-                $this->info('========================');
             }
 
         }
