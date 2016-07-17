@@ -97,7 +97,7 @@ class UpdateResourceStaticData extends Command
                 }
 
                 if ($name == 'UNSPECIFIED' && isset($newData['description']) === true) {
-                    $newData['name'] = strtoupper(str_replace(' ', '-', $name));
+                    $newData['name'] = strtoupper(str_replace(' ', '-', $newData['description']));
                 } else {
                     $newData['name'] = $name;
                 }
