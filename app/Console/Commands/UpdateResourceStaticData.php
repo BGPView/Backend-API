@@ -83,8 +83,8 @@ class UpdateResourceStaticData extends Command
                     $newData['description_full'] = json_encode($description);
                 }
 
-                ASN::where('asn', $asNumber)->update($newData);
                 dump('AS' . $asNumber, $newData);
+                ASN::where('asn', $asNumber)->update($newData);
                 $this->info('========================');
             }
 
