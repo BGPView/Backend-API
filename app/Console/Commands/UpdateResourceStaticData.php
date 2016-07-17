@@ -71,7 +71,7 @@ class UpdateResourceStaticData extends Command
             $name = $this->extractValues($org, 'name');
             $orgs[$organisation] = $name;
         }
-        
+
         $url = 'http://ftp.ripe.net/ripe/dbase/split/ripe.db.aut-num.gz';
         $this->info('Downloading RIPE ' . $url);
         $gzipContents = file_get_contents($url);
@@ -86,7 +86,7 @@ class UpdateResourceStaticData extends Command
                 $name = $this->extractValues($asn, 'as-name');
                 $description = $this->extractValues($asn, 'descr');
                 $description = is_array($description) === true ? $description : empty($description) ? null : [$description];
-                $org = $this->extractValues($org, 'org');
+                $org = $this->extractValues($asn, 'org');
 
                 $newData = [
                     'name' => $name,
