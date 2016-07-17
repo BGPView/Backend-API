@@ -68,7 +68,7 @@ class UpdateResourceStaticData extends Command
 
         foreach ($ripeOrgs as $org) {
             $organisation = $this->extractValues($org, 'organisation');
-            $name = $this->extractValues($org, 'name');
+            $name = $this->extractValues($org, 'org-name');
             $orgs[$organisation] = $name;
         }
 
