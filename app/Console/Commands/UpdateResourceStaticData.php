@@ -72,6 +72,7 @@ class UpdateResourceStaticData extends Command
                 $asNumber = str_ireplace('as', '', $this->extractValues($asn, 'aut-num'));
                 $name = $this->extractValues($asn, 'as-name');
                 $description = $this->extractValues($asn, 'descr');
+                $description = is_array($description) === true ? $description : [$description];
 
                 $newData = [
                     'name' => $name,
