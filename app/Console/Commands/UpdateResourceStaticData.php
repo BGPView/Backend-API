@@ -88,16 +88,18 @@ class UpdateResourceStaticData extends Command
                 $description = is_array($description) === true ? $description : empty($description) ? null : [$description];
                 $org = $this->extractValues($asn, 'org');
 
-                $newData = [
-                    'name' => $name,
-                ];
-
                 if (is_null($description) !== true) {
                     $newData['description'] =  isset($description[0]) === true ? $description[0] : $description;
                     $newData['description_full'] = json_encode($description);
                 } elseif (is_null($org) !== true && isset($orgs[$org]) === true) {
                     $newData['description'] =  $orgs[$org];
                     $newData['description_full'] = json_encode([$orgs[$org]]);
+                }
+
+                if ($name == 'UNSPECIFIED' && isset($newData['description']) === true) {
+                    $newData['name'] = strtoupper(str_replace(' ', '-', $name));
+                } else {
+                    $newData['name'] = $name;
                 }
 
                 // dump('AS' . $asNumber, $newData);
