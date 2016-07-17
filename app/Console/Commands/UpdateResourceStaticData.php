@@ -65,13 +65,13 @@ class UpdateResourceStaticData extends Command
         $contents = gzdecode($gzipContents);
         $asns = explode("\n\n", $contents);
 
-        $this->info('Processing RIPE ASN');
+        $this->info('Processing RIPE ASNs (' . count($asns) . ')');
 
         foreach($asns as $asn) {
             if (strpos($asn, 'aut-num:') !== false) {
                 $asNumber = str_ireplace('as', '', $this->extractValues($asn, 'aut-num'));
                 $name = $this->extractValues($asn, 'as-name');
-                $description = $this->extractValues($asn, 'as-name');
+                $description = $this->extractValues($asn, 'descr');
 
                 $newData = [
                     'name' => $name,
@@ -83,7 +83,7 @@ class UpdateResourceStaticData extends Command
                 }
 
                 ASN::where('asn', $asNumber)->update($newData);
-                dump('AS' . $asNumber, $name);
+                dump('AS' . $asNumber, $newData);
                 $this->info('========================');
             }
 
