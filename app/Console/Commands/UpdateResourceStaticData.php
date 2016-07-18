@@ -94,7 +94,8 @@ class UpdateResourceStaticData extends Command
                 $name = $this->extractValues($asn, 'as-name');
                 $org = $this->extractValues($asn, 'org');
                 $description = $this->extractValues($asn, 'descr');
-                if (is_array($description) === false) {
+                $description empty($description) ? null : $description;
+                if (is_array($description) === false && $description !== null) {
                     $description = [$description];
                 }
 
@@ -136,7 +137,8 @@ class UpdateResourceStaticData extends Command
                 $asNumber = str_ireplace('as', '', $this->extractValues($asn, 'aut-num'));
                 $name = $this->extractValues($asn, 'as-name');
                 $description = $this->extractValues($asn, 'descr');
-                if (is_array($description) === false) {
+                $description empty($description) ? null : $description;
+                if (is_array($description) === false && $description !== null) {
                     $description = [$description];
                 }
 
@@ -150,11 +152,6 @@ class UpdateResourceStaticData extends Command
                 } else {
                     $newData['name'] = $name;
                 }
-
-                if ($asNumber == 24466) {
-                    dump($newData, $asn);
-                }
-                continue;
 
                 // dump('AS' . $asNumber, $newData, '=========');
                 $asnClass = new ASN();
