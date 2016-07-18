@@ -80,8 +80,6 @@ class UpdateResourceStaticData extends Command
         $asns = explode("\n\n", $contents);
 
         $this->info('Processing RIPE ASNs (' . number_format(count($asns)) . ')');
-        $asnClass = new ASN();
-        $asnClass->timestamps = false;
 
         foreach($asns as $asn) {
             if (strpos($asn, 'aut-num:') !== false) {
@@ -113,6 +111,8 @@ class UpdateResourceStaticData extends Command
                 }
 
                 // dump('AS' . $asNumber, $newData, '=========');
+                $asnClass = new ASN();
+                $asnClass->timestamps = false;
                 $asnClass->where('asn', $asNumber)->update($newData);
             }
 
@@ -127,8 +127,7 @@ class UpdateResourceStaticData extends Command
         $asns = explode("\n\n", $contents);
 
         $this->info('Processing APNIC ASNs (' . number_format(count($asns)) . ')');
-        $asnClass = new ASN();
-        $asnClass->timestamps = false;
+
 
         foreach($asns as $asn) {
             if (strpos($asn, 'aut-num:') !== false) {
@@ -149,6 +148,8 @@ class UpdateResourceStaticData extends Command
                 }
 
                 // dump('AS' . $asNumber, $newData, '=========');
+                $asnClass = new ASN();
+                $asnClass->timestamps = false;
                 $asnClass->where('asn', $asNumber)->update($newData);
             }
 
