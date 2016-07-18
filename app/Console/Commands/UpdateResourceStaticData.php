@@ -45,6 +45,7 @@ class UpdateResourceStaticData extends Command
         $this->bench->start();
 
 
+        $this->processApnicAsn();
         $this->processRipeAsn();
 //
 
@@ -78,7 +79,7 @@ class UpdateResourceStaticData extends Command
         $contents = gzdecode($gzipContents);
         $asns = explode("\n\n", $contents);
 
-        $this->info('Processing RIPE ASNs (' . count($asns) . ')');
+        $this->info('Processing RIPE ASNs (' . number_format(count($asns)) . ')');
         $asnClass = new ASN();
         $asnClass->timestamps = false;
 
@@ -109,8 +110,42 @@ class UpdateResourceStaticData extends Command
             }
 
         }
+    }
 
+    private function processApnicAsn() {
+        $url = 'ftp://ftp.apnic.net/public/apnic/whois/apnic.db.aut-num.gz';
+        $this->info('Downloading APNIC ' . $url);
+        $gzipContents = file_get_contents($url);
+        $contents = gzdecode($gzipContents);
+        $asns = explode("\n\n", $contents);
 
+        $this->info('Processing APNIC ASNs (' . number_format(count($asns)) . ')');
+        $asnClass = new ASN();
+        $asnClass->timestamps = false;
+
+        foreach($asns as $asn) {
+            if (strpos($asn, 'aut-num:') !== false) {
+                $asNumber = str_ireplace('as', '', $this->extractValues($asn, 'aut-num'));
+                $name = $this->extractValues($asn, 'as-name');
+                $description = $this->extractValues($asn, 'descr');
+                $description = is_array($description) === true ? $description : empty($description) ? null : [$description];
+
+                if (is_null($description) !== true) {
+                    $newData['description'] =  isset($description[0]) === true ? $description[0] : $description;
+                    $newData['description_full'] = json_encode($description);
+                }
+
+                if ($name == 'UNSPECIFIED' && isset($newData['description']) === true) {
+                    $newData['name'] = strtoupper(str_replace(' ', '-', $newData['description']));
+                } else {
+                    $newData['name'] = $name;
+                }
+
+                // dump('AS' . $asNumber, $newData, '=========');
+                $asnClass->where('asn', $asNumber)->update($newData);
+            }
+
+        }
     }
 
     private function extractValues($string, $key)
