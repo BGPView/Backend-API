@@ -92,9 +92,11 @@ class UpdateResourceStaticData extends Command
 
                 $asNumber = str_ireplace('as', '', $this->extractValues($asn, 'aut-num'));
                 $name = $this->extractValues($asn, 'as-name');
-                $description = $this->extractValues($asn, 'descr');
-                $description = is_array($description) === true ? $description : empty($description) ? null : [$description];
                 $org = $this->extractValues($asn, 'org');
+                $description = $this->extractValues($asn, 'descr');
+                if (is_array($description) === false) {
+                    $description = [$description];
+                }
 
                 if (is_null($description) !== true) {
                     $newData['description'] =  isset($description[0]) === true ? $description[0] : $description;
@@ -134,7 +136,9 @@ class UpdateResourceStaticData extends Command
                 $asNumber = str_ireplace('as', '', $this->extractValues($asn, 'aut-num'));
                 $name = $this->extractValues($asn, 'as-name');
                 $description = $this->extractValues($asn, 'descr');
-                $description = is_array($description) === true ? $description : empty($description) ? null : [$description];
+                if (is_array($description) === false) {
+                    $description = [$description];
+                }
 
                 if (is_null($description) !== true) {
                     $newData['description'] =  isset($description[0]) === true ? $description[0] : $description;
@@ -146,6 +150,11 @@ class UpdateResourceStaticData extends Command
                 } else {
                     $newData['name'] = $name;
                 }
+
+                if ($asNumber == 24466) {
+                    dump($newData, $asn);
+                }
+                continue;
 
                 // dump('AS' . $asNumber, $newData, '=========');
                 $asnClass = new ASN();
@@ -177,7 +186,7 @@ class UpdateResourceStaticData extends Command
         }
 
         if (count($values) > 1) {
-            return array_unique($values);
+            return array_unique(array_filter($values));
         }
 
         return null;
