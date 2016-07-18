@@ -85,6 +85,13 @@ class UpdateResourceStaticData extends Command
 
         foreach($asns as $asn) {
             if (strpos($asn, 'aut-num:') !== false) {
+
+                $status = $this->extractValues($asn, 'status');
+                // Only look at RIPE ASNs
+                if ($status == 'OTHER') {
+                    continue;
+                }
+
                 $asNumber = str_ireplace('as', '', $this->extractValues($asn, 'aut-num'));
                 $name = $this->extractValues($asn, 'as-name');
                 $description = $this->extractValues($asn, 'descr');
