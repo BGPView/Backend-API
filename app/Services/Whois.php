@@ -43,10 +43,20 @@ class Whois
 
             ];
 
-    public function __construct($input, $cidr = null)
+    public function __construct($input, $cidr = null, $rir = null, $useRaw = true)
     {
         $this->ipUtils = new IpUtils;
         $this->whoisUrl = config('app.whois_query_url');
+
+        // Check if we supply direct raw whois details
+        if ($useRaw === true && is_null($rir) !== true) {
+            $this->rir = $rir;
+            $this->rawData = $input;
+            $this->rawLines = explode("\n", $input);
+            return;
+        }
+
+
         $this->input = $this->ipUtils->normalizeInput(trim($input), $showAS = true);
         $allocation = $this->ipUtils->getAllocationEntry($this->input, $cidr);
 
