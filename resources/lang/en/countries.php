@@ -16,7 +16,7 @@ return [
     'AT' => 'Austria',
     'AU' => 'Australia',
     'AW' => 'Aruba',
-    'AX' => '�land Islands',
+    'AX' => 'Aland Islands',
     'AZ' => 'Azerbaijan',
     'BA' => 'Bosnia and Herzegovina',
     'BB' => 'Barbados',
