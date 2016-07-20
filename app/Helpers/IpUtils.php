@@ -259,6 +259,7 @@ class IpUtils
         if (is_null($ip_address) === true) {
             return null;
         }
+        $ip_address = trim($ip_address);
 
         // IPv4 address
         if (strpos($ip_address, ':') === false && strpos($ip_address, '.') !== false) {
