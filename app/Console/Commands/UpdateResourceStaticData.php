@@ -111,6 +111,7 @@ class UpdateResourceStaticData extends Command
                 $key = $ipParts[0] . '/' . $ipv4CidrAmount[$ipDiff];
             }
 
+            $key = strtolower($key);
             $whoisRecords[$type][$key] = implode("\n", $whoisEntryLines);
         }
 
@@ -119,6 +120,7 @@ class UpdateResourceStaticData extends Command
         foreach ($whoisRecords['aut-num'] as $rawWhois) {
             $asNumber = str_ireplace('as', '', $this->extractValues($rawWhois, 'aut-num'));
             $org = $this->extractValues($rawWhois, 'org');
+            $org = strtolower($org);
 
             if (empty($org) !== true && isset($whoisRecords['organisation'][$org]) === true) {
                 $rawWhois .= "\n\n" . $whoisRecords['organisation'][$org];
@@ -129,12 +131,14 @@ class UpdateResourceStaticData extends Command
             if (empty($maintainers) !== true) {
                 if (is_array($maintainers) === true) {
                     foreach ($maintainers as $maintainer) {
-                        if (strtolower($maintainer) != 'afrinic-hm-mnt' && isset($seenMnt[$maintainer]) !== true) {
+                        $maintainer = strtolower($maintainer);
+                        if ($maintainer != 'afrinic-hm-mnt' && isset($seenMnt[$maintainer]) !== true) {
                             $rawWhois .= "\n\n" . $whoisRecords['mntner'][$maintainer];
                             $seenMnt[$maintainer] = "";
                         }
                     }
                 } else if (isset($seenMnt[$maintainers]) !== true && strtolower($maintainers) != 'afrinic-hm-mnt')  {
+                    $maintainers = strtolower($maintainers);
                     $rawWhois .= "\n\n" . $whoisRecords['mntner'][$maintainers];
                     $seenMnt[$maintainers] = "";
                 }
