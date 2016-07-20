@@ -43,7 +43,7 @@ class Whois
 
             ];
 
-    public function __construct($input, $cidr = null, $rir = null, $useRaw = true)
+    public function __construct($input, $cidr = null, $rir = null, $useRaw = false)
     {
         $this->ipUtils = new IpUtils;
         $this->whoisUrl = config('app.whois_query_url');
