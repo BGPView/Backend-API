@@ -6,6 +6,8 @@
     "type": "project",
     "require": {
         "php": ">=5.5.9",
+        "ext-bcmath": "*",
+        "ext-curl": "*",
         "laravel/framework": "5.2.*",
         "webpatser/laravel-countries": "dev-master",
         "league/climate": "^3.2",
