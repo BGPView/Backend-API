@@ -629,4 +629,28 @@ class IpUtils
             'source'         => $resourceData ? $resourceData->rir->name : null,
         ];
     }
+
+    public function range2cidr($startIp, $endIp)
+    {
+        // Get the IP count in the prefix
+        $startIpDec = $this->ip2dec($startIp);
+        $endIpDec = $this->ip2dec($endIp);
+        $ipCount = bcadd(bcsub($endIpDec, $startIpDec), 1);
+
+        // Lets check if v6 or v4
+        if ($this->getInputType($startIp) === 6) {
+            $prefixSizes = $this->IPv6cidrIpCount(true);
+        } else {
+            $prefixSizes = $this->IPv4cidrIpCount(true);
+        }
+
+        // Check if its a valid prefix size
+        if (isset($prefixSizes[$ipCount]) !== true) {
+            return false;
+        }
+
+        $cidrSize = $prefixSizes[$ipCount];
+
+        return $startIp . '/' . $cidrSize;
+    }
 }
