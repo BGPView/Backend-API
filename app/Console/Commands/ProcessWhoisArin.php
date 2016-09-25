@@ -239,7 +239,6 @@ class ProcessWhoisArin extends Command
         $file = 'arin_db_prefixes.txt';
         $rawContent = file_get_contents($file);
         $this->info('Reading ARIN Prefix whois file');
-        $currentCount = 0;
 
         // Split all block
         $whoisBlocks = explode("\n\n\n", $rawContent);
@@ -265,20 +264,10 @@ class ProcessWhoisArin extends Command
             $ipDecEnd = $this->ipUtils->ip2dec($netRangeParts[1]);
 
             // Bulk insert mysql
-            $multiSqlInsertString .= '('.$ipDecStart.','.$ipDecEnd.','.addslashes($whoisBlock).'"),';
-
-
-            $currentCount++;
-            if ($currentCount === 250000) {
-                $this->info('Inserting 250,000 Prefix records in bulk');
-                $multiSqlInsertString = rtrim($multiSqlInsertString, ',').';';
-                DB::statement('INSERT INTO whois_db_arin_prefixes_temp (ip_dec_start, ip_dec_end, raw) VALUES ' . $multiSqlInsertString);
-                $multiSqlInsertString = '';
-                $currentCount = 0;
-            }
+            $multiSqlInsertString .= '('.$ipDecStart.','.$ipDecEnd.',"'.addslashes($whoisBlock).'"),';
         }
 
-        $this->info('Doing a bulk insert of all Prefix Blocks for the remaining prefixes');
+        $this->info('Doing a bulk insert of all Prefix Blocks');
         $multiSqlInsertString = rtrim($multiSqlInsertString, ',').';';
         DB::statement('INSERT INTO whois_db_arin_prefixes_temp (ip_dec_start, ip_dec_end, raw) VALUES ' . $multiSqlInsertString);
 
