@@ -77,7 +77,7 @@ class ProcessWhoisArin extends Command
         DB::statement('DROP TABLE IF EXISTS backup_whois_db_arin_asns');
         DB::statement('DROP TABLE IF EXISTS backup_whois_db_arin_orgs');
         DB::statement('DROP TABLE IF EXISTS backup_whois_db_arin_pocs');
-        DB::statement('DROP TABLE IF EXISTS whois_db_arin_prefixes');
+        DB::statement('DROP TABLE IF EXISTS backup_whois_db_arin_prefixes');
 
     }
 
