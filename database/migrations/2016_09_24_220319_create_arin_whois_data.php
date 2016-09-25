@@ -32,7 +32,7 @@ class CreateArinWhoisData extends Migration
             $table->longText('raw');
         });
 
-        Schema::create('whois_db_arin_prefixes', function($table)
+        Schema::create('whois_db_arin_nets', function($table)
         {
             $table->decimal('ip_dec_start', 39, 0)->unsigned()->index();
             $table->decimal('ip_dec_end', 39, 0)->unsigned()->index();
@@ -50,6 +50,6 @@ class CreateArinWhoisData extends Migration
         Schema::dropIfExists('whois_db_arin_asns');
         Schema::dropIfExists('whois_db_arin_orgs');
         Schema::dropIfExists('whois_db_arin_pocs');
-        Schema::dropIfExists('whois_db_arin_prefixes');
+        Schema::dropIfExists('whois_db_arin_nets');
     }
 }

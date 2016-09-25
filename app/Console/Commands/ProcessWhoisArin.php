@@ -56,7 +56,7 @@ class ProcessWhoisArin extends Command
         DB::statement('CREATE TABLE whois_db_arin_asns_temp LIKE whois_db_arin_asns');
         DB::statement('CREATE TABLE whois_db_arin_orgs_temp LIKE whois_db_arin_orgs');
         DB::statement('CREATE TABLE whois_db_arin_pocs_temp LIKE whois_db_arin_pocs');
-        DB::statement('CREATE TABLE whois_db_arin_prefixes_temp LIKE whois_db_arin_prefixes');
+        DB::statement('CREATE TABLE whois_db_arin_nets_temp LIKE whois_db_arin_nets');
 
         $this->warn("########################################################################");
         $this->warn("###  MAKE SURE 'max_allowed_packet' IS SET < 1G IN YOUR my.cnf file  ###");
@@ -70,14 +70,14 @@ class ProcessWhoisArin extends Command
         DB::statement('RENAME TABLE whois_db_arin_asns TO backup_whois_db_arin_asns, whois_db_arin_asns_temp TO whois_db_arin_asns;');
         DB::statement('RENAME TABLE whois_db_arin_orgs TO backup_whois_db_arin_orgs, whois_db_arin_orgs_temp TO whois_db_arin_orgs;');
         DB::statement('RENAME TABLE whois_db_arin_pocs TO backup_whois_db_arin_pocs, whois_db_arin_pocs_temp TO whois_db_arin_pocs;');
-        DB::statement('RENAME TABLE whois_db_arin_prefixes TO backup_whois_db_arin_prefixes, whois_db_arin_prefixes_temp TO whois_db_arin_prefixes;');
+        DB::statement('RENAME TABLE whois_db_arin_nets TO backup_whois_db_arin_nets, whois_db_arin_nets_temp TO whois_db_arin_nets;');
 
 
         // Clean up old backup tables
         DB::statement('DROP TABLE IF EXISTS backup_whois_db_arin_asns');
         DB::statement('DROP TABLE IF EXISTS backup_whois_db_arin_orgs');
         DB::statement('DROP TABLE IF EXISTS backup_whois_db_arin_pocs');
-        DB::statement('DROP TABLE IF EXISTS backup_whois_db_arin_prefixes');
+        DB::statement('DROP TABLE IF EXISTS backup_whois_db_arin_nets');
 
     }
 
@@ -269,7 +269,7 @@ class ProcessWhoisArin extends Command
 
         $this->info('Doing a bulk insert of all Prefix Blocks');
         $multiSqlInsertString = rtrim($multiSqlInsertString, ',').';';
-        DB::statement('INSERT INTO whois_db_arin_prefixes_temp (ip_dec_start, ip_dec_end, raw) VALUES ' . $multiSqlInsertString);
+        DB::statement('INSERT INTO whois_db_arin_nets_temp (ip_dec_start, ip_dec_end, raw) VALUES ' . $multiSqlInsertString);
 
         $this->bench->end();
         $this->info(sprintf(
