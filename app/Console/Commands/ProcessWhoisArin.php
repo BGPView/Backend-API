@@ -50,7 +50,7 @@ class ProcessWhoisArin extends Command
         DB::statement('DROP TABLE IF EXISTS whois_db_arin_asns_temp');
         DB::statement('DROP TABLE IF EXISTS whois_db_arin_orgs_temp');
         DB::statement('DROP TABLE IF EXISTS whois_db_arin_pocs_temp');
-        DB::statement('DROP TABLE IF EXISTS whois_db_arin_prefixes_temp');
+        DB::statement('DROP TABLE IF EXISTS whois_db_arin_nets_temp');
 
         // Prep new temp tables for hot swap ability
         DB::statement('CREATE TABLE whois_db_arin_asns_temp LIKE whois_db_arin_asns');
@@ -62,7 +62,7 @@ class ProcessWhoisArin extends Command
         $this->warn("###  MAKE SURE 'max_allowed_packet' IS SET < 1G IN YOUR my.cnf file  ###");
         $this->warn("########################################################################");
         $this->processAsns();
-        $this->processPrefixes();
+        $this->processNets();
         $this->processPocs();
         $this->processOrgs();
 
@@ -90,9 +90,9 @@ class ProcessWhoisArin extends Command
     {
         $this->bench->start();
 
-        $file = 'arin_db_asns.txt';
-        $rawContent = file_get_contents($file);
         $this->info('Reading ARIN ASN whois file');
+        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/asns.txt';
+        $rawContent = $this->getContents($url);
 
         // Split all block
         $whoisBlocks = explode("\n\n\n\n", $rawContent);
@@ -146,9 +146,9 @@ class ProcessWhoisArin extends Command
     {
         $this->bench->start();
 
-        $file = 'arin_db_pocs.txt';
-        $rawContent = file_get_contents($file);
         $this->info('Reading ARIN POC whois file');
+        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/pocs.txt';
+        $rawContent = $this->getContents($url);
 
         // Split all block
         $whoisBlocks = explode("\n\n\n\n", $rawContent);
@@ -191,9 +191,9 @@ class ProcessWhoisArin extends Command
     {
         $this->bench->start();
 
-        $file = 'arin_db_orgs.txt';
-        $rawContent = file_get_contents($file);
         $this->info('Reading ARIN ORG whois file');
+        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/orgs.txt';
+        $rawContent = $this->getContents($url);
 
         // Split all block
         $whoisBlocks = explode("\n\n\n\n", $rawContent);
@@ -232,13 +232,13 @@ class ProcessWhoisArin extends Command
 
     }
 
-    public function processPrefixes()
+    public function processNets()
     {
         $this->bench->start();
 
-        $file = 'arin_db_prefixes.txt';
-        $rawContent = file_get_contents($file);
         $this->info('Reading ARIN Prefix whois file');
+        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/nets.txt';
+        $rawContent = $this->getContents($url);
 
         // Split all block
         $whoisBlocks = explode("\n\n\n", $rawContent);
@@ -279,6 +279,28 @@ class ProcessWhoisArin extends Command
         ));
 
         $this->warn('===================');
+    }
+
+    private function getContents($url)
+    {
+        $apiKey = env('WHOIS_DB_ARIN_KEY');
+        $url = $url . '?apikey=' . $apiKey;
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_NOPROGRESS, false);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_ENCODING , "gzip");
+
+        $data = curl_exec($ch);
+        curl_close($ch);
+
+        return $data;
+
     }
 
     private function extractValues($rawData, $key, $first = true)
