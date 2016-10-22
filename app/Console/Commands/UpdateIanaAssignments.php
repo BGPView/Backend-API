@@ -110,7 +110,7 @@ class UpdateIanaAssignments extends Command
             
             $parts = explode('/', $assignment['Prefix']);
             $start = $this->ipUtils->ip2dec($parts[0]);
-            $end = $start + $ipv6CountInPrefix[$parts[1]] - 1;
+            $end = bcsub(bcadd($start, $ipv6CountInPrefix[$parts[1]]), 1);
 
             $ianaAssignment = new IanaAssignment();
             $ianaAssignment->type = 6;

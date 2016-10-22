@@ -183,8 +183,8 @@ class UpdateBgpData extends Command
 
                 // Only entry prefixes which are not set
                 if (isset($$seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn]) === false) {
-
-                    $$newPrefixes .= "('".$parsedLine->ip."','".$parsedLine->cidr."',".$this->ipUtils->ip2dec($parsedLine->ip).",".number_format(($this->ipUtils->ip2dec($parsedLine->ip) + $$ipvAmountCidrArray[$parsedLine->cidr] -1), 0, '', '').",".$parsedLine->asn.",".$this->ipUtils->checkROA($parsedLine->asn, $parsedLine->prefix).",".$mysqlTime.",".$mysqlTime."),";
+                    $ipDecEnd = bcsub(bcadd($this->ipUtils->ip2dec($parsedLine->ip), $$ipvAmountCidrArray[$parsedLine->cidr]), 1);
+                    $$newPrefixes .= "('".$parsedLine->ip."','".$parsedLine->cidr."',".$this->ipUtils->ip2dec($parsedLine->ip).",".$ipDecEnd.",".$parsedLine->asn.",".$this->ipUtils->checkROA($parsedLine->asn, $parsedLine->prefix).",".$mysqlTime.",".$mysqlTime."),";
                     $$seenPrefixes[$parsedLine->prefix.'|'.$parsedLine->asn] = true;
                     $$prefixCounter++;
 

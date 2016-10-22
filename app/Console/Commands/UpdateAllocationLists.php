@@ -204,14 +204,14 @@ class UpdateAllocationLists extends Command
                         // Deal with the remainder
                         $remainingIps = $data[4] - $roundedAmount;
                         $remainCidr = 32 - intval(log($remainingIps)/log(2));
-                        $startIpDec = $this->ipUtils->ip2dec($data[3]) + $roundedAmount;
+                        $startIpDec = bcadd($this->ipUtils->ip2dec($data[3]), $roundedAmount);
                         $startIp = $this->ipUtils->dec2ip($startIpDec);
                         $this->seenIpv4Allocation[$data[3].'/'.$remainCidr] = [
                             'rir_id' => $rir->id,
                             'ip' => $startIp,
                             'cidr' => $remainCidr,
                             'ip_dec_start' => $startIpDec,
-                            'ip_dec_end' => $startIpDec + $remainingIps - 1,
+                            'ip_dec_end' => bcsub(bcadd($startIpDec, $remainingIps), 1),
                             'counrty_code' => $data[1] ?: null,
                             'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
                             'status' => $data[6],
@@ -252,7 +252,7 @@ class UpdateAllocationLists extends Command
                         'ip' => $data[3],
                         'cidr' => $data[4],
                         'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                        'ip_dec_end' => ($this->ipUtils->ip2dec($data[3]) + $ipv6AmountCidrArray[$data[4]] - 1),
+                        'ip_dec_end' => bcsub(bcadd($this->ipUtils->ip2dec($data[3]), $ipv6AmountCidrArray[$data[4]]),  1),
                         'counrty_code' => $data[1] ?: null,
                         'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
                         'status' => $data[6],

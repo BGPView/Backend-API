@@ -592,7 +592,7 @@ class IpUtils
         }
 
         $startDec = $this->ip2dec($ip);
-        $endDec = $startDec + $ipArrayCount[$cidr] - 1;
+        $endDec = bcsub(bcadd($startDec, $ipArrayCount[$cidr]), 1);
 
         return $bgpPrefixClass::where('ip_dec_start', '>=', $startDec)->where('ip_dec_end', '<=', $endDec)->where('cidr', '!=', $cidr)->get();
     }
