@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\ReindexES::class,
         \App\Console\Commands\UpdateMaxmindDB::class,
         \App\Console\Commands\ReindexArinWhois::class,
+        \App\Console\Commands\ReindexApnicWhois::class,
     ];
 
     /**
