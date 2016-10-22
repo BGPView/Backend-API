@@ -62,7 +62,7 @@ class ReindexArinWhois extends ReindexRIRWhois
         $currentCount = 0;
 
         $this->info('Reading ARIN POC whois file');
-        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/pocs.txt';
+        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/pocs.txt?apikey=' . env('WHOIS_DB_ARIN_KEY');
         $rawContent = $this->getContents($url);
         // Split all block
         $whoisBlocks = explode("\n\n\n\n", $rawContent);
@@ -125,7 +125,7 @@ class ReindexArinWhois extends ReindexRIRWhois
         $currentCount = 0;
 
         $this->info('Reading ARIN ORG whois file');
-        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/orgs.txt';
+        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/orgs.txt?apikey=' . env('WHOIS_DB_ARIN_KEY');
         $rawContent = $this->getContents($url);
         // Split all block
         $whoisBlocks = explode("\n\n\n\n", $rawContent);
@@ -188,7 +188,7 @@ class ReindexArinWhois extends ReindexRIRWhois
         $currentCount = 0;
 
         $this->info('Reading ARIN Prefix whois file');
-        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/nets.txt';
+        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/nets.txt?apikey=' . env('WHOIS_DB_ARIN_KEY');
         $rawContent = $this->getContents($url);
 
         // Split all block
@@ -256,7 +256,7 @@ class ReindexArinWhois extends ReindexRIRWhois
         $currentCount = 0;
 
         $this->info('Reading ARIN ASN whois file');
-        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/asns.txt';
+        $url = 'https://www.arin.net/public/secure/downloads/bulkwhois/asns.txt?apikey=' . env('WHOIS_DB_ARIN_KEY');
         $rawContent = $this->getContents($url);
         // Split all block
         $whoisBlocks = explode("\n\n\n\n", $rawContent);
