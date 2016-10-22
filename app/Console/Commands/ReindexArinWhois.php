@@ -95,7 +95,6 @@ class ReindexArinWhois extends ReindexRIRWhois
             $currentCount++;
 
             if ($currentCount > $this->esBatchAmount) {
-                $this->info('Inserted ' . number_format($this->esBatchAmount) . ' POC records');
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
@@ -108,7 +107,6 @@ class ReindexArinWhois extends ReindexRIRWhois
         // Insert the remaining entries
         if (count($params['body']) > 0) {
             $this->esClient->bulk($params);
-            $this->info('Inserted the remaining ' . count($params['body']) . ' records');
         }
 
         $this->bench->end();
@@ -158,7 +156,6 @@ class ReindexArinWhois extends ReindexRIRWhois
             $currentCount++;
 
             if ($currentCount > $this->esBatchAmount) {
-                $this->info('Inserted ' . number_format($this->esBatchAmount) . ' ORG records');
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
@@ -171,7 +168,6 @@ class ReindexArinWhois extends ReindexRIRWhois
         // Insert the remaining entries
         if (count($params['body']) > 0) {
             $this->esClient->bulk($params);
-            $this->info('Inserted the remaining ' . count($params['body']) . ' records');
         }
 
         $this->bench->end();
@@ -227,7 +223,6 @@ class ReindexArinWhois extends ReindexRIRWhois
             $currentCount++;
 
             if ($currentCount > $this->esBatchAmount) {
-                $this->info('Inserted ' . number_format($this->esBatchAmount) . ' NET records');
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
@@ -239,7 +234,6 @@ class ReindexArinWhois extends ReindexRIRWhois
         // Insert the remaining entries
         if (count($params['body']) > 0) {
             $this->esClient->bulk($params);
-            $this->info('Inserted the remaining ' . count($params['body']) . ' records');
         }
 
         $this->bench->end();
@@ -300,7 +294,6 @@ class ReindexArinWhois extends ReindexRIRWhois
             $currentCount++;
 
             if ($currentCount > $this->esBatchAmount) {
-                $this->info('Inserted ' . number_format($this->esBatchAmount) . ' ASN records');
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
@@ -313,7 +306,6 @@ class ReindexArinWhois extends ReindexRIRWhois
         // Insert the remaining entries
         if (count($params['body']) > 0) {
             $this->esClient->bulk($params);
-            $this->info('Inserted the remaining ' . count($params['body']) . ' records');
         }
 
         $this->bench->end();
