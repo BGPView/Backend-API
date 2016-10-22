@@ -265,7 +265,6 @@ class ReindexArinWhois extends ReindexRIRWhois
         foreach ($whoisBlocks as $whoisBlock) {
             // Do quick cleanup
             $whoisBlock = trim($whoisBlock);
-            $orgId = $this->extractValues($whoisBlock, 'OrgID');
             $asns = $this->extractValues($whoisBlock, 'ASNumber');
             if (empty($asns) === true && $asns !== "0") {
                 $this->warn('-------------------');
@@ -287,7 +286,7 @@ class ReindexArinWhois extends ReindexRIRWhois
             $data = [
                 'asn_start' => $asnStart,
                 'asn_end' => $asnEnd,
-                'org_id' => $orgId,
+                'asn_count' => $asnEnd - $asnStart + 1,
                 'whois_block' => $whoisBlock,
             ];
 
@@ -336,7 +335,7 @@ class ReindexArinWhois extends ReindexRIRWhois
                     'properties' => [
                         'asn_start'    => ['type' => 'integer', 'index' => 'not_analyzed'],
                         'asn_end'    => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'org_id'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'asn_count'    => ['type' => 'integer', 'index' => 'not_analyzed'],
                         'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
