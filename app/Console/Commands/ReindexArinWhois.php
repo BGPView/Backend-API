@@ -115,6 +115,8 @@ class ReindexArinWhois extends ReindexRIRWhois
             $this->bench->getTime(),
             $this->bench->getMemoryPeak()
         ));
+
+        $this->warn('=========================');
     }
 
     private function processOrgs()
@@ -176,6 +178,8 @@ class ReindexArinWhois extends ReindexRIRWhois
             $this->bench->getTime(),
             $this->bench->getMemoryPeak()
         ));
+
+        $this->warn('=========================');
     }
 
     private function processNets()
@@ -242,6 +246,8 @@ class ReindexArinWhois extends ReindexRIRWhois
             $this->bench->getTime(),
             $this->bench->getMemoryPeak()
         ));
+
+        $this->warn('=========================');
     }
 
     private function processAsns()
@@ -314,6 +320,8 @@ class ReindexArinWhois extends ReindexRIRWhois
             $this->bench->getTime(),
             $this->bench->getMemoryPeak()
         ));
+
+        $this->warn('=========================');
     }
 
     /**

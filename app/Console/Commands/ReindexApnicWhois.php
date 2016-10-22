@@ -132,6 +132,8 @@ class ReindexApnicWhois extends ReindexRIRWhois
             $this->bench->getTime(),
             $this->bench->getMemoryPeak()
         ));
+
+        $this->warn('=========================');
     }
 
     private function processAsns()
@@ -206,6 +208,8 @@ class ReindexApnicWhois extends ReindexRIRWhois
             $this->bench->getTime(),
             $this->bench->getMemoryPeak()
         ));
+
+        $this->warn('=========================');
     }
 
     private function processPrefixes($ipVersion = 4)
@@ -296,6 +300,8 @@ class ReindexApnicWhois extends ReindexRIRWhois
             $this->bench->getTime(),
             $this->bench->getMemoryPeak()
         ));
+
+        $this->warn('=========================');
     }
 
     private function processRoles()
@@ -350,8 +356,21 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 $currentCount = 0;
                 $params['body'] = [];
             }
-
         }
+
+        // Insert the remaining entries
+        if (count($params['body']) > 0) {
+            $this->esClient->bulk($params);
+        }
+
+        $this->bench->end();
+        $this->info(sprintf(
+            'Time: %s, Memory: %s',
+            $this->bench->getTime(),
+            $this->bench->getMemoryPeak()
+        ));
+
+        $this->warn('=========================');
     }
 
     private function processPersons()
@@ -406,8 +425,21 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 $currentCount = 0;
                 $params['body'] = [];
             }
-
         }
+
+        // Insert the remaining entries
+        if (count($params['body']) > 0) {
+            $this->esClient->bulk($params);
+        }
+
+        $this->bench->end();
+        $this->info(sprintf(
+            'Time: %s, Memory: %s',
+            $this->bench->getTime(),
+            $this->bench->getMemoryPeak()
+        ));
+
+        $this->warn('=========================');
     }
 
     private function processMaintainers()
@@ -462,8 +494,21 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 $currentCount = 0;
                 $params['body'] = [];
             }
-
         }
+
+        // Insert the remaining entries
+        if (count($params['body']) > 0) {
+            $this->esClient->bulk($params);
+        }
+
+        $this->bench->end();
+        $this->info(sprintf(
+            'Time: %s, Memory: %s',
+            $this->bench->getTime(),
+            $this->bench->getMemoryPeak()
+        ));
+
+        $this->warn('=========================');
     }
 
     /**
