@@ -207,6 +207,7 @@ class ReindexArinWhois extends ReindexRIRWhois
                 continue;
             }
             $netRangeParts = explode(' - ', $netRange);
+            $ipVersion = filter_var($netRangeParts[0], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? 6 : 4;
             $ipDecStart = $this->ipUtils->ip2dec($netRangeParts[0]);
             $ipDecEnd = $this->ipUtils->ip2dec($netRangeParts[1]);
 
@@ -214,6 +215,7 @@ class ReindexArinWhois extends ReindexRIRWhois
                 'ip_dec_start' => $ipDecStart,
                 'ip_dec_end' => $ipDecEnd,
                 'ip_count' => bcadd(1, bcsub($ipDecEnd, $ipDecStart)),
+                'ip_version' => $ipVersion,
                 'whois_block' => $whoisBlock,
             ];
 
@@ -344,6 +346,7 @@ class ReindexArinWhois extends ReindexRIRWhois
                         'ip_dec_start'    => ['type' => 'double', 'index' => 'not_analyzed'],
                         'ip_dec_end'    => ['type' => 'double', 'index' => 'not_analyzed'],
                         'ip_count'    => ['type' => 'double', 'index' => 'not_analyzed'],
+                        'ip_version'    => ['type' => 'integer', 'index' => 'not_analyzed'],
                         'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
