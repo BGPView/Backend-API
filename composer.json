@@ -8,6 +8,7 @@
         "php": ">=5.5.9",
         "ext-bcmath": "*",
         "ext-curl": "*",
+        "ext-bz2": "*",
         "laravel/framework": "5.2.*",
         "webpatser/laravel-countries": "dev-master",
         "league/climate": "^3.2",
