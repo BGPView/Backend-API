@@ -4,9 +4,6 @@ namespace App\Console\Commands;
 
 use App\Helpers\IpUtils;
 use App\Models\Rir;
-use App\Models\RirAsnAllocation;
-use App\Models\RirIPv4Allocation;
-use App\Models\RirIPv6Allocation;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use League\CLImate\CLImate;

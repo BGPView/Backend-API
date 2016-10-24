@@ -12,11 +12,6 @@ class MakeAsnBigInt extends Migration
      */
     public function up()
     {
-        Schema::table('rir_asn_allocations', function($table)
-        {
-            $table->bigInteger('asn')->change();
-        });
-
         Schema::table('asns', function($table)
         {
             $table->bigInteger('asn')->change();
@@ -67,11 +62,6 @@ class MakeAsnBigInt extends Migration
      */
     public function down()
     {
-        Schema::table('rir_asn_allocations', function($table)
-        {
-            $table->integer('asn')->change();
-        });
-
         Schema::table('asns', function($table)
         {
             $table->integer('asn')->change();

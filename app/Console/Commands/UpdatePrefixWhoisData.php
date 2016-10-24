@@ -9,7 +9,6 @@ use App\Models\IPv4PrefixWhois;
 use App\Models\IPv6PrefixWhoisEmail;
 use App\Models\IPv6BgpPrefix;
 use App\Models\IPv6PrefixWhois;
-use App\Models\RirIPv4Allocation;
 use App\Services\BgpParser;
 use App\Services\Whois;
 use Carbon\Carbon;
@@ -74,12 +73,15 @@ class UpdatePrefixWhoisData extends Command
 
         $this->cli->br()->comment('Getting all the IPv' . $ipVersion . 'prefixes from the BGP table');
 
+        // Get all allocated IP prefixes
         $className = 'App\Models\RirIPv' . $ipVersion . 'Allocation';
         $sourcePrefixes['rir_prefixes'] = $className::where('status', 'allocated')->orWhere('status', 'assigned')->get()->shuffle();
 
+        // get all bgp prefixes
         $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
         $sourcePrefixes['bgp_prefixes'] = $className::all()->shuffle();
 
+        // Make sure they are unqie
         $prefixes = [];
         foreach ($sourcePrefixes as $sourcePrefix) {
             foreach ($sourcePrefix as $prefixObj) {
@@ -89,6 +91,7 @@ class UpdatePrefixWhoisData extends Command
             }
         }
 
+        // Update them
         foreach ($prefixes as $ipPrefix) {
 
             // Lets skip if its a bogon address
