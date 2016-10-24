@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Elasticsearch\ClientBuilder;
 use Illuminate\Console\Command;
 
 class ReindexApnicWhois extends ReindexRIRWhois
@@ -44,7 +43,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
     {
         $params = [
             'index' => $this->versionedIndex,
-            'body' => $this->getIndexMapping(),
+            'body'  => $this->getIndexMapping(),
         ];
         $this->esClient->indices()->create($params);
 
@@ -65,7 +64,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
         $currentCount = 0;
 
         $this->info('Reading APNIC ASN Blocks whois file');
-        $url = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.as-block.gz';
+        $url        = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.as-block.gz';
         $rawContent = gzdecode($this->getContents($url));
 
         // Split all block
@@ -89,24 +88,23 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 continue;
             }
 
-            $asBlock = str_ireplace('as', '', $asBlock);
+            $asBlock  = str_ireplace('as', '', $asBlock);
             $asnParts = explode(" - ", $asBlock);
             $asnStart = trim($asnParts[0]);
-            $asnEnd = trim($asnParts[1]);
-
+            $asnEnd   = trim($asnParts[1]);
 
             $data = [
-                'asn_start' => $asnStart,
-                'asn_end' => $asnEnd,
-                'asn_count' => $asnEnd - $asnStart + 1,
+                'asn_start'   => $asnStart,
+                'asn_end'     => $asnEnd,
+                'asn_count'   => $asnEnd - $asnStart + 1,
                 'whois_block' => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'asns',
-                ]
+                    '_type'  => 'asns',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -115,7 +113,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
 
@@ -142,7 +140,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
         $currentCount = 0;
 
         $this->info('Reading APNIC ASNs whois file');
-        $url = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.aut-num.gz';
+        $url        = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.aut-num.gz';
         $rawContent = gzdecode($this->getContents($url));
 
         // Split all block
@@ -166,23 +164,22 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 continue;
             }
 
-            $asNum = str_ireplace('as', '', $asNum);
+            $asNum    = str_ireplace('as', '', $asNum);
             $asnStart = trim($asNum);
-            $asnEnd = trim($asNum);
-
+            $asnEnd   = trim($asNum);
 
             $data = [
-                'asn_start' => $asnStart,
-                'asn_end' => $asnEnd,
-                'asn_count' => $asnEnd - $asnStart + 1,
+                'asn_start'   => $asnStart,
+                'asn_end'     => $asnEnd,
+                'asn_count'   => $asnEnd - $asnStart + 1,
                 'whois_block' => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'asns',
-                ]
+                    '_type'  => 'asns',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -191,7 +188,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
 
@@ -215,12 +212,12 @@ class ReindexApnicWhois extends ReindexRIRWhois
     private function processPrefixes($ipVersion = 4)
     {
         $this->bench->start();
-        $currentCount = 0;
+        $currentCount        = 0;
         $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
 
         $this->info('Reading APNIC IPv' . $ipVersion . ' Prefixes whois file');
-        $vUrl = $ipVersion == 4? '' : 6;
-        $url = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.inet' . $vUrl . 'num.gz';
+        $vUrl       = $ipVersion == 4 ? '' : 6;
+        $url        = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.inet' . $vUrl . 'num.gz';
         $rawContent = gzdecode($this->getContents($url));
 
         // Split all block
@@ -235,7 +232,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 continue;
             }
 
-            $prefix = $this->extractValues($whoisBlock, 'inet' . $vUrl .'num');
+            $prefix = $this->extractValues($whoisBlock, 'inet' . $vUrl . 'num');
             if (empty($prefix) === true) {
                 $this->warn('-------------------');
                 $this->warn('Unknown IPv' . $ipVersion . ' prefixes on:');
@@ -255,27 +252,26 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 }
 
                 $ipDecStart = $this->ipUtils->ip2dec($netRangeParts[0]);
-                $ipDecEnd = $this->ipUtils->ip2dec($netRangeParts[1]);
+                $ipDecEnd   = $this->ipUtils->ip2dec($netRangeParts[1]);
             } else {
                 $netRangeParts = explode('/', $prefix);
-                $ipDecStart = $this->ipUtils->ip2dec($netRangeParts[0]);
-                $ipDecEnd = bcsub(bcadd($this->ipUtils->ip2dec($netRangeParts[0]), $ipv6AmountCidrArray[$netRangeParts[1]]),  1);
+                $ipDecStart    = $this->ipUtils->ip2dec($netRangeParts[0]);
+                $ipDecEnd      = bcsub(bcadd($this->ipUtils->ip2dec($netRangeParts[0]), $ipv6AmountCidrArray[$netRangeParts[1]]), 1);
             }
-
 
             $data = [
                 'ip_dec_start' => $ipDecStart,
-                'ip_dec_end' => $ipDecEnd,
-                'ip_count' => bcadd(1, bcsub($ipDecEnd, $ipDecStart)),
-                'ip_version' => $ipVersion,
-                'whois_block' => $whoisBlock,
+                'ip_dec_end'   => $ipDecEnd,
+                'ip_count'     => bcadd(1, bcsub($ipDecEnd, $ipDecStart)),
+                'ip_version'   => $ipVersion,
+                'whois_block'  => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'nets',
-                ]
+                    '_type'  => 'nets',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -284,7 +280,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
 
@@ -311,7 +307,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
         $currentCount = 0;
 
         $this->info('Reading APNIC Role whois file');
-        $url = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.role.gz';
+        $url        = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.role.gz';
         $rawContent = gzdecode($this->getContents($url));
 
         // Split all block
@@ -335,17 +331,16 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 continue;
             }
 
-
             $data = [
-                'role_id' => $nicHdl,
+                'role_id'     => $nicHdl,
                 'whois_block' => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'roles',
-                ]
+                    '_type'  => 'roles',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -354,7 +349,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
         }
@@ -380,7 +375,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
         $currentCount = 0;
 
         $this->info('Reading APNIC Person whois file');
-        $url = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.person.gz';
+        $url        = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.person.gz';
         $rawContent = gzdecode($this->getContents($url));
 
         // Split all block
@@ -404,17 +399,16 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 continue;
             }
 
-
             $data = [
-                'person_id' => $nicHdl,
+                'person_id'   => $nicHdl,
                 'whois_block' => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'persons',
-                ]
+                    '_type'  => 'persons',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -423,7 +417,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
         }
@@ -449,7 +443,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
         $currentCount = 0;
 
         $this->info('Reading APNIC Maintainers whois file');
-        $url = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.mntner.gz';
+        $url        = env('WHOIS_DB_APNIC_BASE_URL') . 'apnic.db.mntner.gz';
         $rawContent = gzdecode($this->getContents($url));
 
         // Split all block
@@ -473,17 +467,16 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 continue;
             }
 
-
             $data = [
-                'mntner_id' => $nicHdl,
+                'mntner_id'   => $nicHdl,
                 'whois_block' => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'mntners',
-                ]
+                    '_type'  => 'mntners',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -492,7 +485,7 @@ class ReindexApnicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
         }
@@ -519,39 +512,39 @@ class ReindexApnicWhois extends ReindexRIRWhois
     {
         return [
             'mappings' => [
-                'asns'  => [
+                'asns'    => [
                     'properties' => [
-                        'asn_start'    => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'asn_end'    => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'asn_count'    => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'asn_start'   => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'asn_end'     => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'asn_count'   => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'whois_block' => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
-                'nets'  => [
+                'nets'    => [
                     'properties' => [
-                        'ip_dec_start'    => ['type' => 'double', 'index' => 'not_analyzed'],
-                        'ip_dec_end'    => ['type' => 'double', 'index' => 'not_analyzed'],
-                        'ip_count'    => ['type' => 'double', 'index' => 'not_analyzed'],
-                        'ip_version'    => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'ip_dec_start' => ['type' => 'double', 'index' => 'not_analyzed'],
+                        'ip_dec_end'   => ['type' => 'double', 'index' => 'not_analyzed'],
+                        'ip_count'     => ['type' => 'double', 'index' => 'not_analyzed'],
+                        'ip_version'   => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'whois_block'  => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
-                'roles'  => [
+                'roles'   => [
                     'properties' => [
-                        'role_id'    => ['type' => 'string', 'index' => 'not_analyzed'],
-                        'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'role_id'     => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'whois_block' => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
-                'persons'  => [
+                'persons' => [
                     'properties' => [
-                        'person_id'    => ['type' => 'string', 'index' => 'not_analyzed'],
-                        'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'person_id'   => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'whois_block' => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
-                'mntners'  => [
+                'mntners' => [
                     'properties' => [
-                        'mntner_id'    => ['type' => 'string', 'index' => 'not_analyzed'],
-                        'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'mntner_id'   => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'whois_block' => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
             ],

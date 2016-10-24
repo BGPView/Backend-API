@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Elasticsearch\ClientBuilder;
 use Illuminate\Console\Command;
 
 class ReindexAfrinicWhois extends ReindexRIRWhois
@@ -44,7 +43,7 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
     {
         $params = [
             'index' => $this->versionedIndex,
-            'body' => $this->getIndexMapping(),
+            'body'  => $this->getIndexMapping(),
         ];
         $this->esClient->indices()->create($params);
 
@@ -64,12 +63,12 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
     {
         $this->info('Downloading and populating Afrinic WHOIS dump');
         $bz2Content = $this->getContents(env('WHOIS_DB_AFRINIC_BASE_URL'));
-        $rawData = bzdecompress($bz2Content);
-        $dataParts = array_filter(explode("\n", $rawData));
+        $rawData    = bzdecompress($bz2Content);
+        $dataParts  = array_filter(explode("\n", $rawData));
 
         // Categorise the whois data dump
         foreach ($dataParts as $dataPart) {
-            $elementType = explode(':', $dataPart, 2)[0];
+            $elementType                     = explode(':', $dataPart, 2)[0];
             $this->whoisDump[$elementType][] = str_replace('\t', "\t", str_replace('\n', "\n", $dataPart));
         }
     }
@@ -95,24 +94,23 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
                 continue;
             }
 
-            $asBlock = str_ireplace('as', '', $asBlock);
+            $asBlock  = str_ireplace('as', '', $asBlock);
             $asnParts = explode(" - ", $asBlock);
             $asnStart = trim($asnParts[0]);
-            $asnEnd = trim($asnParts[1]);
-
+            $asnEnd   = trim($asnParts[1]);
 
             $data = [
-                'asn_start' => $asnStart,
-                'asn_end' => $asnEnd,
-                'asn_count' => $asnEnd - $asnStart + 1,
+                'asn_start'   => $asnStart,
+                'asn_end'     => $asnEnd,
+                'asn_count'   => $asnEnd - $asnStart + 1,
                 'whois_block' => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'asns',
-                ]
+                    '_type'  => 'asns',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -121,7 +119,7 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
 
@@ -163,23 +161,22 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
                 continue;
             }
 
-            $asNum = str_ireplace('as', '', $asNum);
+            $asNum    = str_ireplace('as', '', $asNum);
             $asnStart = trim($asNum);
-            $asnEnd = trim($asNum);
-
+            $asnEnd   = trim($asNum);
 
             $data = [
-                'asn_start' => $asnStart,
-                'asn_end' => $asnEnd,
-                'asn_count' => $asnEnd - $asnStart + 1,
+                'asn_start'   => $asnStart,
+                'asn_end'     => $asnEnd,
+                'asn_count'   => $asnEnd - $asnStart + 1,
                 'whois_block' => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'asns',
-                ]
+                    '_type'  => 'asns',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -188,7 +185,7 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
 
@@ -212,9 +209,9 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
     private function processPrefixes($ipVersion = 4)
     {
         $this->bench->start();
-        $currentCount = 0;
+        $currentCount        = 0;
         $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
-        $vUrl = $ipVersion == 4 ? '' : 6;
+        $vUrl                = $ipVersion == 4 ? '' : 6;
 
         $this->info('Reading Afrinic IPv' . $ipVersion . ' prefixes whois file');
         $this->info(number_format(count($this->whoisDump['inet' . $vUrl . 'num'])) . ' IPv' . $ipVersion . ' Prefixes Found');
@@ -223,7 +220,7 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
             // Do quick cleanup
             $whoisBlock = trim($whoisBlock);
 
-            $prefix = $this->extractValues($whoisBlock, 'inet' . $vUrl .'num');
+            $prefix = $this->extractValues($whoisBlock, 'inet' . $vUrl . 'num');
             if (empty($prefix) === true) {
                 $this->warn('-------------------');
                 $this->warn('Unknown IPv' . $ipVersion . ' prefixes on:');
@@ -243,26 +240,26 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
                 }
 
                 $ipDecStart = $this->ipUtils->ip2dec($netRangeParts[0]);
-                $ipDecEnd = $this->ipUtils->ip2dec($netRangeParts[1]);
+                $ipDecEnd   = $this->ipUtils->ip2dec($netRangeParts[1]);
             } else {
                 $netRangeParts = explode('/', $prefix);
-                $ipDecStart = $this->ipUtils->ip2dec($netRangeParts[0]);
-                $ipDecEnd = bcsub(bcadd($this->ipUtils->ip2dec($netRangeParts[0]), $ipv6AmountCidrArray[$netRangeParts[1]]),  1);
+                $ipDecStart    = $this->ipUtils->ip2dec($netRangeParts[0]);
+                $ipDecEnd      = bcsub(bcadd($this->ipUtils->ip2dec($netRangeParts[0]), $ipv6AmountCidrArray[$netRangeParts[1]]), 1);
             }
 
             $data = [
                 'ip_dec_start' => $ipDecStart,
-                'ip_dec_end' => $ipDecEnd,
-                'ip_count' => bcadd(1, bcsub($ipDecEnd, $ipDecStart)),
-                'ip_version' => $ipVersion,
-                'whois_block' => $whoisBlock,
+                'ip_dec_end'   => $ipDecEnd,
+                'ip_count'     => bcadd(1, bcsub($ipDecEnd, $ipDecStart)),
+                'ip_version'   => $ipVersion,
+                'whois_block'  => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'nets',
-                ]
+                    '_type'  => 'nets',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -271,7 +268,7 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
 
@@ -313,17 +310,16 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
                 continue;
             }
 
-
             $data = [
-                'org_id' => $orgId,
+                'org_id'      => $orgId,
                 'whois_block' => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'orgs',
-                ]
+                    '_type'  => 'orgs',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -332,7 +328,7 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
         }
@@ -374,15 +370,15 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
             }
 
             $data = [
-                'mntner_id' => $nicHdl,
+                'mntner_id'   => $nicHdl,
                 'whois_block' => $whoisBlock,
             ];
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->versionedIndex,
-                    '_type' => 'mntners',
-                ]
+                    '_type'  => 'mntners',
+                ],
             ];
             $params['body'][] = $data;
             $currentCount++;
@@ -391,7 +387,7 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
                 // Get our document body data.
                 $this->esClient->bulk($params);
                 // Reset the batching
-                $currentCount = 0;
+                $currentCount   = 0;
                 $params['body'] = [];
             }
         }
@@ -418,33 +414,33 @@ class ReindexAfrinicWhois extends ReindexRIRWhois
     {
         return [
             'mappings' => [
-                'asns'  => [
+                'asns'    => [
                     'properties' => [
-                        'asn_start'    => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'asn_end'    => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'asn_count'    => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'asn_start'   => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'asn_end'     => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'asn_count'   => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'whois_block' => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
-                'nets'  => [
+                'nets'    => [
                     'properties' => [
-                        'ip_dec_start'    => ['type' => 'double', 'index' => 'not_analyzed'],
-                        'ip_dec_end'    => ['type' => 'double', 'index' => 'not_analyzed'],
-                        'ip_count'    => ['type' => 'double', 'index' => 'not_analyzed'],
-                        'ip_version'    => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'ip_dec_start' => ['type' => 'double', 'index' => 'not_analyzed'],
+                        'ip_dec_end'   => ['type' => 'double', 'index' => 'not_analyzed'],
+                        'ip_count'     => ['type' => 'double', 'index' => 'not_analyzed'],
+                        'ip_version'   => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'whois_block'  => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
-                'orgs'  => [
+                'orgs'    => [
                     'properties' => [
-                        'org_id'    => ['type' => 'string', 'index' => 'not_analyzed'],
-                        'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'org_id'      => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'whois_block' => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
-                'mntners'  => [
+                'mntners' => [
                     'properties' => [
-                        'mntner_id'    => ['type' => 'string', 'index' => 'not_analyzed'],
-                        'whois_block'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'mntner_id'   => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'whois_block' => ['type' => 'string', 'index' => 'not_analyzed'],
                     ],
                 ],
             ],
