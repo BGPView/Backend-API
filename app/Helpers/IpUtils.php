@@ -378,27 +378,57 @@ class IpUtils
     public function getAllocationEntry($input, $cidr = null)
     {
         $type = $this->getInputType($input);
+        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
 
         // Try to do IP lookups
         if (is_numeric($type) === true) {
-            if ($type === 6) {
-                $class = RirIPv6Allocation::class;
-            } else {
-                $class = RirIPv4Allocation::class;
-            }
+            $ipDec = $this->ip2dec($input);
 
-            $ipDec = number_format($this->ip2dec($input), 0, '', '');
+            $searchParams = [
+                'index' => 'rir_allocations',
+                'type' => 'prefixes',
+                'body' => [
+                    'sort' => [
+                        'date_allocated' => [
+                            'order' => 'asc',
+                        ],
+                    ],
+                    'filter' => [
+                        'bool' => [
+                            'must' => [
+                                [
+                                    'range' => [
+                                        'ip_dec_start' => [
+                                            'lte' => $ipDec
+                                        ],
+                                    ]
+                                ],
+                                [
+                                    'range' => [
+                                        'ip_dec_end' => [
+                                            'gte' => $ipDec
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'match' => [
+                                        'ip_version' => (int) $type,
+                                    ]
+                                ]
+                            ],
+                        ],
+                    ],
+                ],
+            ];
 
-            $allocations = $class::where('ip_dec_start', '<=', $ipDec)
-                ->where('ip_dec_end', '>=',  $ipDec)
-                ->orderBy('date_allocated', 'asc')
-                ->get();
+            $searchResults = $client->search($searchParams);
+            $allocations = $this->cleanEsResults($searchResults);
 
-            if ($allocations->count() === 1) {
+            if (count($allocations) === 1) {
                 return $allocations[0];
             }
 
-            if ($allocations->count() > 1) {
+            if (count($allocations) > 1) {
                 if ($cidr === null) {
                     return null;
                 }
@@ -438,9 +468,48 @@ class IpUtils
 
         //Not an IP. lets try look up domain
         $input = str_ireplace("AS", "", $input);
-        return RirAsnAllocation::where('asn', $input)
-            ->orderBy('date_allocated', 'desc')
-            ->first();
+
+        $searchParams = [
+            'index' => 'rir_allocations',
+            'type' => 'asns',
+            'body' => [
+                'sort' => [
+                    'date_allocated' => [
+                        'order' => 'desc',
+                    ],
+                ],
+                'query' => [
+                    'match' => [
+                        'asn' => $input
+                    ]
+                ],
+            ],
+        ];
+
+        $searchResults = $client->search($searchParams);
+        $asnsAllocations = $this->cleanEsResults($searchResults);
+
+        if (count($asnsAllocations) < 1) {
+            return null;
+        } else {
+            return $asnsAllocations[0];
+        }
+    }
+
+    private function cleanEsResults($results)
+    {
+        $data = [];
+
+        // Clean results
+        foreach ($results['hits']['hits'] as $searchResult) {
+            $hit = new \stdClass();
+            foreach ($searchResult['_source'] as $key => $value) {
+                $hit->$key = $value;
+            }
+            $data[] = $hit;
+        }
+
+        return $data;
     }
 
     public function getBgpPrefixes($input)
