@@ -2,48 +2,40 @@
 
 namespace App\Console\Commands;
 
-use App\Helpers\IpUtils;
 use App\Models\Rir;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use League\CLImate\CLImate;
-use Ubench;
 
-class UpdateAllocationLists extends Command
+class UpdateAllocationLists extends ReindexRIRWhois
 {
-
-    private $cli;
-    private $ipUtils;
-    private $bench;
-
-    private $seenIpv4Allocation = [];
-    private $seenIpv6Allocation = [];
-    private $seenAsnAllocation = [];
-
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'zIPLookup:update-allocation-lists';
+    protected $signature = 'zBGPView:reindex-rir-allocations';
+    protected $indexName = 'rir_allocations';
+    protected $versionedIndex;
+    protected $seenIpv4Allocation = [];
+    protected $seenIpv6Allocation = [];
+    protected $seenAsnAllocation = [];
+
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Update the RIR allocation lists (IPv4, IPv6 and ASN)';
-
+    protected $description = 'Reindex in ES RIR allocation lists';
 
     /**
      * Create a new command instance.
+     *
+     * @return void
      */
-    public function __construct(CLImate $cli, IpUtils $ipUtils, Ubench $bench)
+    public function __construct()
     {
         parent::__construct();
-        $this->cli = $cli;
-        $this->ipUtils = $ipUtils;
-        $this->bench = $bench;
+        $this->versionedIndex = $this->indexName . '_' . time();
     }
 
     /**
@@ -53,130 +45,104 @@ class UpdateAllocationLists extends Command
      */
     public function handle()
     {
-        $this->cli->br()->comment('Updating the IPv4, IPv6 and ASN RIR allocated resources');
+        $params = [
+            'index' => $this->versionedIndex,
+            'body'  => $this->getIndexMapping(),
+        ];
+        $this->esClient->indices()->create($params);
+
+        $this->info('Updating the IPv4, IPv6 and ASN RIR allocated resources');
 
         foreach (Rir::all() as $rir) {
-            $this->bench->start();
-            $this->cli->br()->comment('===================================================');
-            $this->cli->br()->comment('Downloading ' . $rir->name . ' allocation list');
+            $this->warn('===================================================');
+            $this->info('Downloading ' . $rir->name . ' allocation list');
 
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $rir->allocation_list_url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_NOPROGRESS, false);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
+            $rirAllocationData = $this->getContents($rir->allocation_list_url);
 
-            if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')){
-                curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-            }
+            $this->getAllocations($rir, $rirAllocationData);
 
-            $output = curl_exec($ch);
-            curl_close($ch);
-            $this->output->newLine(1);
-            $this->updateDb($rir, $output);
-            $this->output->newLine(2);
-            $output = null;
-
-            $this->bench->end();
-            $this->cli->info(sprintf(
-                'Time: %s, Memory: %s',
-                $this->bench->getTime(),
-                $this->bench->getMemoryPeak()
-            ))->br();
         }
 
-        $this->bench->start();
-        $mysqlTime = date('Y-m-d H:i:s');
-        $this->cli->br()->comment('Inserting the allocations into DB');
+        $this->insertAllocations('asns', $this->seenAsnAllocation);
+        $this->insertAllocations('prefixes', $this->seenIpv4Allocation);
+        $this->insertAllocations('prefixes', $this->seenIpv6Allocation);
 
-        DB::statement('DROP TABLE IF EXISTS rir_ipv4_allocations_temp');
-        DB::statement('DROP TABLE IF EXISTS rir_ipv6_allocations_temp');
-        DB::statement('DROP TABLE IF EXISTS rir_asn_allocations_temp');
 
-        DB::statement('CREATE TABLE rir_ipv4_allocations_temp LIKE rir_ipv4_allocations');
-        DB::statement('CREATE TABLE rir_ipv6_allocations_temp LIKE rir_ipv6_allocations');
-        DB::statement('CREATE TABLE rir_asn_allocations_temp LIKE rir_asn_allocations');
-
-        $asnInsertLine = '';
-        foreach ($this->seenAsnAllocation as $asn) {
-            $date_allocated = $asn['date_allocated'] ? '"'.$asn['date_allocated'].'"' : 'null';
-            $counrty_code = $asn['counrty_code'] ? '"'.$asn['counrty_code'].'"' : 'null';
-            $asnInsertLine .= '('.$asn['rir_id'].','.$asn['asn'].','.$counrty_code.','.$date_allocated.',"'.$asn['status'].'","'.$mysqlTime.'", "'.$mysqlTime.'"),';
-        }
-        $asnInsertLine= rtrim($asnInsertLine, ',').';';
-        DB::statement('INSERT INTO rir_asn_allocations_temp (rir_id,asn,counrty_code,date_allocated,status,updated_at,created_at) VALUES '.$asnInsertLine);
-
-        $ipv4InsertLine = '';
-        foreach ($this->seenIpv4Allocation as $ipv4) {
-            $date_allocated = $ipv4['date_allocated'] ? '"'.$ipv4['date_allocated'].'"' : 'null';
-            $counrty_code = $ipv4['counrty_code'] ? '"'.$ipv4['counrty_code'].'"' : 'null';
-            $ipv4InsertLine .= '('.$ipv4['rir_id'].',"'.$ipv4['ip'].'",'.$ipv4['cidr'].','.$ipv4['ip_dec_start'].','.$ipv4['ip_dec_end'].','.$counrty_code.','.$date_allocated.',"'.$ipv4['status'].'","'.$mysqlTime.'", "'.$mysqlTime.'"),';
-        }
-        $ipv4InsertLine= rtrim($ipv4InsertLine, ',').';';
-        DB::statement('INSERT INTO rir_ipv4_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,status,updated_at,created_at) VALUES '.$ipv4InsertLine);
-
-        $ipv6InsertLine = '';
-        foreach ($this->seenIpv6Allocation as $ipv6) {
-            $date_allocated = $ipv6['date_allocated'] ? '"'.$ipv6['date_allocated'].'"' : 'null';
-            $counrty_code = $ipv6['counrty_code'] ? '"'.$ipv6['counrty_code'].'"' : 'null';
-            $ipv6InsertLine .= '('.$ipv6['rir_id'].',"'.$ipv6['ip'].'",'.$ipv6['cidr'].','.$ipv6['ip_dec_start'].','.$ipv6['ip_dec_end'].','.$counrty_code.','.$date_allocated.',"'.$ipv6['status'].'", "'.$mysqlTime.'", "'.$mysqlTime.'"),';
-        }
-        $ipv6InsertLine= rtrim($ipv6InsertLine, ',').';';
-        DB::statement('INSERT INTO rir_ipv6_allocations_temp (rir_id,ip,cidr,ip_dec_start,ip_dec_end,counrty_code,date_allocated,status,updated_at,created_at) VALUES '.$ipv6InsertLine);
-
-        DB::statement('RENAME TABLE rir_ipv4_allocations TO backup_rir_ipv4_allocations, rir_ipv4_allocations_temp TO rir_ipv4_allocations;');
-        DB::statement('RENAME TABLE rir_ipv6_allocations TO backup_rir_ipv6_allocations, rir_ipv6_allocations_temp TO rir_ipv6_allocations;');
-        DB::statement('RENAME TABLE rir_asn_allocations TO backup_rir_asn_allocations, rir_asn_allocations_temp TO rir_asn_allocations;');
-
-        DB::statement('DROP TABLE backup_rir_ipv4_allocations');
-        DB::statement('DROP TABLE backup_rir_ipv6_allocations');
-        DB::statement('DROP TABLE backup_rir_asn_allocations');
-
-        $this->bench->end();
-        $this->cli->info(sprintf(
-            'Time: %s, Memory: %s',
-            $this->bench->getTime(),
-            $this->bench->getMemoryPeak()
-        ))->br();
+        $this->hotSwapIndices($this->versionedIndex, $this->indexName);
     }
 
-    private function updateDb($rir, $list)
+    private function insertAllocations($type, $allocations)
     {
-        $lines = explode("\n", $list);
-        $this->cli->br()->comment('Collection and parsing all resources from ' . $rir->name . ' allocation list ('.number_format(count($lines)).' entries)');
+        $this->bench->start();
+        $currentCount = 0;
 
+        $this->warn('===================================================');
+        $this->info('Inserting ' . number_format(count($allocations)) . ' '. $type);
+
+
+        foreach ($allocations as $allocation) {
+            $params['body'][] = [
+                'index' => [
+                    '_index' => $this->versionedIndex,
+                    '_type'  => $type,
+                ],
+            ];
+            $params['body'][] = $allocation;
+            $currentCount++;
+
+            if ($currentCount > $this->esBatchAmount) {
+                // Get our document body data.
+                $this->esClient->bulk($params);
+                // Reset the batching
+                $currentCount   = 0;
+                $params['body'] = [];
+            }
+        }
+
+        // Insert the remaining entries
+        if (count($params['body']) > 0) {
+            $this->esClient->bulk($params);
+        }
+
+    }
+
+    private function getAllocations($rir, $rirAllocationData)
+    {
+        $rirAllocationData = explode("\n", $rirAllocationData);
         $ipv4AmountCidrArray = $this->ipUtils->IPv4cidrIpCount($reverse = true);
         $ipv6AmountCidrArray = $this->ipUtils->IPv6cidrIpCount();
 
-        foreach ($lines as $line) {
-            $data = explode('|', $line);
+        $this->info('Arranging ' . number_format(count($rirAllocationData)) . ' ' . $rir->name . ' resources');
+
+        foreach ($rirAllocationData as $allocatedResource) {
+
+            $allocationData = explode('|', $allocatedResource);
 
             // if it doesnt have 8 parts, skip
-            if (count($data) !== 8 && isset($data[6]) === true && $data[6] != 'available' && $data[6] != 'reserved') {
+            if (count($allocationData) !== 8 && isset($allocationData[6]) === true && $allocationData[6] != 'available' && $allocationData[6] != 'reserved') {
                 continue;
             }
 
             // Only take allocated resources
-            if (empty($data[2]) !== true && empty($data[6]) !== true && empty($data[3]) !== true) {
+            if (empty($allocationData[2]) !== true && empty($allocationData[6]) !== true && empty($allocationData[3]) !== true) {
 
-                $resourceType = $data[2];
+                $resourceType = $allocationData[2];
 
                 // Replace 'ZZ' with null country code
-                $data[1] = $data[1] == 'ZZ' ? null : $data[1];
+                $allocationData[1] = $allocationData[1] == 'ZZ' ? null : $allocationData[1];
 
                 if ($resourceType === 'asn') {
 
-                    if (isset($this->seenAsnAllocation[$data[3]]) === true) {
+                    if (isset($this->seenAsnAllocation[$allocationData[3]]) === true) {
                         continue;
                     }
-
-                    $this->seenAsnAllocation[$data[3]] = [
+                    $this->seenAsnAllocation[$allocationData[3]] = [
                         'rir_id' => $rir->id,
-                        'asn' => $data[3],
-                        'counrty_code' => $data[1] ?: null,
-                        'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
-                        'status' => $data[6],
+                        'rir_name' => $rir->name,
+                        'asn' => $allocationData[3],
+                        'country_code' => $allocationData[1] ?: null,
+                        'date_allocated' => $allocationData[5] ? substr($allocationData[5], 0, 4) . "-" . substr($allocationData[5], 4, 2) . "-" . substr($allocationData[5], 6, 2) : null,
+                        'status' => $allocationData[6],
                     ];
 
                 } else if ($resourceType === 'ipv4') {
@@ -184,79 +150,124 @@ class UpdateAllocationLists extends Command
                     // Since some RIRs allocate random non CIDR addresses
                     // We shall split them up into the best CIDR that we can
                     // Really unhappy with this :/
-                    if (isset($ipv4AmountCidrArray[$data[4]]) !== true) {
-                        $roundedCidr = 32 - intval(log($data[4])/log(2));
+                    if (isset($ipv4AmountCidrArray[$allocationData[4]]) !== true) {
+
+                        $roundedCidr = 32 - intval(log($allocationData[4]) / log(2));
                         $roundedAmount = pow(2, (32 - $roundedCidr));
-                        $this->seenIpv4Allocation[$data[3].'/'.$roundedCidr] = [
+                        $this->seenIpv4Allocation[$allocationData[3] . '/' . $roundedCidr] = [
                             'rir_id' => $rir->id,
-                            'ip' => $data[3],
+                            'rir_name' => $rir->name,
+                            'ip_version' => 4,
+                            'ip' => $allocationData[3],
                             'cidr' => $roundedCidr,
-                            'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                            'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $roundedAmount - 1,
-                            'counrty_code' => $data[1] ?: null,
-                            'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
-                            'status' => $data[6],
+                            'ip_dec_start' => $this->ipUtils->ip2dec($allocationData[3]),
+                            'ip_dec_end' => $this->ipUtils->ip2dec($allocationData[3]) + $roundedAmount - 1,
+                            'country_code' => $allocationData[1] ?: null,
+                            'date_allocated' => $allocationData[5] ? substr($allocationData[5], 0, 4) . "-" . substr($allocationData[5], 4, 2) . "-" . substr($allocationData[5], 6, 2) : null,
+                            'status' => $allocationData[6],
                         ];
 
                         // Deal with the remainder
-                        $remainingIps = $data[4] - $roundedAmount;
-                        $remainCidr = 32 - intval(log($remainingIps)/log(2));
-                        $startIpDec = bcadd($this->ipUtils->ip2dec($data[3]), $roundedAmount);
+                        $remainingIps = $allocationData[4] - $roundedAmount;
+                        $remainCidr = 32 - intval(log($remainingIps) / log(2));
+                        $startIpDec = bcadd($this->ipUtils->ip2dec($allocationData[3]), $roundedAmount);
                         $startIp = $this->ipUtils->dec2ip($startIpDec);
-                        $this->seenIpv4Allocation[$data[3].'/'.$remainCidr] = [
+                        $this->seenIpv4Allocation[$allocationData[3] . '/' . $remainCidr] = [
                             'rir_id' => $rir->id,
+                            'rir_name' => $rir->name,
                             'ip' => $startIp,
+                            'ip_version' => 4,
                             'cidr' => $remainCidr,
                             'ip_dec_start' => $startIpDec,
                             'ip_dec_end' => bcsub(bcadd($startIpDec, $remainingIps), 1),
-                            'counrty_code' => $data[1] ?: null,
-                            'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
-                            'status' => $data[6],
+                            'country_code' => $allocationData[1] ?: null,
+                            'date_allocated' => $allocationData[5] ? substr($allocationData[5], 0, 4) . "-" . substr($allocationData[5], 4, 2) . "-" . substr($allocationData[5], 6, 2) : null,
+                            'status' => $allocationData[6],
                         ];
 
                         continue;
                     }
 
-                    $cidr = $ipv4AmountCidrArray[$data[4]];
-                    if (isset($this->seenIpv4Allocation[$data[3].'/'.$cidr]) === true) {
+                    $cidr = $ipv4AmountCidrArray[$allocationData[4]];
+
+                    if (isset($this->seenIpv4Allocation[$allocationData[3] . '/' . $cidr]) === true) {
                         continue;
                     }
 
-                    $this->seenIpv4Allocation[$data[3].'/'.$cidr] = [
+                    $this->seenIpv4Allocation[$allocationData[3] . '/' . $cidr] = [
                         'rir_id' => $rir->id,
-                        'ip' => $data[3],
+                        'rir_name' => $rir->name,
+                        'ip' => $allocationData[3],
+                        'ip_version' => 4,
                         'cidr' => $cidr,
-                        'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                        'ip_dec_end' => $this->ipUtils->ip2dec($data[3]) + $data[4] - 1,
-                        'counrty_code' => $data[1] ?: null,
-                        'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
-                        'status' => $data[6],
+                        'ip_dec_start' => $this->ipUtils->ip2dec($allocationData[3]),
+                        'ip_dec_end' => $this->ipUtils->ip2dec($allocationData[3]) + $allocationData[4] - 1,
+                        'country_code' => $allocationData[1] ?: null,
+                        'date_allocated' => $allocationData[5] ? substr($allocationData[5], 0, 4) . "-" . substr($allocationData[5], 4, 2) . "-" . substr($allocationData[5], 6, 2) : null,
+                        'status' => $allocationData[6],
                     ];
 
                 } else if ($resourceType === 'ipv6') {
 
                     // If the amount of IP address are unknown, then lets continue...
-                    if (isset($ipv6AmountCidrArray[$data[4]]) !== true) {
+                    if (isset($ipv6AmountCidrArray[$allocationData[4]]) !== true) {
                         continue;
                     }
 
-                    if (isset($this->seenIpv6Allocation[$data[3].'/'.$data[4]]) === true) {
+                    if (isset($this->seenIpv6Allocation[$allocationData[3] . '/' . $allocationData[4]]) === true) {
                         continue;
                     }
 
-                    $this->seenIpv6Allocation[$data[3].'/'.$data[4]] = [
+                    $this->seenIpv6Allocation[$allocationData[3] . '/' . $allocationData[4]] = [
                         'rir_id' => $rir->id,
-                        'ip' => $data[3],
-                        'cidr' => $data[4],
-                        'ip_dec_start' => $this->ipUtils->ip2dec($data[3]),
-                        'ip_dec_end' => bcsub(bcadd($this->ipUtils->ip2dec($data[3]), $ipv6AmountCidrArray[$data[4]]),  1),
-                        'counrty_code' => $data[1] ?: null,
-                        'date_allocated' => $data[5] ? substr($data[5], 0 , 4) . "-" . substr($data[5], 4, 2) . "-" . substr($data[5], 6, 2) : null,
-                        'status' => $data[6],
+                        'rir_name' => $rir->name,
+                        'ip' => $allocationData[3],
+                        'ip_version' => 4,
+                        'cidr' => $allocationData[4],
+                        'ip_dec_start' => $this->ipUtils->ip2dec($allocationData[3]),
+                        'ip_dec_end' => bcsub(bcadd($this->ipUtils->ip2dec($allocationData[3]), $ipv6AmountCidrArray[$allocationData[4]]), 1),
+                        'country_code' => $allocationData[1] ?: null,
+                        'date_allocated' => $allocationData[5] ? substr($allocationData[5], 0, 4) . "-" . substr($allocationData[5], 4, 2) . "-" . substr($allocationData[5], 6, 2) : null,
+                        'status' => $allocationData[6],
                     ];
-
                 }
             }
         }
     }
+
+    /**
+     * Return index mapping.
+     */
+    public function getIndexMapping()
+    {
+        return [
+            'mappings' => [
+                'prefixes' => [
+                    'properties' => [
+                        'rir_id'         => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'rir_name'       => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'ip_version'     => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'ip'             => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'cidr'           => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'ip_dec_start'   => ['type' => 'double', 'index' => 'not_analyzed'],
+                        'ip_dec_end'     => ['type' => 'double', 'index' => 'not_analyzed'],
+                        'country_code'   => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'date_allocated' => ['type' => 'date', 'index' => 'not_analyzed'],
+                        'status'         => ['type' => 'string', 'index' => 'not_analyzed'],
+                    ],
+                ],
+                'asns'     => [
+                    'properties' => [
+                        'rir_id'         => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'rir_name'       => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'asn'            => ['type' => 'integer', 'index' => 'not_analyzed'],
+                        'country_code'   => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'date_allocated' => ['type' => 'date', 'index' => 'not_analyzed'],
+                        'status'         => ['type' => 'string', 'index' => 'not_analyzed'],
+                    ],
+                ],
+            ],
+        ];
+    }
+
 }
