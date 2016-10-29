@@ -96,15 +96,22 @@ class UpdateASNWhoisInfo extends Command
         return null;
     }
 
+    private function getAllAsns()
+    {
+        $sourceAsns['allocated_asns'] = RirAsnAllocation::all()->shuffle();
+        $sourceAsns['ix_asns'] = IXMember::all()->shuffle();
+        $sourceAsns['ipv4_bgp_asns'] = IPv4BgpEntry::select('asn')->distinct()->get()->shuffle();
+        $sourceAsns['ipv6_bgp_asns'] = IPv6BgpEntry::select('asn')->distinct()->get()->shuffle();
+
+        return $sourceAsns;
+    }
+
     private function updateASN()
     {
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Adding newly allocated ASNs')->br();
 
-        $sourceAsns['allocated_asns'] = RirAsnAllocation::all()->shuffle();
-        $sourceAsns['ix_ssns'] = IXMember::all()->shuffle();
-        $sourceAsns['ipv4_bgp_asns'] = IPv4BgpEntry::select('asn')->distinct()->get()->shuffle();
-        $sourceAsns['ipv6_bgp_asns'] = IPv6BgpEntry::select('asn')->distinct()->get()->shuffle();
+        $sourceAsns = $this->getAllAsns();
 
         $asns = [];
         foreach ($sourceAsns as $sourceAsn) {
