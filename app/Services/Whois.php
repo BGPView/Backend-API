@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Helpers\IpUtils;
 use App\Models\Rir;
+use Elasticsearch\ClientBuilder;
 use Illuminate\Support\Facades\Log;
 
 class Whois
@@ -15,6 +16,8 @@ class Whois
     private $rawData;
     private $rawLines;
     private $ipUtils;
+    private $esClient;
+
 
     private $ignoreEmailAddresses = [
             ];
@@ -45,6 +48,7 @@ class Whois
 
     public function __construct($input, $cidr = null, $rir = null, $useRaw = false)
     {
+        $this->esClient = new ClientBuilder();
         $this->ipUtils = new IpUtils;
         $this->whoisUrl = config('app.whois_query_url');
 
@@ -667,7 +671,5 @@ class Whois
 
         return array_unique($finalAddress);
     }
-
-
 
 }
