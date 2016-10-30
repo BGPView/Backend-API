@@ -137,7 +137,7 @@ class UpdateASNWhoisInfo extends Command
             }
         }
 
-        $sourceAsns['allocated_asns'] = collect($allocatedAsns);
+        $sourceAsns['allocated_asns'] = collect($allocatedAsns)->shuffle();
         $sourceAsns['ix_asns'] = IXMember::all()->shuffle();
         $sourceAsns['ipv4_bgp_asns'] = IPv4BgpEntry::select('asn')->distinct()->get()->shuffle();
         $sourceAsns['ipv6_bgp_asns'] = IPv6BgpEntry::select('asn')->distinct()->get()->shuffle();
