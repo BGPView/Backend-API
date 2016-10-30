@@ -13,7 +13,6 @@ use App\Models\IPv6Peer;
 use App\Models\IPv6PrefixWhois;
 use App\Models\IX;
 use App\Models\IXMember;
-use App\Models\RirAsnAllocation;
 use App\Services\Dns;
 use Illuminate\Http\Request;
 
@@ -41,7 +40,7 @@ class ApiV1Controller extends ApiBaseController
         $as_number = $this->ipUtils->normalizeInput($as_number);
 
         $asnData = ASN::with('emails')->where('asn', $as_number)->first();
-        $allocation = RirAsnAllocation::where('asn', $as_number)->first();
+        $allocation = $this->ipUtils->getAllocationEntry($as_number);
 
         if (is_null($asnData)) {
             $data = $this->makeStatus('Could not find ASN', false);

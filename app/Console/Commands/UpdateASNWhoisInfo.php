@@ -8,7 +8,6 @@ use App\Models\ASNEmail;
 use App\Models\IPv4BgpEntry;
 use App\Models\IPv6BgpEntry;
 use App\Models\IXMember;
-use App\Models\RirAsnAllocation;
 use App\Services\Whois;
 use Carbon\Carbon;
 use Elasticsearch\ClientBuilder;
