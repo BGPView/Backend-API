@@ -76,7 +76,7 @@ class Whois
             }
 
         } else {
-            $this->rir = $allocation->rir;
+            $this->rir = Rir::find($allocation->rir_id);
         }
 
         if (empty($this->rir) || is_null($this->rir) === true) {
