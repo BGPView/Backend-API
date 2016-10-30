@@ -12,6 +12,7 @@ use App\Models\IPv6PrefixWhois;
 use App\Services\BgpParser;
 use App\Services\Whois;
 use Carbon\Carbon;
+use Elasticsearch\ClientBuilder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use League\CLImate\CLImate;
@@ -23,6 +24,8 @@ class UpdatePrefixWhoisData extends Command
     private $bench;
     private $bgpParser;
     private $ipUtils;
+    private $esClient;
+
     /**
      * The name and signature of the console command.
      *
@@ -47,6 +50,7 @@ class UpdatePrefixWhoisData extends Command
         $this->bench = $bench;
         $this->bgpParser = $bgpParser;
         $this->ipUtils = $ipUtils;
+        $this->esClient = ClientBuilder::create()->setHosts(config('elasticsearch.hosts'))->build();
     }
 
     /**
@@ -62,6 +66,72 @@ class UpdatePrefixWhoisData extends Command
         $this->updateOldPrefixes(4);
     }
 
+    private function getAllPrefixes($ipVersion)
+    {
+        $rirPrefixes = [];
+        // Get all allocated IP prefixes
+        $params = [
+            'search_type' => 'scan',
+            'scroll' => '30s',
+            'size' => 10000,
+            'index' => 'rir_allocations',
+            'type'  => 'prefixes',
+            'body' => [
+                'filter' => [
+                    'bool' => [
+                        'should' => [
+                            [
+                                'match' => [
+                                    'status' => 'allocated',
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'status' => 'assigned',
+                                ],
+                            ],
+                        ],
+                        'must' => [
+                            'match' => [
+                                'ip_version' => $ipVersion,
+                            ],
+                        ]
+                    ],
+                ],
+            ],
+        ];
+
+        $docs = $this->esClient->search($params);
+        $scroll_id = $docs['_scroll_id'];
+
+        while (true) {
+            $response = $this->esClient->scroll(
+                array(
+                    "scroll_id" => $scroll_id,
+                    "scroll" => "30s"
+                )
+            );
+
+            if (count($response['hits']['hits']) > 0) {
+                $results = $this->ipUtils->cleanEsResults($response);
+                $rirPrefixes = array_merge($rirPrefixes, $results);
+
+                // Get new scroll_id
+                $scroll_id = $response['_scroll_id'];
+            } else {
+                // All done scrolling over data
+                break;
+            }
+        }
+
+        $sourcePrefixes['rir_prefixes'] = collect($rirPrefixes)->shuffle();
+        // get all bgp prefixes
+        $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
+        $sourcePrefixes['bgp_prefixes'] = $className::all()->shuffle();
+
+        return $sourcePrefixes;
+    }
+
     private function updatePrefixes($ipVersion)
     {
         $ipVersion = (string) $ipVersion;
@@ -73,13 +143,7 @@ class UpdatePrefixWhoisData extends Command
 
         $this->cli->br()->comment('Getting all the IPv' . $ipVersion . 'prefixes from the BGP table');
 
-        // Get all allocated IP prefixes
-        $className = 'App\Models\RirIPv' . $ipVersion . 'Allocation';
-        $sourcePrefixes['rir_prefixes'] = $className::where('status', 'allocated')->orWhere('status', 'assigned')->get()->shuffle();
-
-        // get all bgp prefixes
-        $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
-        $sourcePrefixes['bgp_prefixes'] = $className::all()->shuffle();
+        $sourcePrefixes = $this->getAllPrefixes($ipVersion);
 
         // Make sure they are unqie
         $prefixes = [];
