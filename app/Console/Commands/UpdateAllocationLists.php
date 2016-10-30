@@ -222,7 +222,7 @@ class UpdateAllocationLists extends ReindexRIRWhois
                         'rir_id' => $rir->id,
                         'rir_name' => $rir->name,
                         'ip' => $allocationData[3],
-                        'ip_version' => 4,
+                        'ip_version' => 6,
                         'cidr' => $allocationData[4],
                         'ip_dec_start' => $this->ipUtils->ip2dec($allocationData[3]),
                         'ip_dec_end' => bcsub(bcadd($this->ipUtils->ip2dec($allocationData[3]), $ipv6AmountCidrArray[$allocationData[4]]), 1),
