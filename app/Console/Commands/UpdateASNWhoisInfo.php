@@ -59,7 +59,7 @@ class UpdateASNWhoisInfo extends Command
      */
     public function handle()
     {
-        // $this->loadPeeringDB();
+        $this->loadPeeringDB();
         $this->updateASN();
     }
 
