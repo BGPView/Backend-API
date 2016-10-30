@@ -493,7 +493,7 @@ class IpUtils
         }
     }
 
-    private function cleanEsResults($results)
+    public function cleanEsResults($results)
     {
         $data = [];
 

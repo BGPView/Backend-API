@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\IpUtils;
 use App\Models\ASN;
 use App\Models\ASNEmail;
 use App\Models\IPv4BgpEntry;
@@ -10,6 +11,7 @@ use App\Models\IXMember;
 use App\Models\RirAsnAllocation;
 use App\Services\Whois;
 use Carbon\Carbon;
+use Elasticsearch\ClientBuilder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use League\CLImate\CLImate;
@@ -22,6 +24,8 @@ class UpdateASNWhoisInfo extends Command
     // For docs: https://beta.peeringdb.com/apidocs/
     private $peeringdb_url = 'https://www.peeringdb.com/api/net';
     private $peeringDBData;
+    private $esClient;
+    private $ipUtils;
 
     /**
      * The name and signature of the console command.
@@ -40,10 +44,12 @@ class UpdateASNWhoisInfo extends Command
     /**
      * Create a new command instance.
      */
-    public function __construct(CLImate $cli)
+    public function __construct(CLImate $cli, IpUtils $ipUtils )
     {
         parent::__construct();
         $this->cli = $cli;
+        $this->ipUtils = $ipUtils;
+        $this->esClient = ClientBuilder::create()->setHosts(config('elasticsearch.hosts'))->build();
     }
 
     /**
@@ -53,7 +59,7 @@ class UpdateASNWhoisInfo extends Command
      */
     public function handle()
     {
-        $this->loadPeeringDB();
+        // $this->loadPeeringDB();
         $this->updateASN();
     }
 
@@ -98,7 +104,40 @@ class UpdateASNWhoisInfo extends Command
 
     private function getAllAsns()
     {
-        $sourceAsns['allocated_asns'] = RirAsnAllocation::all()->shuffle();
+        $allocatedAsns = [];
+
+        $params = [
+            'search_type' => 'scan',
+            'scroll' => '30s',
+            'size' => 10000,
+            'index' => 'rir_allocations',
+            'type'  => 'asns',
+        ];
+
+        $docs = $this->esClient->search($params);
+        $scroll_id = $docs['_scroll_id'];
+
+        while (true) {
+            $response = $this->esClient->scroll(
+                array(
+                    "scroll_id" => $scroll_id,
+                    "scroll" => "30s"
+                )
+            );
+
+            if (count($response['hits']['hits']) > 0) {
+                $results = $this->ipUtils->cleanEsResults($response);
+                $allocatedAsns = array_merge($allocatedAsns, $results);
+
+                // Get new scroll_id
+                $scroll_id = $response['_scroll_id'];
+            } else {
+                // All done scrolling over data
+                break;
+            }
+        }
+
+        $sourceAsns['allocated_asns'] = collect($allocatedAsns);
         $sourceAsns['ix_asns'] = IXMember::all()->shuffle();
         $sourceAsns['ipv4_bgp_asns'] = IPv4BgpEntry::select('asn')->distinct()->get()->shuffle();
         $sourceAsns['ipv6_bgp_asns'] = IPv6BgpEntry::select('asn')->distinct()->get()->shuffle();
