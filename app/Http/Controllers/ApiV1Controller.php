@@ -61,7 +61,7 @@ class ApiV1Controller extends ApiBaseController
         $output['owner_address']        = $asnData->owner_address;
 
         $output['rir_allocation']['rir_name']           = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
-        $output['rir_allocation']['country_code']       = isset($allocation->counrty_code) ? $allocation->counrty_code : null;
+        $output['rir_allocation']['country_code']       = isset($allocation->country_code) ? $allocation->country_code : null;
         $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
         $output['rir_allocation']['allocation_status']  = isset($allocation->status) ? $allocation->status : 'unknown';
 
@@ -227,11 +227,11 @@ class ApiV1Controller extends ApiBaseController
         $output['owner_address']    = $prefixWhois ? $prefixWhois->owner_address : null;
 
         $output['country_codes']['whois_country_code']          = $prefixWhois ? $prefixWhois->counrty_code : null;
-        $output['country_codes']['rir_allocation_country_code'] = $allocation ? $allocation->counrty_code : null;
+        $output['country_codes']['rir_allocation_country_code'] = $allocation ? $allocation->country_code : null;
         $output['country_codes']['maxmind_country_code']        = $geoip ? $geoip->country->isoCode : null;
 
         $output['rir_allocation']['rir_name']           = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
-        $output['rir_allocation']['country_code']       = isset($allocation->counrty_code) ? $allocation->counrty_code : null;
+        $output['rir_allocation']['country_code']       = isset($allocation->country_code) ? $allocation->country_code : null;
         $output['rir_allocation']['ip']                 = isset($allocation->ip) ? $allocation->ip : null;
         $output['rir_allocation']['cidr']               = isset($allocation->cidr) ? $allocation->cidr : null;
         $output['rir_allocation']['prefix']             = isset($allocation->ip) && isset($allocation->cidr) ? $allocation->ip . '/' . $allocation->cidr : null;
@@ -336,7 +336,7 @@ class ApiV1Controller extends ApiBaseController
         });
 
         $output['rir_allocation']['rir_name']           = isset($allocation->rir_name) && empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
-        $output['rir_allocation']['country_code']       = isset($allocation->counrty_code) ? $allocation->counrty_code : null;
+        $output['rir_allocation']['country_code']       = isset($allocation->country_code) ? $allocation->country_code : null;
         $output['rir_allocation']['ip']                 = $rirIp;
         $output['rir_allocation']['cidr']               = $rirCidr;
         $output['rir_allocation']['prefix']             = $rirPrefix;
