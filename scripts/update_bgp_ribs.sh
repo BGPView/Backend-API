@@ -41,6 +41,11 @@ then
 fi
 process_rib $BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE
 
+
+# Static local BGP MRT
+./scripts/bgpdump -m /var/lib/bird-dump/v4 | grep  -v "|W|\||STATE|">> ./storage/bgp_lines.txt;
+./scripts/bgpdump -m /var/lib/bird-dump/v6 | grep  -v "|W|\||STATE|">> ./storage/bgp_lines.txt;
+
 ###############################################################################################
 
 process_rib http://data.ris.ripe.net/rrc00/latest-bview.gz
@@ -60,7 +65,6 @@ process_rib http://data.ris.ripe.net/rrc13/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc14/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc15/latest-bview.gz
 process_rib http://data.ris.ripe.net/rrc16/latest-bview.gz
-# process_rib http://108.61.158.52/bgp4_mtr.gz
-# process_rib http://108.61.158.52/bgp6_mtr.gz   
 
 ###############################################################################################
+
