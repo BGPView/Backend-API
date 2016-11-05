@@ -526,6 +526,8 @@ class IpUtils
                             'match' => [
                                 'ip' => $ip,
                             ],
+                        ],
+                        [
                             'match' => [
                                 'cidr' => $cidr,
                             ],
