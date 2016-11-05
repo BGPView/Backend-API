@@ -101,6 +101,7 @@ class GenerateGraphs extends Command
                         'asn1'   => $asn,
                         'asn2'   => $asns[$key + 1],
                     ];
+                    $asnList[] = $asn;
                 }
             }
         }
@@ -111,7 +112,7 @@ class GenerateGraphs extends Command
             $keyAsns[$relation['asn1']][] = $relation;
         }
 
-        $asnsData = ASN::whereIn('asn', array_keys($keyAsns))->get();
+        $asnsData = ASN::whereIn('asn', array_unique($asnList))->get();
 
         foreach ($keyAsns as $groupedAsns) {
             $highestNumber = $groupedAsns[0]['weight'];
