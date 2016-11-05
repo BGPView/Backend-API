@@ -159,13 +159,13 @@ class GenerateGraphs extends Command
                 if (is_null($asnMeta) !== true) {
                     $countryCode = empty($asnMeta->counrty_code) !== true ? ' [' . $asnMeta->counrty_code . ']' : '';
                     $description = strlen($asnMeta->description) > 27 ? $asnMeta->name : $asnMeta->description;
-                    $outputGraphvizText .= 'AS' . $relation['asn1'] .' ';
+                    $outputGraphvizText .= 'AS' . $relation['asn2'] .' ';
                     $outputGraphvizText .= '[';
                     $outputGraphvizText .= 'tooltip="AS' . $asnMeta->asn . ' ~ ' . addslashes($description) . $countryCode . '" ';
                     $outputGraphvizText .= 'URL="https://bgpview.io/asn/' . $asnMeta->asn . '" ';
                     $outputGraphvizText .= 'fontcolor="#2C94B3" ';
                     $outputGraphvizText .= ']'.PHP_EOL;
-                    $processedAsn[$relation['asn1']] = true;
+                    $processedAsn[$relation['asn2']] = true;
                 }
             }
 
