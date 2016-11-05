@@ -323,8 +323,8 @@ class ASN extends Model
 
         // Get Graph images
         if ($direction === 'upstreams') {
-            $imagePathv4 = '/assets/graphs/' . 'AS' . $as_number . '_v4.png';
-            $imagePathv6 = '/assets/graphs/' . 'AS' . $as_number . '_v6.png';
+            $imagePathv4 = '/assets/graphs/' . 'AS' . $as_number . '_v4.svg';
+            $imagePathv6 = '/assets/graphs/' . 'AS' . $as_number . '_v6.svg';
 
             if (file_exists(public_path() . $imagePathv4) === true) {
                 $output['ipv4_graph'] = config('app.url') . $imagePathv4;
