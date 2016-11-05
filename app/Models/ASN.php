@@ -302,16 +302,16 @@ class ASN extends Model
                 continue;
             }
 
-            $asnOutput['asn']          = $steam->$oderKey;
+            $asnOutput['asn'] = $steam->$oderKey;
 
             if ($asnMeta === true) {
-                $asnData = self::where('asn', $steam->$oderKey)->first();
+                $asnData                   = self::where('asn', $steam->$oderKey)->first();
                 $asnOutput['name']         = isset($asnData->name) ? $asnData->name : null;
                 $asnOutput['description']  = isset($asnData->description) ? $asnData->description : null;
                 $asnOutput['country_code'] = isset($asnData->counrty_code) ? $asnData->counrty_code : null;
             }
 
-            $asnOutput['bgp_paths'][]  = $steam->bgp_path;
+            $asnOutput['bgp_paths'][] = $steam->bgp_path;
 
             $output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey] = $asnOutput;
             $asnOutput                                                               = null;
@@ -320,6 +320,24 @@ class ASN extends Model
 
         $output['ipv4_' . $direction] = array_values($output['ipv4_' . $direction]);
         $output['ipv6_' . $direction] = array_values($output['ipv6_' . $direction]);
+
+        // Get Graph images
+        if ($direction === 'upstreams') {
+            $imagePathv4 = '/assets/graphs/' . 'AS' . $as_number . '_v4.png';
+            $imagePathv6 = '/assets/graphs/' . 'AS' . $as_number . '_v4.png';
+
+            if (file_exists(public_path() . $imagePathv4) === true) {
+                $output['ipv4_graph'] = config('app.url') . $imagePathv4;
+            } else {
+                $output['ipv4_graph'] = null;
+            }
+
+            if (file_exists(public_path() . $imagePathv6) === true) {
+                $output['ipv6_graph'] = config('app.url') . $imagePathv6;
+            } else {
+                $output['ipv6_graph'] = null;
+            }
+        }
 
         return $output;
     }
