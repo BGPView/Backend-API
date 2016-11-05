@@ -7,7 +7,8 @@ use Elasticquent\ElasticquentTrait;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Database\Eloquent\Model;
 
-class ASN extends Model {
+class ASN extends Model
+{
 
     use ElasticquentTrait;
 
@@ -21,13 +22,13 @@ class ASN extends Model {
             'analyzer' => [
                 'string_lowercase' => [
                     'tokenizer' => 'keyword',
-                    'filter' => [ 'asciifolding', 'lowercase', 'custom_replace' ],
+                    'filter'    => ['asciifolding', 'lowercase', 'custom_replace'],
                 ],
             ],
-            'filter' => [
+            'filter'   => [
                 'custom_replace' => [
-                    'type' => 'pattern_replace',
-                    'pattern' => "[^a-z0-9 ]",
+                    'type'        => 'pattern_replace',
+                    'pattern'     => "[^a-z0-9 ]",
                     'replacement' => "",
                 ],
             ],
@@ -40,17 +41,17 @@ class ASN extends Model {
      * @var array
      */
     protected $mappingProperties = [
-        'name' => [
-            'type' => 'string',
-            'analyzer' => 'string_lowercase'
+        'name'        => [
+            'type'     => 'string',
+            'analyzer' => 'string_lowercase',
         ],
         'description' => [
-            'type' => 'string',
-            'analyzer' => 'string_lowercase'
+            'type'     => 'string',
+            'analyzer' => 'string_lowercase',
         ],
-        'asn' => [
-            'type' => 'string',
-	        'fields' => [
+        'asn'         => [
+            'type'   => 'string',
+            'fields' => [
                 'sort' => ['type' => 'long'],
             ],
         ],
@@ -69,7 +70,6 @@ class ASN extends Model {
      * @var array
      */
     protected $hidden = ['id', 'rir_id', 'raw_whois', 'created_at', 'updated_at'];
-
 
     public function emails()
     {
@@ -102,17 +102,17 @@ class ASN extends Model {
             return null;
         }
 
-        $data = json_decode($value);
+        $data         = json_decode($value);
         $addressLines = [];
 
         if (is_object($data) !== true && is_array($data) !== true) {
             return $addressLines;
         }
 
-        foreach($data as $entry) {
+        foreach ($data as $entry) {
             // Remove/Clean all double commas
-            $entry = preg_replace('/,+/', ',', $entry);
-            $addressArr = explode(',', $entry);
+            $entry        = preg_replace('/,+/', ',', $entry);
+            $addressArr   = explode(',', $entry);
             $addressLines = array_merge($addressLines, $addressArr);
         }
 
@@ -131,7 +131,7 @@ class ASN extends Model {
     {
         $email_contacts = [];
         foreach ($this->emails as $email) {
-                 $email_contacts[] = $email->email_address;
+            $email_contacts[] = $email->email_address;
         }
         return $email_contacts;
     }
@@ -151,8 +151,8 @@ class ASN extends Model {
     {
         $peerSet['ipv4_peers'] = IPv4Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
         $peerSet['ipv6_peers'] = IPv6Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
-        $output['ipv4_peers'] = [];
-        $output['ipv6_peers'] = [];
+        $output['ipv4_peers']  = [];
+        $output['ipv6_peers']  = [];
 
         foreach ($peerSet as $ipVersion => $peers) {
             foreach ($peers as $peer) {
@@ -161,12 +161,12 @@ class ASN extends Model {
                 }
 
                 $peerAsn = $peer->asn_1 == $as_number ? $peer->asn_2 : $peer->asn_1;
-                $asn = self::where('asn', $peerAsn)->first();
+                $asn     = self::where('asn', $peerAsn)->first();
 
-                $peerAsnInfo['asn']             = $peerAsn;
-                $peerAsnInfo['name']            = is_null($asn) ? null : $asn->name;
-                $peerAsnInfo['description']     = is_null($asn) ? null : $asn->description;
-                $peerAsnInfo['country_code']    = is_null($asn) ? null : $asn->counrty_code;
+                $peerAsnInfo['asn']          = $peerAsn;
+                $peerAsnInfo['name']         = is_null($asn) ? null : $asn->name;
+                $peerAsnInfo['description']  = is_null($asn) ? null : $asn->description;
+                $peerAsnInfo['country_code'] = is_null($asn) ? null : $asn->counrty_code;
 
                 $output[$ipVersion][] = $peerAsnInfo;
             }
@@ -188,48 +188,48 @@ class ASN extends Model {
         foreach ($prefixes['ipv4'] as $prefix) {
             $prefixWhois = $prefix->whois;
 
-            $prefixOutput['prefix']         = $prefix->ip . '/' . $prefix->cidr;
-            $prefixOutput['ip']             = $prefix->ip;
-            $prefixOutput['cidr']           = $prefix->cidr;
-            $prefixOutput['roa_status']     = $prefix->roa_status;
+            $prefixOutput['prefix']     = $prefix->ip . '/' . $prefix->cidr;
+            $prefixOutput['ip']         = $prefix->ip;
+            $prefixOutput['cidr']       = $prefix->cidr;
+            $prefixOutput['roa_status'] = $prefix->roa_status;
 
-            $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
-            $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
-            $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
+            $prefixOutput['name']         = isset($prefixWhois->name) ? $prefixWhois->name : null;
+            $prefixOutput['description']  = isset($prefixWhois->description) ? $prefixWhois->description : null;
+            $prefixOutput['country_code'] = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
 
-            $prefixOutput['parent']['prefix']   = empty($prefixWhois->parent_ip) !== true && isset($prefixWhois->parent_cidr) ? $prefixWhois->parent_ip . '/' . $prefixWhois->parent_cidr : null;
-            $prefixOutput['parent']['ip']       = empty($prefixWhois->parent_ip) !== true ? $prefixWhois->parent_ip : null;
-            $prefixOutput['parent']['cidr']     = empty($prefixWhois->parent_cidr) !== true ? $prefixWhois->parent_cidr : null;
-            $prefixOutput['parent']['rir_name'] = empty($prefixWhois->rir_id) !== true ? $rirNames[$prefixWhois->rir_id] : null;
-            $prefixOutput['parent']['allocation_status']    = empty($prefixWhois->status) !== true ? $prefixWhois->status : 'unknown';
+            $prefixOutput['parent']['prefix']            = empty($prefixWhois->parent_ip) !== true && isset($prefixWhois->parent_cidr) ? $prefixWhois->parent_ip . '/' . $prefixWhois->parent_cidr : null;
+            $prefixOutput['parent']['ip']                = empty($prefixWhois->parent_ip) !== true ? $prefixWhois->parent_ip : null;
+            $prefixOutput['parent']['cidr']              = empty($prefixWhois->parent_cidr) !== true ? $prefixWhois->parent_cidr : null;
+            $prefixOutput['parent']['rir_name']          = empty($prefixWhois->rir_id) !== true ? $rirNames[$prefixWhois->rir_id] : null;
+            $prefixOutput['parent']['allocation_status'] = empty($prefixWhois->status) !== true ? $prefixWhois->status : 'unknown';
 
-            $output['ipv4_prefixes'][]  = $prefixOutput;
-            $prefixOutput = null;
-            $prefixWhois = null;
+            $output['ipv4_prefixes'][] = $prefixOutput;
+            $prefixOutput              = null;
+            $prefixWhois               = null;
         }
 
         $output['ipv6_prefixes'] = [];
         foreach ($prefixes['ipv6'] as $prefix) {
             $prefixWhois = $prefix->whois;
 
-            $prefixOutput['prefix'] = $prefix->ip . '/' . $prefix->cidr;
-            $prefixOutput['ip']     = $prefix->ip;
-            $prefixOutput['cidr']   = $prefix->cidr;
-            $prefixOutput['roa_status']     = $prefix->roa_status;
+            $prefixOutput['prefix']     = $prefix->ip . '/' . $prefix->cidr;
+            $prefixOutput['ip']         = $prefix->ip;
+            $prefixOutput['cidr']       = $prefix->cidr;
+            $prefixOutput['roa_status'] = $prefix->roa_status;
 
-            $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
-            $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
-            $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
+            $prefixOutput['name']         = isset($prefixWhois->name) ? $prefixWhois->name : null;
+            $prefixOutput['description']  = isset($prefixWhois->description) ? $prefixWhois->description : null;
+            $prefixOutput['country_code'] = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
 
-            $prefixOutput['parent']['prefix']   = empty($prefixWhois->parent_ip) !== true && isset($prefixWhois->parent_cidr) ? $prefixWhois->parent_ip . '/' . $prefixWhois->parent_cidr : null;
-            $prefixOutput['parent']['ip']       = empty($prefixWhois->parent_ip) !== true ? $prefixWhois->parent_ip : null;
-            $prefixOutput['parent']['cidr']     = empty($prefixWhois->parent_cidr) !== true ? $prefixWhois->parent_cidr : null;
-            $prefixOutput['parent']['rir_name'] = empty($prefixWhois->rir_id) !== true ? $rirNames[$prefixWhois->rir_id] : null;
-            $prefixOutput['parent']['allocation_status']    = empty($prefixWhois->status) !== true ? $prefixWhois->status : 'unknown';
+            $prefixOutput['parent']['prefix']            = empty($prefixWhois->parent_ip) !== true && isset($prefixWhois->parent_cidr) ? $prefixWhois->parent_ip . '/' . $prefixWhois->parent_cidr : null;
+            $prefixOutput['parent']['ip']                = empty($prefixWhois->parent_ip) !== true ? $prefixWhois->parent_ip : null;
+            $prefixOutput['parent']['cidr']              = empty($prefixWhois->parent_cidr) !== true ? $prefixWhois->parent_cidr : null;
+            $prefixOutput['parent']['rir_name']          = empty($prefixWhois->rir_id) !== true ? $rirNames[$prefixWhois->rir_id] : null;
+            $prefixOutput['parent']['allocation_status'] = empty($prefixWhois->status) !== true ? $prefixWhois->status : 'unknown';
 
-            $output['ipv6_prefixes'][]  = $prefixOutput;
-            $prefixOutput = null;
-            $prefixWhois = null;
+            $output['ipv6_prefixes'][] = $prefixOutput;
+            $prefixOutput              = null;
+            $prefixWhois               = null;
         }
 
         return $output;
@@ -239,36 +239,36 @@ class ASN extends Model {
     {
         if ($direction == 'upstreams') {
             $searchKey = 'asn';
-            $oderKey = 'upstream_asn';
+            $oderKey   = 'upstream_asn';
         } else {
             $searchKey = 'upstream_asn';
-            $oderKey = 'asn';
+            $oderKey   = 'asn';
         }
 
-        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
+        $client  = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
         $ipUtils = new IpUtils();
 
         $params = [
             'search_type' => 'scan',
-            'scroll' => '30s',
-            'size' => 10000,
-            'index' => 'bgp_data',
-            'type'  => 'full_table',
-            'body' => [
-                'sort' => [
+            'scroll'      => '30s',
+            'size'        => 10000,
+            'index'       => 'bgp_data',
+            'type'        => 'full_table',
+            'body'        => [
+                'sort'  => [
                     $oderKey => [
                         'order' => 'asc',
                     ],
                 ],
                 'query' => [
                     'match' => [
-                        '$searchKey' => $as_number
-                    ]
+                        $searchKey => $as_number,
+                    ],
                 ],
             ],
         ];
 
-        $docs = $client->search($params);
+        $docs      = $client->search($params);
         $scroll_id = $docs['_scroll_id'];
 
         $steams = [];
@@ -276,13 +276,13 @@ class ASN extends Model {
             $response = $client->scroll(
                 array(
                     "scroll_id" => $scroll_id,
-                    "scroll" => "30s"
+                    "scroll"    => "30s",
                 )
             );
 
             if (count($response['hits']['hits']) > 0) {
                 $results = $ipUtils->cleanEsResults($response);
-                $steams = array_merge($steams, $results);
+                $steams  = array_merge($steams, $results);
                 // Get new scroll_id
                 $scroll_id = $response['_scroll_id'];
             } else {
@@ -291,32 +291,32 @@ class ASN extends Model {
             }
         }
 
-        $output['ipv4_'.$direction] = [];
-        $output['ipv6_'.$direction] = [];
+        $output['ipv4_' . $direction] = [];
+        $output['ipv6_' . $direction] = [];
         foreach ($steams as $steam) {
 
-            if (isset($output['ipv'.$steam->ip_version.'_'.$direction][$steam->$searchKey]) === true) {
-                if (in_array($steam->bgp_path, $output['ipv'.$steam->ip_version.'_'.$direction][$steam->$searchKey]['bgp_paths']) === false) {
-                    $output['ipv'.$steam->ip_version.'_'.$direction][$steam->$searchKey]['bgp_paths'][] = $steam->bgp_path;
+            if (isset($output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey]) === true) {
+                if (in_array($steam->bgp_path, $output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey]['bgp_paths']) === false) {
+                    $output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey]['bgp_paths'][] = $steam->bgp_path;
                 }
                 continue;
             }
 
-            $asnData = self::where('asn', $steam->$searchKey)->first();
+            $asnData = self::where('asn', $steam->$oderKey)->first();
 
-            $asnOutput['asn']          = $steam->$searchKey;
+            $asnOutput['asn']          = $steam->$oderKey;
             $asnOutput['name']         = isset($asnData->name) ? $asnData->name : null;
             $asnOutput['description']  = isset($asnData->description) ? $asnData->description : null;
             $asnOutput['country_code'] = isset($asnData->counrty_code) ? $asnData->counrty_code : null;
             $asnOutput['bgp_paths'][]  = $steam->bgp_path;
 
-            $output['ipv'.$asnData->ip_version.'_'.$direction][$asnData->$searchKey]  = $asnOutput;
-            $asnOutput = null;
-            $upstreamAsn = null;
+            $output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey] = $asnOutput;
+            $asnOutput                                                               = null;
+            $upstreamAsn                                                             = null;
         }
 
-        $output['ipv4_'.$direction] = array_values($output['ipv4_'.$direction]);
-        $output['ipv6_'.$direction] = array_values($output['ipv6_'.$direction]);
+        $output['ipv4_' . $direction] = array_values($output['ipv4_' . $direction]);
+        $output['ipv6_' . $direction] = array_values($output['ipv6_' . $direction]);
 
         return $output;
     }
@@ -330,5 +330,5 @@ class ASN extends Model {
     {
         return self::getStreams($as_number, 'upstreams');
     }
-    
+
 }
