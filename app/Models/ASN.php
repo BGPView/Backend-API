@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\IpUtils;
 use Elasticquent\ElasticquentTrait;
+use Elasticsearch\ClientBuilder;
 use Illuminate\Database\Eloquent\Model;
 
 class ASN extends Model {
@@ -236,38 +237,59 @@ class ASN extends Model {
 
     public static function getUpstreams($as_number)
     {
-        $ipv4Upstreams = IPv4BgpEntry::where('asn', $as_number)->orderBy('upstream_asn', 'asc')->get();
-        $ipv6Upstreams = IPv6BgpEntry::where('asn', $as_number)->orderBy('upstream_asn', 'asc')->get();
+        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
+        $ipUtils = new IpUtils();
 
-        $output['ipv4_upstreams'] = [];
-        foreach ($ipv4Upstreams as $upstream) {
+        $params = [
+            'search_type' => 'scan',
+            'scroll' => '30s',
+            'size' => 10000,
+            'index' => 'bgp_data',
+            'type'  => 'full_table',
+            'body' => [
+                'sort' => [
+                    'upstream_asn' => [
+                        'order' => 'asc',
+                    ],
+                ],
+                'query' => [
+                    'match' => [
+                        'asn' => $as_number
+                    ]
+                ],
+            ],
+        ];
 
-            if (isset($output['ipv4_upstreams'][$upstream->upstream_asn]) === true) {
-                if (in_array($upstream->bgp_path, $output['ipv4_upstreams'][$upstream->upstream_asn]['bgp_paths']) === false) {
-                    $output['ipv4_upstreams'][$upstream->upstream_asn]['bgp_paths'][] = $upstream->bgp_path;
-                }
-                continue;
+        $docs = $client->search($params);
+        $scroll_id = $docs['_scroll_id'];
+
+        $upstreams = [];
+        while (true) {
+            $response = $client->scroll(
+                array(
+                    "scroll_id" => $scroll_id,
+                    "scroll" => "30s"
+                )
+            );
+
+            if (count($response['hits']['hits']) > 0) {
+                $results = $ipUtils->cleanEsResults($response);
+                $upstreams = array_merge($upstreams, $results);
+                // Get new scroll_id
+                $scroll_id = $response['_scroll_id'];
+            } else {
+                // All done scrolling over data
+                break;
             }
-
-            $upstreamAsn = self::where('asn', $upstream->upstream_asn)->first();
-
-            $upstreamOutput['asn']          = $upstream->upstream_asn;
-            $upstreamOutput['name']         = isset($upstreamAsn->name) ? $upstreamAsn->name : null;
-            $upstreamOutput['description']  = isset($upstreamAsn->description) ? $upstreamAsn->description : null;
-            $upstreamOutput['country_code'] = isset($upstreamAsn->counrty_code) ? $upstreamAsn->counrty_code : null;
-            $upstreamOutput['bgp_paths'][]  = $upstream->bgp_path;
-
-            $output['ipv4_upstreams'][$upstream->upstream_asn]  = $upstreamOutput;
-            $upstreamOutput = null;
-            $upstreamAsn = null;
         }
-
+        
+        $output['ipv4_upstreams'] = [];
         $output['ipv6_upstreams'] = [];
-        foreach ($ipv6Upstreams as $upstream) {
+        foreach ($upstreams as $upstream) {
 
-            if (isset($output['ipv6_upstreams'][$upstream->upstream_asn]) === true) {
-                if (in_array($upstream->bgp_path, $output['ipv6_upstreams'][$upstream->upstream_asn]['bgp_paths']) === false) {
-                    $output['ipv6_upstreams'][$upstream->upstream_asn]['bgp_paths'][] = $upstream->bgp_path;
+            if (isset($output['ipv'.$upstream->ip_version.'_upstreams'][$upstream->upstream_asn]) === true) {
+                if (in_array($upstream->bgp_path, $output['ipv'.$upstream->ip_version.'_upstreams'][$upstream->upstream_asn]['bgp_paths']) === false) {
+                    $output['ipv'.$upstream->ip_version.'_upstreams'][$upstream->upstream_asn]['bgp_paths'][] = $upstream->bgp_path;
                 }
                 continue;
             }
@@ -280,7 +302,7 @@ class ASN extends Model {
             $upstreamOutput['country_code'] = isset($upstreamAsn->counrty_code) ? $upstreamAsn->counrty_code : null;
             $upstreamOutput['bgp_paths'][]  = $upstream->bgp_path;
 
-            $output['ipv6_upstreams'][$upstream->upstream_asn]  = $upstreamOutput;
+            $output['ipv'.$upstream->ip_version.'_upstreams'][$upstream->upstream_asn]  = $upstreamOutput;
             $upstreamOutput = null;
             $upstreamAsn = null;
         }
