@@ -144,12 +144,13 @@ class GenerateGraphs extends Command
                 $asnMeta = $asnsData->where('asn', (int) $relation['asn1'])->first();
                 if (is_null($asnMeta) !== true) {
                     $countryCode = empty($asnMeta->counrty_code) !== true ? ' [' . $asnMeta->counrty_code . ']' : '';
+                    $description = strlen($asnMeta->description) > 27 ? $asnMeta->name : $asnMeta->description;
                     $outputGraphvizText .= 'AS' . $relation['asn1'] .' ';
                     $outputGraphvizText .= '[';
-                    $outputGraphvizText .= 'tooltip="AS' . $asnMeta->asn . ' ~ ' . addslashes($asnMeta->description) . $countryCode . '" ';
-                    $outputGraphvizText .= 'URL="https://bgpview.io/asn/' . $asnMeta->asn . '"';
+                    $outputGraphvizText .= 'tooltip="AS' . $asnMeta->asn . ' ~ ' . addslashes($description) . $countryCode . '" ';
+                    $outputGraphvizText .= 'URL="https://bgpview.io/asn/' . $asnMeta->asn . '" ';
                     $outputGraphvizText .= 'fontcolor="#2C94B3" ';
-                    $outputGraphvizText .= ']';
+                    $outputGraphvizText .= ']'.PHP_EOL;
                     $processedAsn[$relation['asn1']] = true;
                 }
             }
@@ -157,13 +158,14 @@ class GenerateGraphs extends Command
                 $asnMeta = $asnsData->where('asn', (int) $relation['asn2'])->first();
                 if (is_null($asnMeta) !== true) {
                     $countryCode = empty($asnMeta->counrty_code) !== true ? ' [' . $asnMeta->counrty_code . ']' : '';
-                    $outputGraphvizText .= 'AS' . $relation['asn2'] .' ';
+                    $description = strlen($asnMeta->description) > 27 ? $asnMeta->name : $asnMeta->description;
+                    $outputGraphvizText .= 'AS' . $relation['asn1'] .' ';
                     $outputGraphvizText .= '[';
-                    $outputGraphvizText .= 'tooltip="AS' . $asnMeta->asn . ' ~ ' . addslashes($asnMeta->description) . $countryCode . '" ';
-                    $outputGraphvizText .= 'URL="https://bgpview.io/asn/' . $asnMeta->asn . '"';
+                    $outputGraphvizText .= 'tooltip="AS' . $asnMeta->asn . ' ~ ' . addslashes($description) . $countryCode . '" ';
+                    $outputGraphvizText .= 'URL="https://bgpview.io/asn/' . $asnMeta->asn . '" ';
                     $outputGraphvizText .= 'fontcolor="#2C94B3" ';
-                    $outputGraphvizText .= ']';
-                    $processedAsn[$relation['asn2']] = true;
+                    $outputGraphvizText .= ']'.PHP_EOL;
+                    $processedAsn[$relation['asn1']] = true;
                 }
             }
 
