@@ -26,6 +26,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\ReindexArinWhois::class,
         \App\Console\Commands\ReindexApnicWhois::class,
         \App\Console\Commands\ReindexAfrinicWhois::class,
+        \App\Console\Commands\GenerateGraphs::class,
     ];
 
     /**

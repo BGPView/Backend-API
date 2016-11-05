@@ -235,7 +235,7 @@ class ASN extends Model
         return $output;
     }
 
-    private static function getStreams($as_number, $direction = 'upstreams')
+    private static function getStreams($as_number, $direction = 'upstreams', $asnMeta)
     {
         if ($direction == 'upstreams') {
             $searchKey = 'asn';
@@ -302,12 +302,15 @@ class ASN extends Model
                 continue;
             }
 
-            $asnData = self::where('asn', $steam->$oderKey)->first();
-
             $asnOutput['asn']          = $steam->$oderKey;
-            $asnOutput['name']         = isset($asnData->name) ? $asnData->name : null;
-            $asnOutput['description']  = isset($asnData->description) ? $asnData->description : null;
-            $asnOutput['country_code'] = isset($asnData->counrty_code) ? $asnData->counrty_code : null;
+
+            if ($asnMeta === true) {
+                $asnData = self::where('asn', $steam->$oderKey)->first();
+                $asnOutput['name']         = isset($asnData->name) ? $asnData->name : null;
+                $asnOutput['description']  = isset($asnData->description) ? $asnData->description : null;
+                $asnOutput['country_code'] = isset($asnData->counrty_code) ? $asnData->counrty_code : null;
+            }
+
             $asnOutput['bgp_paths'][]  = $steam->bgp_path;
 
             $output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey] = $asnOutput;
@@ -321,14 +324,14 @@ class ASN extends Model
         return $output;
     }
 
-    public static function getDownstreams($as_number)
+    public static function getDownstreams($as_number, $asnMeta = true)
     {
-        return self::getStreams($as_number, 'downstreams');
+        return self::getStreams($as_number, 'downstreams', $asnMeta);
     }
 
-    public static function getUpstreams($as_number)
+    public static function getUpstreams($as_number, $asnMeta = true)
     {
-        return self::getStreams($as_number, 'upstreams');
+        return self::getStreams($as_number, 'upstreams', $asnMeta);
     }
 
 }
