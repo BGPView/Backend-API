@@ -283,7 +283,7 @@ class UpdateBgpData extends ReindexRIRWhois
         // Rename temp table to take over
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Swapping v4 TEMP table with production table');
-        //DB::statement('RENAME TABLE ipv4_bgp_prefixes TO backup_ipv4_bgp_prefixes, ipv4_bgp_prefixes_temp TO ipv4_bgp_prefixes;');
+        DB::statement('RENAME TABLE ipv4_bgp_prefixes TO backup_ipv4_bgp_prefixes, ipv4_bgp_prefixes_temp TO ipv4_bgp_prefixes;');
         DB::statement('RENAME TABLE ipv4_peers TO backup_ipv4_peers, ipv4_peers_temp TO ipv4_peers;');
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Swapping v6 TEMP table with production table');
