@@ -64,6 +64,7 @@ class GenerateGraphs extends Command
 
     private function generateGraphs($asns)
     {
+        $this->info('Generating graph images per ASN');
         foreach ($asns as $asn) {
             $upstreams = ASN::getUpstreams($asn, $asnMeta = false);
 
@@ -137,12 +138,12 @@ class GenerateGraphs extends Command
         }
         $outputGraphvizText .= "}" . PHP_EOL;
 
-        $this->info('Making image for AS' . $inputAsn);
         exec('echo "' . $outputGraphvizText . '" | dot -Tpng -o ' . public_path() . '/assets/graphs/AS' . $inputAsn . '_v' . $ipVersion . '.png');
     }
 
     private function getAsns()
     {
+        $this->info('Getting all ASNs from ES');
         $bgpAsns = [];
         $params  = [
             'search_type' => 'scan',
