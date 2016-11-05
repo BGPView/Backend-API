@@ -5,8 +5,6 @@ namespace App\Console\Commands;
 use App\Helpers\IpUtils;
 use App\Models\ASN;
 use App\Models\ASNEmail;
-use App\Models\IPv4BgpEntry;
-use App\Models\IPv6BgpEntry;
 use App\Models\IXMember;
 use App\Services\Whois;
 use Carbon\Carbon;
