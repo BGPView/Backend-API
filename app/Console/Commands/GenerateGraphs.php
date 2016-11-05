@@ -179,6 +179,7 @@ class GenerateGraphs extends Command
             }
         }
 
+        $this->info('Found ' . number_format(count($bgpAsns)) . ' unique ASNs in BGP table');
         return array_keys($bgpAsns);
     }
 }
