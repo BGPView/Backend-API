@@ -523,13 +523,15 @@ class IpUtils
                 'filter' => [
                     'bool' => [
                         'must' => [
-                            'match' => [
-                                'ip' => $ip,
+                            [
+                                'match' => [
+                                    'ip' => $ip,
+                                ],
                             ],
-                        ],
-                        [
-                            'match' => [
-                                'cidr' => $cidr,
+                            [
+                                'match' => [
+                                    'cidr' => $cidr,
+                                ],
                             ],
                         ],
                     ],
