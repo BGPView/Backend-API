@@ -133,7 +133,7 @@ class GenerateGraphs extends Command
             }
         }
 
-        $outputGraphvizText = 'digraph {' . PHP_EOL;
+        $outputGraphvizText = 'digraph AS' . $inputAsn . ' IPv' . $ipVersion . ' Upstream Graph {' . PHP_EOL;
         $outputGraphvizText .= 'rankdir=LR;' . PHP_EOL;
         $processedAsn = [];
         foreach ($realRelation as $relation) {
@@ -142,14 +142,16 @@ class GenerateGraphs extends Command
             if (isset($processedAsn[$relation['asn1']]) !== true) {
                 $asnMeta = $asnsData->where('asn', (int) $relation['asn1'])->first();
                 if (is_null($asnMeta) !== true) {
-                    $outputGraphvizText .= '"AS' . $relation['asn1'] . '" [tooltip="AS' . $asnMeta->asn . ' ~ ' . $asnMeta->description . '" URL="https://bgpview.io/asn/' . $asnMeta->asn . '"]';
+                    $countryCode = empty($asnMeta->counrty_code) !== true ? ' [' . $asnMeta->counrty_code . ']' : '';
+                    $outputGraphvizText .= 'AS' . $relation['asn2'] . ' [tooltip="AS' . $asnMeta->asn . ' ~ ' . $asnMeta->description . $countryCode . ']" URL="https://bgpview.io/asn/' . $asnMeta->asn . '"]';
                     $processedAsn[$relation['asn1']] = true;
                 }
             }
             if (isset($processedAsn[$relation['asn2']]) !== true) {
                 $asnMeta = $asnsData->where('asn', (int) $relation['asn2'])->first();
                 if (is_null($asnMeta) !== true) {
-                    $outputGraphvizText .= '"AS' . $relation['asn2'] . '" [tooltip="AS' . $asnMeta->asn . ' ~ ' . $asnMeta->description . '" URL="https://bgpview.io/asn/' . $asnMeta->asn . '"]';
+                    $countryCode = empty($asnMeta->counrty_code) !== true ? ' [' . $asnMeta->counrty_code . ']' : '';
+                    $outputGraphvizText .= 'AS' . $relation['asn2'] . ' [tooltip="AS' . $asnMeta->asn . ' ~ ' . $asnMeta->description . $countryCode . ']" URL="https://bgpview.io/asn/' . $asnMeta->asn . '"]';
                     $processedAsn[$relation['asn2']] = true;
                 }
             }
@@ -158,7 +160,7 @@ class GenerateGraphs extends Command
         }
         $outputGraphvizText .= '}' . PHP_EOL;
 
-        exec('echo "' . $outputGraphvizText . '" | dot -Tsvg -o ' . public_path() . '/assets/graphs/AS' . $inputAsn . '_v' . $ipVersion . '.svg');
+        exec('echo \'' . $outputGraphvizText . '\' | dot -Tsvg -o ' . public_path() . '/assets/graphs/AS' . $inputAsn . '_v' . $ipVersion . '.svg');
     }
 
     private function getAsns()
