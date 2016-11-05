@@ -509,6 +509,58 @@ class IpUtils
         return $data;
     }
 
+    public function getPrefixesFromBgpTable($ip, $cidr)
+    {
+        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
+
+        $params = [
+            'search_type' => 'scan',
+            'scroll'      => '30s',
+            'size'        => 10000,
+            'index'       => 'bgp_data',
+            'type'        => 'full_table',
+            'body'        => [
+                'filter' => [
+                    'bool' => [
+                        'must' => [
+                            'match' => [
+                                'ip' => $ip,
+                            ],
+                            'match' => [
+                                'cidr' => $cidr,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $docs      = $client->search($params);
+        $scroll_id = $docs['_scroll_id'];
+
+        $entries = [];
+        while (true) {
+            $response = $client->scroll(
+                array(
+                    "scroll_id" => $scroll_id,
+                    "scroll"    => "30s",
+                )
+            );
+
+            if (count($response['hits']['hits']) > 0) {
+                $results = $this->cleanEsResults($response);
+                $entries  = array_merge($entries, $results);
+                // Get new scroll_id
+                $scroll_id = $response['_scroll_id'];
+            } else {
+                // All done scrolling over data
+                break;
+            }
+        }
+
+        return collect($entries);
+    }
+
     public function getBgpPrefixes($input)
     {
         $type = $this->getInputType($input);

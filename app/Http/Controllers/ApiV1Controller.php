@@ -152,13 +152,15 @@ class ApiV1Controller extends ApiBaseController
         $ipVersion = $this->ipUtils->getInputType($ip);
 
         if ($ipVersion === 4) {
-            $prefixes = IPv4BgpEntry::where('ip', $ip)->where('cidr', $cidr)->get();
+            $prefixWhoisClass = IPv4PrefixWhois::class;
         } else if ($ipVersion === 6) {
-            $prefixes = IPv6BgpEntry::where('ip', $ip)->where('cidr', $cidr)->get();
+            $prefixWhoisClass = IPv6PrefixWhois::class;
         } else {
             $data = $this->makeStatus('Malformed input', false);
             return $this->respond($data);
         }
+
+        $prefixes = $this->ipUtils->getPrefixesFromBgpTable($ip, $cidr);
 
         if ($prefixes->count() === 0) {
             if ($ipVersion === 4) {
@@ -170,7 +172,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixWhois = $prefix;
         } else {
             $prefix = $prefixes[0];
-            $prefixWhois = $prefix->whois();
+            $prefixWhois = $prefixWhoisClass::where('ip', $prefix->ip)->where('cidr', $prefix->cidr)->first();
         }
 
         if (is_null($prefix) === true) {
