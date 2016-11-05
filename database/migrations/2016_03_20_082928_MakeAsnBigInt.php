@@ -43,16 +43,6 @@ class MakeAsnBigInt extends Migration
             $table->bigInteger('asn_1')->change();
             $table->bigInteger('asn_2')->change();
         });
-
-        Schema::table('ipv4_bgp_table', function($table)
-        {
-            $table->bigInteger('asn')->change();
-        });
-
-        Schema::table('ipv6_bgp_table', function($table)
-        {
-            $table->bigInteger('asn')->change();
-        });
     }
 
     /**
