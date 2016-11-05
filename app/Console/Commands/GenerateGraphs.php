@@ -140,16 +140,16 @@ class GenerateGraphs extends Command
 
             // Add labels and hyperlinks
             if (isset($processedAsn[$relation['asn1']]) !== true) {
-                $asnMeta = $asnsData->where('asn', $relation['asn1'])->first();
+                $asnMeta = $asnsData->where('asn', (int) $relation['asn1'])->first();
                 if (is_null($asnMeta) !== true) {
-                    $outputGraphvizText .= '"AS'.$relation['asn1'].'" [tooltip="AS'.$asnMeta->asn.' ~ '.$asnMeta->description.'" URL="https://bgpview.io/asn/'.$asnsData->asn.'"]';
+                    $outputGraphvizText .= '"AS' . $relation['asn1'] . '" [tooltip="AS' . $asnMeta->asn . ' ~ ' . $asnMeta->description . '" URL="https://bgpview.io/asn/' . $asnMeta->asn . '"]';
                     $processedAsn[$relation['asn1']] = true;
                 }
             }
             if (isset($processedAsn[$relation['asn2']]) !== true) {
-                $asnMeta = $asnsData->where('asn', $relation['asn2'])->first();
+                $asnMeta = $asnsData->where('asn', (int) $relation['asn2'])->first();
                 if (is_null($asnMeta) !== true) {
-                    $outputGraphvizText .= '"AS'.$relation['asn2'].'" [tooltip="AS'.$asnMeta->asn.' ~ '.$asnMeta->description.'" URL="https://bgpview.io/asn/'.$asnsData->asn.'"]';
+                    $outputGraphvizText .= '"AS' . $relation['asn2'] . '" [tooltip="AS' . $asnMeta->asn . ' ~ ' . $asnMeta->description . '" URL="https://bgpview.io/asn/' . $asnMeta->asn . '"]';
                     $processedAsn[$relation['asn2']] = true;
                 }
             }
