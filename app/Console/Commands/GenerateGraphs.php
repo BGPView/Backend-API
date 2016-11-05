@@ -19,7 +19,7 @@ class GenerateGraphs extends Command
     protected $bench;
     protected $esClient;
     protected $ipUtils;
-    protected $maxLineThickness = 5;
+    protected $maxLineThickness = 4.5;
 
     /**
      * Create a new command instance.
@@ -111,6 +111,8 @@ class GenerateGraphs extends Command
             $keyAsns[$relation['asn1']][] = $relation;
         }
 
+        $asnsData = ASN::whereIn('asn', array_keys($keyAsns))->get();
+
         foreach ($keyAsns as $groupedAsns) {
             $highestNumber = $groupedAsns[0]['weight'];
             foreach ($groupedAsns as $asn) {
@@ -131,14 +133,32 @@ class GenerateGraphs extends Command
             }
         }
 
-        $outputGraphvizText = "digraph {" . PHP_EOL;
-        $outputGraphvizText .= "rankdir=LR;" . PHP_EOL;
+        $outputGraphvizText = 'digraph {' . PHP_EOL;
+        $outputGraphvizText .= 'rankdir=LR;' . PHP_EOL;
+        $processedAsn = [];
         foreach ($realRelation as $relation) {
+
+            // Add labels and hyperlinks
+            if (isset($processedAsn[$relation['asn1']]) !== true) {
+                $asnMeta = $asnsData->where('asn', $relation['asn1'])->first();
+                if (is_null($asnMeta) !== true) {
+                    $outputGraphvizText .= '"AS'.$relation['asn1'].'" [tooltip="AS'.$asnMeta->asn.' ~ '.$asnMeta->description.'" URL="https://bgpview.io/asn/'.$asnsData->asn.'"]';
+                    $processedAsn[$relation['asn1']] = true;
+                }
+            }
+            if (isset($processedAsn[$relation['asn2']]) !== true) {
+                $asnMeta = $asnsData->where('asn', $relation['asn2'])->first();
+                if (is_null($asnMeta) !== true) {
+                    $outputGraphvizText .= '"AS'.$relation['asn2'].'" [tooltip="AS'.$asnMeta->asn.' ~ '.$asnMeta->description.'" URL="https://bgpview.io/asn/'.$asnsData->asn.'"]';
+                    $processedAsn[$relation['asn2']] = true;
+                }
+            }
+
             $outputGraphvizText .= 'AS' . $relation['asn1'] . ' -> AS' . $relation['asn2'] . ' [ penwidth = ' . $relation['weight'] . ' ];' . PHP_EOL;
         }
-        $outputGraphvizText .= "}" . PHP_EOL;
+        $outputGraphvizText .= '}' . PHP_EOL;
 
-        exec('echo "' . $outputGraphvizText . '" | dot -Tpng -o ' . public_path() . '/assets/graphs/AS' . $inputAsn . '_v' . $ipVersion . '.png');
+        exec('echo "' . $outputGraphvizText . '" | dot -Tsvg -o ' . public_path() . '/assets/graphs/AS' . $inputAsn . '_v' . $ipVersion . '.svg');
     }
 
     private function getAsns()
