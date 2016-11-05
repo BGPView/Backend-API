@@ -144,7 +144,8 @@ class GenerateGraphs extends Command
                 $asnMeta = $asnsData->where('asn', (int) $relation['asn1'])->first();
                 if (is_null($asnMeta) !== true) {
                     $countryCode = empty($asnMeta->counrty_code) !== true ? ' [' . $asnMeta->counrty_code . ']' : '';
-                    $description = strlen($asnMeta->description) > 27 ? $asnMeta->name : $asnMeta->description;
+                    $description = strlen($asnMeta->description) > 35 ? $asnMeta->name : $asnMeta->description;
+                    $description = str_replace("'", "", $description);
                     $outputGraphvizText .= 'AS' . $relation['asn1'] .' ';
                     $outputGraphvizText .= '[';
                     $outputGraphvizText .= 'tooltip="AS' . $asnMeta->asn . ' ~ ' . addslashes($description) . $countryCode . '" ';
@@ -158,7 +159,8 @@ class GenerateGraphs extends Command
                 $asnMeta = $asnsData->where('asn', (int) $relation['asn2'])->first();
                 if (is_null($asnMeta) !== true) {
                     $countryCode = empty($asnMeta->counrty_code) !== true ? ' [' . $asnMeta->counrty_code . ']' : '';
-                    $description = strlen($asnMeta->description) > 27 ? $asnMeta->name : $asnMeta->description;
+                    $description = strlen($asnMeta->description) > 35 ? $asnMeta->name : $asnMeta->description;
+                    $description = str_replace("'", "", $description);
                     $outputGraphvizText .= 'AS' . $relation['asn2'] .' ';
                     $outputGraphvizText .= '[';
                     $outputGraphvizText .= 'tooltip="AS' . $asnMeta->asn . ' ~ ' . addslashes($description) . $countryCode . '" ';
