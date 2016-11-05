@@ -84,8 +84,9 @@ class GenerateGraphs extends Command
             foreach ($upstream['bgp_paths'] as $path) {
                 $asns = explode(' ', $path);
 
-                $previousAsn = false;
                 foreach ($asns as $key => $asn) {
+                    $asnList[] = $asn;
+
                     // If its the last ASN, then stop
                     if (isset($asns[$key + 1]) !== true) {
                         continue;
@@ -101,7 +102,6 @@ class GenerateGraphs extends Command
                         'asn1'   => $asn,
                         'asn2'   => $asns[$key + 1],
                     ];
-                    $asnList[] = $asn;
                 }
             }
         }
