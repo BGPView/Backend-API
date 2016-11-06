@@ -69,10 +69,14 @@ class GenerateGraphs extends Command
             $upstreams = ASN::getUpstreams($asn, $asnMeta = false);
 
             if (count($upstreams['ipv4_upstreams']) > 0) {
-                $this->createGraphviz($asn, 4, $upstreams['ipv4_upstreams']);
+                $this->createGraphviz($asn, 'v4', $upstreams['ipv4_upstreams']);
             }
             if (count($upstreams['ipv6_upstreams']) > 0) {
-                $this->createGraphviz($asn, 6, $upstreams['ipv6_upstreams']);
+                $this->createGraphviz($asn, 'v6', $upstreams['ipv6_upstreams']);
+            }
+            $combined = array_merge($upstreams['ipv4_upstreams'], $upstreams['ipv6_upstreams']);
+            if (count($combined) > 0) {
+                $this->createGraphviz($asn, 'combined', $combined);
             }
         }
     }
@@ -134,7 +138,7 @@ class GenerateGraphs extends Command
             }
         }
 
-        $outputGraphvizText = 'digraph "AS' . $inputAsn . ' IPv' . $ipVersion . ' Upstream Graph" {' . PHP_EOL;
+        $outputGraphvizText = 'digraph "AS' . $inputAsn . ' IP' . $ipVersion . ' Upstream Graph" {' . PHP_EOL;
         $outputGraphvizText .= 'rankdir=LR;' . PHP_EOL;
         $processedAsn = [];
         foreach ($realRelation as $relation) {
@@ -175,7 +179,7 @@ class GenerateGraphs extends Command
         }
         $outputGraphvizText .= '}' . PHP_EOL;
 
-        exec('echo \'' . $outputGraphvizText . '\' | dot -Tsvg -o ' . public_path() . '/assets/graphs/AS' . $inputAsn . '_v' . $ipVersion . '.svg');
+        exec('echo \'' . $outputGraphvizText . '\' | dot -Tsvg -o ' . public_path() . '/assets/graphs/AS' . $inputAsn . '_' . $ipVersion . '.svg');
     }
 
     private function getAsns()
