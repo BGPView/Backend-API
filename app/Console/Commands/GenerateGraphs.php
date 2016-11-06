@@ -69,14 +69,14 @@ class GenerateGraphs extends Command
             $upstreams = ASN::getUpstreams($asn, $asnMeta = false);
 
             if (count($upstreams['ipv4_upstreams']) > 0) {
-                $this->createGraphviz($asn, 'v4', $upstreams['ipv4_upstreams']);
+                $this->createGraphviz($asn, 'IPv4', $upstreams['ipv4_upstreams']);
             }
             if (count($upstreams['ipv6_upstreams']) > 0) {
-                $this->createGraphviz($asn, 'v6', $upstreams['ipv6_upstreams']);
+                $this->createGraphviz($asn, 'IPv6', $upstreams['ipv6_upstreams']);
             }
             $combined = array_merge($upstreams['ipv4_upstreams'], $upstreams['ipv6_upstreams']);
             if (count($combined) > 0) {
-                $this->createGraphviz($asn, 'combined', $combined);
+                $this->createGraphviz($asn, 'Combined', $combined);
             }
         }
     }
@@ -138,8 +138,10 @@ class GenerateGraphs extends Command
             }
         }
 
-        $outputGraphvizText = 'digraph "AS' . $inputAsn . ' IP' . $ipVersion . ' Upstream Graph" {' . PHP_EOL;
+        $outputGraphvizText = 'digraph "AS' . $inputAsn . ' ' . $ipVersion . ' Upstream Graph" {' . PHP_EOL;
         $outputGraphvizText .= 'rankdir=LR;' . PHP_EOL;
+        $outputGraphvizText .= 'node [style=filled,fillcolor="#ffffff",fontcolor="#2C94B3"];'.PHP_EOL;
+
         $processedAsn = [];
         foreach ($realRelation as $relation) {
 
@@ -169,7 +171,6 @@ class GenerateGraphs extends Command
                     $outputGraphvizText .= '[';
                     $outputGraphvizText .= 'tooltip="AS' . $asnMeta->asn . ' ~ ' . addslashes($description) . $countryCode . '" ';
                     $outputGraphvizText .= 'URL="https://bgpview.io/asn/' . $asnMeta->asn . '" ';
-                    $outputGraphvizText .= 'fontcolor="#2C94B3" ';
                     $outputGraphvizText .= ']'.PHP_EOL;
                     $processedAsn[$relation['asn2']] = true;
                 }
@@ -177,6 +178,7 @@ class GenerateGraphs extends Command
 
             $outputGraphvizText .= 'AS' . $relation['asn1'] . ' -> AS' . $relation['asn2'] . ' [ penwidth = ' . $relation['weight'] . ' ];' . PHP_EOL;
         }
+        $outputGraphvizText .= 'AS'.$inputAsn . '[fontcolor="#880000"]' . PHP_EOL;
         $outputGraphvizText .= '}' . PHP_EOL;
 
         exec('echo \'' . $outputGraphvizText . '\' | dot -Tsvg -o ' . public_path() . '/assets/graphs/AS' . $inputAsn . '_' . $ipVersion . '.svg');
