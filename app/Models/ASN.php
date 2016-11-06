@@ -323,8 +323,9 @@ class ASN extends Model
 
         // Get Graph images
         if ($direction === 'upstreams') {
-            $imagePathv4 = '/assets/graphs/' . 'AS' . $as_number . '_v4.svg';
-            $imagePathv6 = '/assets/graphs/' . 'AS' . $as_number . '_v6.svg';
+            $imagePathv4       = '/assets/graphs/' . 'AS' . $as_number . '_v4.svg';
+            $imagePathv6       = '/assets/graphs/' . 'AS' . $as_number . '_v6.svg';
+            $imageCombinedPath = '/assets/graphs/' . 'AS' . $as_number . '_combined.svg';
 
             if (file_exists(public_path() . $imagePathv4) === true) {
                 $output['ipv4_graph'] = config('app.url') . $imagePathv4;
@@ -336,6 +337,12 @@ class ASN extends Model
                 $output['ipv6_graph'] = config('app.url') . $imagePathv6;
             } else {
                 $output['ipv6_graph'] = null;
+            }
+
+            if (file_exists(public_path() . $imageCombinedPath) === true) {
+                $output['combined_graph'] = config('app.url') . $imageCombinedPath;
+            } else {
+                $output['combined_graph'] = null;
             }
         }
 
