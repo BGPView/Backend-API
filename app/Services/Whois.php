@@ -90,7 +90,7 @@ class Whois
         if (is_null($cidr) !== true) {
             $this->input .= '/' . $cidr;
         }
-        $this->rawData = $this->getRawWhois();
+        $this->rawData = removeAccents($this->getRawWhois());
         $this->rawLines = explode("\n", $this->rawData);
 
     }
