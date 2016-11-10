@@ -689,36 +689,31 @@ class ApiV1Controller extends ApiBaseController
 
         // Group ASNs
         foreach ($allocatedAsns as $allocatedAsn) {
-            if (isset($countriesStats[$allocatedAsn->country_code]) === true) {
-                $countriesStats[$allocatedAsn->country_code]['asn_count'] += 1;
-            } else {
-                $countriesStats[$allocatedAsn->country_code]['asn_count'] = 1;
+            if (isset($countriesStats[$allocatedAsn->country_code]) !== true) {
+                $countriesStats[$allocatedAsn->country_code]['allocated_asn_count'] = 0;
+                $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_prefix_count'] = 0;
+                $countriesStats[$allocatedAsn->country_code]['allocated_ipv6_prefix_count'] = 0;
+                $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_ip_count'] = 0;
             }
+
+            $countriesStats[$allocatedAsn->country_code]['asn_count'] += 1;
         }
 
         foreach ($allocatedPrefixes as $allocatedPrefix) {
-            if (isset($countriesStats[$allocatedPrefix->country_code]['ipv' . $allocatedPrefix->ip_version . '_prefix_allocations']) === true) {
-                $countriesStats[$allocatedPrefix->country_code]['ipv' . $allocatedPrefix->ip_version . '_prefix_allocations'] += 1;
-            } else {
-                $countriesStats[$allocatedPrefix->country_code]['ipv' . $allocatedPrefix->ip_version . '_prefix_allocations'] = 1;
+            if (isset($countriesStats[$allocatedPrefix->country_code]) !== true) {
+                $countriesStats[$allocatedPrefix->country_code]['allocated_asn_count'] = 0;
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_prefix_count'] = 0;
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv6_prefix_count'] = 0;
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] = 0;
             }
+
+            $countriesStats[$allocatedPrefix->country_code]['allocated_ipv' . $allocatedPrefix->ip_version . '_prefix_count'] += 1;
 
             if ($allocatedPrefix->ip_version == 4) {
-                if (isset($countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count']) == true) {
-                    $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
-                } else {
-                    $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] = $ipv4CidrCount[$allocatedPrefix->cidr];
-                }
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
             }
         }
-
-        $stats = [];
-        foreach ($countriesStats as $countryCode => $countryStats) {
-            $stats[] = array_merge(['country_code' => $countryCode], $countryStats);
-        }
-
-        $countriesStats = collect($stats);
-
+        
         return $this->sendData($countriesStats);
     }
 
