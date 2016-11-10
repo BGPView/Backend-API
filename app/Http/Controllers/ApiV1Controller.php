@@ -697,14 +697,16 @@ class ApiV1Controller extends ApiBaseController
         }
 
         foreach ($allocatedPrefixes as $allocatedPrefix) {
-            if (isset($countriesStats[$allocatedPrefix->country_code]) === true) {
+            if (isset($countriesStats[$allocatedPrefix->country_code]['ipv' . $allocatedPrefix->ip_version . '_prefix_allocations']) === true) {
                 $countriesStats[$allocatedPrefix->country_code]['ipv' . $allocatedPrefix->ip_version . '_prefix_allocations'] += 1;
-                if ($allocatedPrefix->ip_version == 4) {
-                    $countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
-                }
             } else {
                 $countriesStats[$allocatedPrefix->country_code]['ipv' . $allocatedPrefix->ip_version . '_prefix_allocations'] = 1;
-                if ($allocatedPrefix->ip_version == 4) {
+            }
+
+            if ($allocatedPrefix->ip_version == 4) {
+                if (isset($countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count']) == true) {
+                    $countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
+                } else {
                     $countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count'] = $ipv4CidrCount[$allocatedPrefix->cidr];
                 }
             }
