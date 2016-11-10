@@ -394,7 +394,7 @@ class ApiV1Controller extends ApiBaseController
     }
 
     /*
-     * URI: /asns/{country_code?}
+     * URI: /asns/
      */
     public function asns(Request $request)
     {
@@ -673,6 +673,44 @@ class ApiV1Controller extends ApiBaseController
         }
 
         return $this->sendData($data);
+    }
+
+    /*
+     * URI: /reports/countries
+     */
+    public function countriesReport()
+    {
+        $ipv4CidrCount = $this->ipUtils->IPv4cidrIpCount();
+        $countriesStats = [];
+
+        $allocatedAsns = $this->ipUtils->getAllocatedAsns();
+        $allocatedPrefixes = $this->ipUtils->getAllocatedPrefixes();
+        // Get all routes (BGP)
+
+        // Group ASNs
+        foreach ($allocatedAsns as $allocatedAsn) {
+            if (isset($countriesStats[$allocatedAsn->country_code]) === true) {
+                $countriesStats[$allocatedAsn->country_code]['asn_count'] += 1;
+            } else {
+                $countriesStats[$allocatedAsn->country_code]['asn_count'] = 1;
+            }
+        }
+
+        foreach ($allocatedPrefixes as $allocatedPrefix) {
+            if (isset($countriesStats[$allocatedPrefix->country_code]) === true) {
+                $countriesStats[$allocatedPrefix->country_code]['ipv' . $allocatedPrefix->ip_version . '_prefix_allocations'] += 1;
+                if ($allocatedPrefix->ip_version == 4) {
+                    $countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
+                }
+            } else {
+                $countriesStats[$allocatedPrefix->country_code]['ipv' . $allocatedPrefix->ip_version . '_prefix_allocations'] = 1;
+                if ($allocatedPrefix->ip_version == 4) {
+                    $countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count'] = $ipv4CidrCount[$allocatedPrefix->cidr];
+                }
+        }
+
+
+        return $this->sendData($countriesStats);
     }
 
     /*
