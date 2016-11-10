@@ -68,63 +68,10 @@ class UpdatePrefixWhoisData extends Command
 
     private function getAllPrefixes($ipVersion)
     {
-        $rirPrefixes = [];
-        // Get all allocated IP prefixes
-        $params = [
-            'search_type' => 'scan',
-            'scroll' => '30s',
-            'size' => 10000,
-            'index' => 'rir_allocations',
-            'type'  => 'prefixes',
-            'body' => [
-                'filter' => [
-                    'bool' => [
-                        'should' => [
-                            [
-                                'match' => [
-                                    'status' => 'allocated',
-                                ],
-                            ],
-                            [
-                                'match' => [
-                                    'status' => 'assigned',
-                                ],
-                            ],
-                        ],
-                        'must' => [
-                            'match' => [
-                                'ip_version' => $ipVersion,
-                            ],
-                        ]
-                    ],
-                ],
-            ],
-        ];
 
-        $docs = $this->esClient->search($params);
-        $scroll_id = $docs['_scroll_id'];
+        $rirPrefixes = $this->ipUtils->getAllocatedPrefixes($ipVersion);
 
-        while (true) {
-            $response = $this->esClient->scroll(
-                array(
-                    "scroll_id" => $scroll_id,
-                    "scroll" => "30s"
-                )
-            );
-
-            if (count($response['hits']['hits']) > 0) {
-                $results = $this->ipUtils->cleanEsResults($response);
-                $rirPrefixes = array_merge($rirPrefixes, $results);
-
-                // Get new scroll_id
-                $scroll_id = $response['_scroll_id'];
-            } else {
-                // All done scrolling over data
-                break;
-            }
-        }
-
-        $sourcePrefixes['rir_prefixes'] = collect($rirPrefixes)->shuffle();
+        $sourcePrefixes['rir_prefixes'] = $rirPrefixes->shuffle();
         // get all bgp prefixes
         $className = 'App\Models\IPv' . $ipVersion . 'BgpPrefix';
         $sourcePrefixes['bgp_prefixes'] = $className::all()->shuffle();
