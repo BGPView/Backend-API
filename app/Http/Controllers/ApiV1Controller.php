@@ -707,6 +707,7 @@ class ApiV1Controller extends ApiBaseController
                 if ($allocatedPrefix->ip_version == 4) {
                     $countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count'] = $ipv4CidrCount[$allocatedPrefix->cidr];
                 }
+            }
         }
 
 
