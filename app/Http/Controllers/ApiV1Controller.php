@@ -716,7 +716,7 @@ class ApiV1Controller extends ApiBaseController
             }
         }
 
-        $countriesStats = collect($countriesStats);
+        $countriesStats = collect(array_values($countriesStats));
         return $this->sendData($countriesStats);
     }
 
