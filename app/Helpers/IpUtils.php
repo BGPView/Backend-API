@@ -801,7 +801,7 @@ class IpUtils
             );
 
             if (count($response['hits']['hits']) > 0) {
-                $results = $this->ipUtils->cleanEsResults($response);
+                $results = $this->cleanEsResults($response);
                 $allocatedAsns = array_merge($allocatedAsns, $results);
 
                 // Get new scroll_id
@@ -863,7 +863,7 @@ class IpUtils
             );
 
             if (count($response['hits']['hits']) > 0) {
-                $results = $this->ipUtils->cleanEsResults($response);
+                $results = $this->cleanEsResults($response);
                 $rirPrefixes = array_merge($rirPrefixes, $results);
 
                 // Get new scroll_id
