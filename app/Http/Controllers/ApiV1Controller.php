@@ -705,13 +705,19 @@ class ApiV1Controller extends ApiBaseController
 
             if ($allocatedPrefix->ip_version == 4) {
                 if (isset($countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count']) == true) {
-                    $countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
+                    $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
                 } else {
-                    $countriesStats[$allocatedPrefix->country_code]['ipv4_ip_count'] = $ipv4CidrCount[$allocatedPrefix->cidr];
+                    $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] = $ipv4CidrCount[$allocatedPrefix->cidr];
                 }
             }
         }
 
+        $stats = [];
+        foreach ($countriesStats as $countryCode => $countryStats) {
+            $stats[] = array_merge(['country_code' => $countryCode], $countryStats);
+        }
+
+        $countriesStats = collect($stats);
 
         return $this->sendData($countriesStats);
     }
