@@ -696,7 +696,7 @@ class ApiV1Controller extends ApiBaseController
                 $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_ip_count'] = 0;
             }
 
-            $countriesStats[$allocatedAsn->country_code]['asn_count'] += 1;
+            $countriesStats[$allocatedAsn->country_code]['allocated_asn_count'] += 1;
         }
 
         foreach ($allocatedPrefixes as $allocatedPrefix) {
@@ -713,7 +713,7 @@ class ApiV1Controller extends ApiBaseController
                 $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
             }
         }
-        
+
         return $this->sendData($countriesStats);
     }
 
