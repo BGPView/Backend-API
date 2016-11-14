@@ -689,7 +689,7 @@ class ApiV1Controller extends ApiBaseController
 
         // Group ASNs
         foreach ($allocatedAsns as $allocatedAsn) {
-            if (isset($countriesStats[$allocatedAsn->country_code]) !== true) {
+            if (isset($countriesStats[$allocatedAsn->country_code]) !== true && is_null($allocatedAsn->country_code) !== true) {
                 $countriesStats[$allocatedAsn->country_code]['country_code'] = $allocatedAsn->country_code;
                 $countriesStats[$allocatedAsn->country_code]['allocated_asn_count'] = 0;
                 $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_prefix_count'] = 0;
@@ -701,7 +701,7 @@ class ApiV1Controller extends ApiBaseController
         }
 
         foreach ($allocatedPrefixes as $allocatedPrefix) {
-            if (isset($countriesStats[$allocatedPrefix->country_code]) !== true) {
+            if (isset($countriesStats[$allocatedPrefix->country_code]) !== true && is_null($allocatedPrefix->country_code) !== true) {
                 $countriesStats[$allocatedPrefix->country_code]['country_code'] = $allocatedPrefix->country_code;
                 $countriesStats[$allocatedPrefix->country_code]['allocated_asn_count'] = 0;
                 $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_prefix_count'] = 0;
