@@ -281,8 +281,8 @@ class ApiV1Controller extends ApiBaseController
     }
 
     /*
-     * URI: /ip/{ip}
-     */
+    * URI: /ip/{ip}
+    */
     public function ip($ip)
     {
         // Check if the IP is in bogon range
@@ -419,7 +419,7 @@ class ApiV1Controller extends ApiBaseController
         $data['current_page']   = $asns->currentPage();
         $data['limit']          = $asns->perPage();
         $data['data']           = $output;
-        
+
         return $this->respond($data);
     }
 
@@ -466,7 +466,7 @@ class ApiV1Controller extends ApiBaseController
                 'order' => 'asc'
             ]]
         ];
-        
+
         $ipSort = [
             ['ip' => [
                 'order' => 'asc'
@@ -697,7 +697,9 @@ class ApiV1Controller extends ApiBaseController
                 $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_ip_count'] = 0;
             }
 
-            $countriesStats[$allocatedAsn->country_code]['allocated_asn_count'] += 1;
+            if (is_null($allocatedAsn->country_code) !== true) {
+                $countriesStats[$allocatedAsn->country_code]['allocated_asn_count'] += 1;
+            }
         }
 
         foreach ($allocatedPrefixes as $allocatedPrefix) {
@@ -709,7 +711,9 @@ class ApiV1Controller extends ApiBaseController
                 $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] = 0;
             }
 
-            $countriesStats[$allocatedPrefix->country_code]['allocated_ipv' . $allocatedPrefix->ip_version . '_prefix_count'] += 1;
+            if (is_null($allocatedAsn->country_code) !== true) {
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv' . $allocatedPrefix->ip_version . '_prefix_count'] += 1;
+            }
 
             if ($allocatedPrefix->ip_version == 4 && isset($ipv4CidrCount[$allocatedPrefix->cidr]) === true) {
                 $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
