@@ -711,7 +711,7 @@ class ApiV1Controller extends ApiBaseController
 
             $countriesStats[$allocatedPrefix->country_code]['allocated_ipv' . $allocatedPrefix->ip_version . '_prefix_count'] += 1;
 
-            if ($allocatedPrefix->ip_version == 4) {
+            if ($allocatedPrefix->ip_version == 4 && isset($ipv4CidrCount[$allocatedPrefix->cidr]) === true) {
                 $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
             }
         }
