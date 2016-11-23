@@ -195,7 +195,7 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->country_code);
         } else {
             $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
@@ -281,7 +281,7 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->country_code);
         } else {
             $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
@@ -367,7 +367,7 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->country_code);
         } else {
             $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
@@ -427,7 +427,7 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->country_code);
         } else {
             $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
@@ -482,7 +482,7 @@ class Whois
         if (is_array($counrty) === true) {
             $data->counrty_code = strtoupper(substr($counrty[0], 0, 2));
         } else if (is_null($counrty) === true) {
-            $data->counrty_code = strtoupper($this->allocationData->counrty_code);
+            $data->counrty_code = strtoupper($this->allocationData->country_code);
         } else {
             $data->counrty_code = strtoupper(substr($counrty, 0, 2));
         }
