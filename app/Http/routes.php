@@ -38,9 +38,13 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('/prefix/{ip}/{cidr}/dns', ['as' => 'prefix.dns', 'uses' => 'ApiV1Controller@prefixDns']);
     Route::get('/ip/{ip}', ['as' => 'ip', 'uses' => 'ApiV1Controller@ip']);
     Route::get('/ix/{ix_id}', ['as' => 'ix', 'uses' => 'ApiV1Controller@ix']);
-    Route::get('/asns/{country_code?}', ['as' => 'asns', 'uses' => 'ApiV1Controller@asns']);
 
     Route::get('/search', ['as' => 'asns', 'uses' => 'ApiV1Controller@search']);
+
+    // Reporting Routes
+    Route::group(['prefix' => 'reports'], function () {
+        Route::get('countries', ['as' => 'reports.countries', 'uses' => 'ApiV1Controller@countriesReport']);
+    });
 
     // Misc Routes (Internal Use)
     Route::get('/dns/live/{hostname}', ['uses' => 'ApiV1Controller@getLiveDns']);

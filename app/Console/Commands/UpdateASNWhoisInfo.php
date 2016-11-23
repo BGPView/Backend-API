@@ -101,38 +101,8 @@ class UpdateASNWhoisInfo extends Command
 
     private function getAllAsns()
     {
-        $allocatedAsns = [];
-        $params = [
-            'search_type' => 'scan',
-            'scroll' => '30s',
-            'size' => 10000,
-            'index' => 'rir_allocations',
-            'type'  => 'asns',
-        ];
 
-        $docs = $this->esClient->search($params);
-        $scroll_id = $docs['_scroll_id'];
-
-        while (true) {
-            $response = $this->esClient->scroll(
-                array(
-                    "scroll_id" => $scroll_id,
-                    "scroll" => "30s"
-                )
-            );
-
-            if (count($response['hits']['hits']) > 0) {
-                $results = $this->ipUtils->cleanEsResults($response);
-                $allocatedAsns = array_merge($allocatedAsns, $results);
-
-                // Get new scroll_id
-                $scroll_id = $response['_scroll_id'];
-            } else {
-                // All done scrolling over data
-                break;
-            }
-        }
-
+        $allocatedAsns = $this->ipUtils->getAllocatedAsns();
         // =============================
 
         $bgpAsns = [];
@@ -170,7 +140,7 @@ class UpdateASNWhoisInfo extends Command
             }
         }
 
-        $sourceAsns['allocated_asns'] = collect($allocatedAsns)->shuffle();
+        $sourceAsns['allocated_asns'] = $allocatedAsns->shuffle();
         $sourceAsns['ix_asns'] = IXMember::all()->shuffle();
         $sourceAsns['bgp_asns'] = collect($bgpAsns)->shuffle();
 

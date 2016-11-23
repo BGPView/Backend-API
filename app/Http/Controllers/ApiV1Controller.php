@@ -281,8 +281,8 @@ class ApiV1Controller extends ApiBaseController
     }
 
     /*
-     * URI: /ip/{ip}
-     */
+    * URI: /ip/{ip}
+    */
     public function ip($ip)
     {
         // Check if the IP is in bogon range
@@ -394,20 +394,16 @@ class ApiV1Controller extends ApiBaseController
     }
 
     /*
-     * URI: /asns/{country_code?}
+     * URI: /asns/
      */
-    public function asns(Request $request, $country_code = null)
+    public function asns(Request $request)
     {
         $limit = $request->input('limit');
         if (is_numeric($limit) !== true || $limit < 1 || $limit > 100) {
             $limit = 20;
         }
 
-        if (is_null($country_code) !== true) {
-            $asns = ASN::where('counrty_code', strtoupper($country_code))->paginate($limit);
-        } else {
-            $asns = ASN::paginate($limit);
-        }
+        $asns = ASN::paginate($limit);
 
         foreach ($asns as $asn) {
             $asnData['asn']                  = $asn->asn;
@@ -423,7 +419,7 @@ class ApiV1Controller extends ApiBaseController
         $data['current_page']   = $asns->currentPage();
         $data['limit']          = $asns->perPage();
         $data['data']           = $output;
-        
+
         return $this->respond($data);
     }
 
@@ -470,7 +466,7 @@ class ApiV1Controller extends ApiBaseController
                 'order' => 'asc'
             ]]
         ];
-        
+
         $ipSort = [
             ['ip' => [
                 'order' => 'asc'
@@ -677,6 +673,55 @@ class ApiV1Controller extends ApiBaseController
         }
 
         return $this->sendData($data);
+    }
+
+    /*
+     * URI: /reports/countries
+     */
+    public function countriesReport()
+    {
+        $ipv4CidrCount = $this->ipUtils->IPv4cidrIpCount();
+        $countriesStats = [];
+
+        $allocatedAsns = $this->ipUtils->getAllocatedAsns();
+        $allocatedPrefixes = $this->ipUtils->getAllocatedPrefixes();
+        // Get all routes (BGP)
+
+        // Group ASNs
+        foreach ($allocatedAsns as $allocatedAsn) {
+            if (isset($countriesStats[$allocatedAsn->country_code]) !== true && is_null($allocatedAsn->country_code) !== true) {
+                $countriesStats[$allocatedAsn->country_code]['country_code'] = $allocatedAsn->country_code;
+                $countriesStats[$allocatedAsn->country_code]['allocated_asn_count'] = 0;
+                $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_prefix_count'] = 0;
+                $countriesStats[$allocatedAsn->country_code]['allocated_ipv6_prefix_count'] = 0;
+                $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_ip_count'] = 0;
+            }
+
+            if (is_null($allocatedAsn->country_code) !== true) {
+                $countriesStats[$allocatedAsn->country_code]['allocated_asn_count'] += 1;
+            }
+        }
+
+        foreach ($allocatedPrefixes as $allocatedPrefix) {
+            if (isset($countriesStats[$allocatedPrefix->country_code]) !== true && is_null($allocatedPrefix->country_code) !== true) {
+                $countriesStats[$allocatedPrefix->country_code]['country_code'] = $allocatedPrefix->country_code;
+                $countriesStats[$allocatedPrefix->country_code]['allocated_asn_count'] = 0;
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_prefix_count'] = 0;
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv6_prefix_count'] = 0;
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] = 0;
+            }
+
+            if (is_null($allocatedAsn->country_code) !== true) {
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv' . $allocatedPrefix->ip_version . '_prefix_count'] += 1;
+            }
+
+            if ($allocatedPrefix->ip_version == 4 && isset($ipv4CidrCount[$allocatedPrefix->cidr]) === true) {
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] += $ipv4CidrCount[$allocatedPrefix->cidr];
+            }
+        }
+
+        $countriesStats = collect(array_values($countriesStats));
+        return $this->sendData($countriesStats);
     }
 
     /*

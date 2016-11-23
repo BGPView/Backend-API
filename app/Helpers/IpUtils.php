@@ -775,4 +775,105 @@ class IpUtils
 
         return $startIp . '/' . $cidrSize;
     }
+
+    public function getAllocatedAsns()
+    {
+        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
+
+        $allocatedAsns = [];
+        $params = [
+            'search_type' => 'scan',
+            'scroll' => '30s',
+            'size' => 10000,
+            'index' => 'rir_allocations',
+            'type'  => 'asns',
+        ];
+
+        $docs = $client->search($params);
+        $scroll_id = $docs['_scroll_id'];
+
+        while (true) {
+            $response = $client->scroll(
+                array(
+                    "scroll_id" => $scroll_id,
+                    "scroll" => "30s"
+                )
+            );
+
+            if (count($response['hits']['hits']) > 0) {
+                $results = $this->cleanEsResults($response);
+                $allocatedAsns = array_merge($allocatedAsns, $results);
+
+                // Get new scroll_id
+                $scroll_id = $response['_scroll_id'];
+            } else {
+                // All done scrolling over data
+                break;
+            }
+        }
+
+        return collect($allocatedAsns);
+    }
+
+    public function getAllocatedPrefixes($ipVersion = null)
+    {
+        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
+
+        $rirPrefixes = [];
+        // Get all allocated IP prefixes
+        $params = [
+            'search_type' => 'scan',
+            'scroll' => '30s',
+            'size' => 10000,
+            'index' => 'rir_allocations',
+            'type'  => 'prefixes',
+            'body' => [
+                'filter' => [
+                    'bool' => [
+                        'should' => [
+                            [
+                                'match' => [
+                                    'status' => 'allocated',
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'status' => 'assigned',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        if (is_null($ipVersion) !== true) {
+            $params['body']['filter']['bool']['must'][] = ['match' => ['ip_version' => $ipVersion]];
+        }
+
+        $docs = $client->search($params);
+        $scroll_id = $docs['_scroll_id'];
+
+        while (true) {
+            $response = $client->scroll(
+                array(
+                    "scroll_id" => $scroll_id,
+                    "scroll" => "30s"
+                )
+            );
+
+            if (count($response['hits']['hits']) > 0) {
+                $results = $this->cleanEsResults($response);
+                $rirPrefixes = array_merge($rirPrefixes, $results);
+
+                // Get new scroll_id
+                $scroll_id = $response['_scroll_id'];
+            } else {
+                // All done scrolling over data
+                break;
+            }
+        }
+
+        return collect($rirPrefixes);
+    }
 }
