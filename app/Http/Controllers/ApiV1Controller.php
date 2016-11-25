@@ -4,14 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\ASN;
 use App\Models\IPv4BgpPrefix;
+use App\Models\IPv4Peer;
 use App\Models\IPv4PrefixWhois;
 use App\Models\IPv6BgpPrefix;
+use App\Models\IPv6Peer;
 use App\Models\IPv6PrefixWhois;
 use App\Models\IX;
 use App\Models\IXMember;
 use App\Services\Dns;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Pdp\Parser;
@@ -717,6 +718,91 @@ class ApiV1Controller extends ApiBaseController
 
         $countriesStats = collect(array_values($countriesStats));
         return $this->sendData($countriesStats);
+    }
+
+    /*
+     * URI: /reports/countries/{country_code}
+     */
+    public function countryReport($country_code)
+    {
+        $asnData       = [];
+        $allocatedAsns = $this->ipUtils->getAllocatedAsns($country_code);
+
+        // Sort out the ASN keys
+        foreach ($allocatedAsns as $allocatedAsn) {
+            $asnData[$allocatedAsn->asn] = [
+                'asn'            => $allocatedAsn->asn,
+                'date_allocated' => $allocatedAsn->date_allocated,
+            ];
+        }
+
+        $asnArray = array_keys($asnData);
+
+        $asnMetas = ASN::whereIn('asn', $asnArray)->get();
+        foreach ($asnMetas as $asnMeta) {
+            $asnData[$asnMeta->asn]['name']        = $asnMeta->name;
+            $asnData[$asnMeta->asn]['description'] = $asnMeta->description;
+        }
+
+        $ipv4Prefixes = IPv4BgpPrefix::select(DB::raw('asn, COUNT(asn) as count'))->whereIn('asn', $asnArray)->groupBy('asn')->get();
+        foreach ($ipv4Prefixes as $ipv4Prefix) {
+            $asnData[$ipv4Prefix->asn]['ipv4_prefixes'] = $ipv4Prefix->count;
+        }
+
+        $ipv6Prefixes = IPv4BgpPrefix::select(DB::raw('asn, COUNT(asn) as count'))->whereIn('asn', $asnArray)->groupBy('asn')->get();
+        foreach ($ipv6Prefixes as $ipv6Prefix) {
+            $asnData[$ipv4Prefix->asn]['ipv6_prefixes'] = $ipv6Prefix->count;
+        }
+
+        $seenIpv4Peers = [];
+        $ipv4Peers = IPv4Peer::select(DB::raw('asn_1 as asn, asn_2 as peer, COUNT(asn_1) as count'))->whereIn('asn_1', $asnArray)->groupBy('asn_1')->get();
+        foreach ($ipv4Peers as $ipv4Peer) {
+            if (isset($seenIpv4Peers[$ipv4Peer->asn][$ipv4Peer->peer]) === true) {
+                continue;
+            }
+
+            $asnData[$ipv4Peer->asn]['ipv4_peers'] = $ipv4Peer->count;
+            $seenIpv4Peers[$ipv4Peer->asn][$ipv4Peer->peer] = true;
+        }
+        $ipv4Peers = IPv4Peer::select(DB::raw('asn_2 as asn, asn_1 as peer, COUNT(asn_2) as count'))->whereIn('asn_2', $asnArray)->groupBy('asn_2')->get();
+        foreach ($ipv4Peers as $ipv4Peer) {
+            if (isset($seenIpv4Peers[$ipv4Peer->asn][$ipv4Peer->peer]) === true) {
+                continue;
+            }
+
+            if (isset($asnData[$ipv4Peer->asn]['ipv4_peers']) !== true) {
+                $asnData[$ipv4Peer->asn]['ipv4_peers'] = 0;
+            }
+
+            $asnData[$ipv4Peer->asn]['ipv4_peers'] += $ipv4Peer->count;
+            $seenIpv4Peers[$ipv4Peer->asn][$ipv4Peer->peer] = true;
+        }
+
+        $seenIpv6Peers = [];
+        $ipv6Peers = IPv6Peer::select(DB::raw('asn_1 as asn, asn_2 as peer, COUNT(asn_1) as count'))->whereIn('asn_1', $asnArray)->groupBy('asn_1')->get();
+        foreach ($ipv6Peers as $ipv6Peer) {
+            if (isset($seenIpv4Peers[$ipv6Peer->asn][$ipv6Peer->peer]) === true) {
+                continue;
+            }
+
+            $asnData[$ipv6Peer->asn]['ipv6_peers'] = $ipv6Peer->count;
+        }
+        $ipv6Peers = IPv6Peer::select(DB::raw('asn_2 as asn, asn_1 as peer, COUNT(asn_2) as count'))->whereIn('asn_2', $asnArray)->groupBy('asn_2')->get();
+        foreach ($ipv6Peers as $ipv6Peer) {
+            if (isset($seenIpv6Peers[$ipv6Peer->asn][$ipv6Peer->peer]) === true) {
+                continue;
+            }
+
+            if (isset($asnData[$ipv6Peer->asn]['ipv6_peers']) !== true) {
+                $asnData[$ipv6Peer->asn]['ipv6_peers'] = 0;
+            }
+
+            $asnData[$ipv6Peer->asn]['ipv6_peers'] += $ipv6Peer->count;
+        }
+
+
+
+        return $this->sendData($asnData);
     }
 
     /*

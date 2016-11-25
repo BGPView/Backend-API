@@ -44,6 +44,7 @@ Route::group(['middleware' => ['api']], function () {
     // Reporting Routes
     Route::group(['prefix' => 'reports'], function () {
         Route::get('countries', ['as' => 'reports.countries', 'uses' => 'ApiV1Controller@countriesReport']);
+        Route::get('countries/{country_code}', ['as' => 'reports.country', 'uses' => 'ApiV1Controller@countryReport']);
     });
 
     // Misc Routes (Internal Use)

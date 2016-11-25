@@ -776,7 +776,7 @@ class IpUtils
         return $startIp . '/' . $cidrSize;
     }
 
-    public function getAllocatedAsns()
+    public function getAllocatedAsns($country_code = null)
     {
         $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
 
@@ -788,6 +788,11 @@ class IpUtils
             'index' => 'rir_allocations',
             'type'  => 'asns',
         ];
+
+        if (is_null($country_code) !== true) {
+            $params['body']['query']['match']['country_code'] = $country_code;
+        }
+
 
         $docs = $client->search($params);
         $scroll_id = $docs['_scroll_id'];
