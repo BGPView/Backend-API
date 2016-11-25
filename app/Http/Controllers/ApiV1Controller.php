@@ -732,6 +732,8 @@ class ApiV1Controller extends ApiBaseController
         foreach ($allocatedAsns as $allocatedAsn) {
             $asnData[$allocatedAsn->asn] = [
                 'asn'            => $allocatedAsn->asn,
+                'name'           => null,
+                'description'    => null,
                 'date_allocated' => $allocatedAsn->date_allocated,
 
                 // Setting the default stats
