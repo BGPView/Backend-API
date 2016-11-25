@@ -801,7 +801,7 @@ class ApiV1Controller extends ApiBaseController
             $asnData[$ipv6Peer->asn]['ipv6_peers'] += $ipv6Peer->count;
         }
 
-        return $this->sendData($asnData);
+        return $this->sendData(array_values($asnData));
     }
 
     /*
