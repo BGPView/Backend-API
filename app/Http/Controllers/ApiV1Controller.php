@@ -733,6 +733,13 @@ class ApiV1Controller extends ApiBaseController
             $asnData[$allocatedAsn->asn] = [
                 'asn'            => $allocatedAsn->asn,
                 'date_allocated' => $allocatedAsn->date_allocated,
+
+                // Setting the default stats
+                'ipv4_prefixes'  => 0,
+                'ipv6_prefixes'  => 0,
+                'ipv4_peers'     => 0,
+                'ipv6_peers'     => 0,
+
             ];
         }
 
@@ -749,19 +756,19 @@ class ApiV1Controller extends ApiBaseController
             $asnData[$ipv4Prefix->asn]['ipv4_prefixes'] = $ipv4Prefix->count;
         }
 
-        $ipv6Prefixes = IPv4BgpPrefix::select(DB::raw('asn, COUNT(asn) as count'))->whereIn('asn', $asnArray)->groupBy('asn')->get();
+        $ipv6Prefixes = IPv6BgpPrefix::select(DB::raw('asn, COUNT(asn) as count'))->whereIn('asn', $asnArray)->groupBy('asn')->get();
         foreach ($ipv6Prefixes as $ipv6Prefix) {
-            $asnData[$ipv4Prefix->asn]['ipv6_prefixes'] = $ipv6Prefix->count;
+            $asnData[$ipv6Prefix->asn]['ipv6_prefixes'] = $ipv6Prefix->count;
         }
 
         $seenIpv4Peers = [];
-        $ipv4Peers = IPv4Peer::select(DB::raw('asn_1 as asn, asn_2 as peer, COUNT(asn_1) as count'))->whereIn('asn_1', $asnArray)->groupBy('asn_1')->get();
+        $ipv4Peers     = IPv4Peer::select(DB::raw('asn_1 as asn, asn_2 as peer, COUNT(asn_1) as count'))->whereIn('asn_1', $asnArray)->groupBy('asn_1')->get();
         foreach ($ipv4Peers as $ipv4Peer) {
             if (isset($seenIpv4Peers[$ipv4Peer->asn][$ipv4Peer->peer]) === true) {
                 continue;
             }
 
-            $asnData[$ipv4Peer->asn]['ipv4_peers'] = $ipv4Peer->count;
+            $asnData[$ipv4Peer->asn]['ipv4_peers'] += $ipv4Peer->count;
             $seenIpv4Peers[$ipv4Peer->asn][$ipv4Peer->peer] = true;
         }
         $ipv4Peers = IPv4Peer::select(DB::raw('asn_2 as asn, asn_1 as peer, COUNT(asn_2) as count'))->whereIn('asn_2', $asnArray)->groupBy('asn_2')->get();
@@ -770,22 +777,18 @@ class ApiV1Controller extends ApiBaseController
                 continue;
             }
 
-            if (isset($asnData[$ipv4Peer->asn]['ipv4_peers']) !== true) {
-                $asnData[$ipv4Peer->asn]['ipv4_peers'] = 0;
-            }
-
             $asnData[$ipv4Peer->asn]['ipv4_peers'] += $ipv4Peer->count;
             $seenIpv4Peers[$ipv4Peer->asn][$ipv4Peer->peer] = true;
         }
 
         $seenIpv6Peers = [];
-        $ipv6Peers = IPv6Peer::select(DB::raw('asn_1 as asn, asn_2 as peer, COUNT(asn_1) as count'))->whereIn('asn_1', $asnArray)->groupBy('asn_1')->get();
+        $ipv6Peers     = IPv6Peer::select(DB::raw('asn_1 as asn, asn_2 as peer, COUNT(asn_1) as count'))->whereIn('asn_1', $asnArray)->groupBy('asn_1')->get();
         foreach ($ipv6Peers as $ipv6Peer) {
             if (isset($seenIpv4Peers[$ipv6Peer->asn][$ipv6Peer->peer]) === true) {
                 continue;
             }
 
-            $asnData[$ipv6Peer->asn]['ipv6_peers'] = $ipv6Peer->count;
+            $asnData[$ipv6Peer->asn]['ipv6_peers'] += $ipv6Peer->count;
         }
         $ipv6Peers = IPv6Peer::select(DB::raw('asn_2 as asn, asn_1 as peer, COUNT(asn_2) as count'))->whereIn('asn_2', $asnArray)->groupBy('asn_2')->get();
         foreach ($ipv6Peers as $ipv6Peer) {
@@ -793,14 +796,8 @@ class ApiV1Controller extends ApiBaseController
                 continue;
             }
 
-            if (isset($asnData[$ipv6Peer->asn]['ipv6_peers']) !== true) {
-                $asnData[$ipv6Peer->asn]['ipv6_peers'] = 0;
-            }
-
             $asnData[$ipv6Peer->asn]['ipv6_peers'] += $ipv6Peer->count;
         }
-
-
 
         return $this->sendData($asnData);
     }
