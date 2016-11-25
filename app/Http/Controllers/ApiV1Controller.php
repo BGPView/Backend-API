@@ -4,18 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\ASN;
 use App\Models\IPv4BgpPrefix;
-use App\Models\IPv4Peer;
 use App\Models\IPv4PrefixWhois;
 use App\Models\IPv6BgpPrefix;
-use App\Models\IPv6Peer;
 use App\Models\IPv6PrefixWhois;
 use App\Models\IX;
 use App\Models\IXMember;
 use App\Services\Dns;
 use Illuminate\Http\Request;
 
-use App\Http\Requests;
-use App\Http\Controllers\ApiBaseController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Pdp\Parser;
