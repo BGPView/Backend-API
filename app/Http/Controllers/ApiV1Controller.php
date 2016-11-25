@@ -707,7 +707,7 @@ class ApiV1Controller extends ApiBaseController
                 $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count']     = 0;
             }
 
-            if (is_null($allocatedAsn->country_code) !== true) {
+            if (is_null($allocatedPrefix->country_code) !== true) {
                 $countriesStats[$allocatedPrefix->country_code]['allocated_ipv' . $allocatedPrefix->ip_version . '_prefix_count'] += 1;
             }
 
