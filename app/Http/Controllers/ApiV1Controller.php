@@ -37,7 +37,7 @@ class ApiV1Controller extends ApiBaseController
         // lets only use the AS number.
         $as_number = $this->ipUtils->normalizeInput($as_number);
 
-        $asnData = ASN::with('emails')->where('asn', $as_number)->first();
+        $asnData    = ASN::with('emails')->where('asn', $as_number)->first();
         $allocation = $this->ipUtils->getAllocationEntry($as_number);
 
         if (is_null($asnData)) {
@@ -45,23 +45,23 @@ class ApiV1Controller extends ApiBaseController
             return $this->respond($data);
         }
 
-        $output['asn']  = $asnData->asn;
-        $output['name'] = $asnData->name;
-        $output['description_short'] = $asnData->description;
-        $output['description_full']  = $asnData->description_full;
-        $output['country_code']         = empty($asnData->counrty_code) !== true ? $asnData->counrty_code : null;
-        $output['website']              = $asnData->website;
-        $output['email_contacts']       = $asnData->email_contacts;
-        $output['abuse_contacts']       = $asnData->abuse_contacts;
-        $output['looking_glass']        = $asnData->looking_glass;
-        $output['traffic_estimation']   = $asnData->traffic_estimation;
-        $output['traffic_ratio']        = $asnData->traffic_ratio;
-        $output['owner_address']        = $asnData->owner_address;
+        $output['asn']                = $asnData->asn;
+        $output['name']               = $asnData->name;
+        $output['description_short']  = $asnData->description;
+        $output['description_full']   = $asnData->description_full;
+        $output['country_code']       = empty($asnData->counrty_code) !== true ? $asnData->counrty_code : null;
+        $output['website']            = $asnData->website;
+        $output['email_contacts']     = $asnData->email_contacts;
+        $output['abuse_contacts']     = $asnData->abuse_contacts;
+        $output['looking_glass']      = $asnData->looking_glass;
+        $output['traffic_estimation'] = $asnData->traffic_estimation;
+        $output['traffic_ratio']      = $asnData->traffic_ratio;
+        $output['owner_address']      = $asnData->owner_address;
 
-        $output['rir_allocation']['rir_name']           = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
-        $output['rir_allocation']['country_code']       = isset($allocation->country_code) ? $allocation->country_code : null;
-        $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
-        $output['rir_allocation']['allocation_status']  = isset($allocation->status) ? $allocation->status : 'unknown';
+        $output['rir_allocation']['rir_name']          = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
+        $output['rir_allocation']['country_code']      = isset($allocation->country_code) ? $allocation->country_code : null;
+        $output['rir_allocation']['date_allocated']    = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
+        $output['rir_allocation']['allocation_status'] = isset($allocation->status) ? $allocation->status : 'unknown';
 
         if ($request->has('with_ixs') === true) {
             $output['internet_exchanges'] = IXMember::getMembers($asnData->asn);
@@ -82,7 +82,7 @@ class ApiV1Controller extends ApiBaseController
             $output['raw_whois'] = $asnData->raw_whois;
         }
 
-        $output['date_updated']        = (string) $asnData->updated_at;
+        $output['date_updated'] = (string) $asnData->updated_at;
         return $this->sendData($output);
     }
 
@@ -91,8 +91,8 @@ class ApiV1Controller extends ApiBaseController
      */
     public function asnPeers($as_number)
     {
-        $as_number  = $this->ipUtils->normalizeInput($as_number);
-        $peers      = ASN::getPeers($as_number);
+        $as_number = $this->ipUtils->normalizeInput($as_number);
+        $peers     = ASN::getPeers($as_number);
 
         return $this->sendData($peers);
     }
@@ -102,8 +102,8 @@ class ApiV1Controller extends ApiBaseController
      */
     public function asnIxs($as_number)
     {
-        $as_number  = $this->ipUtils->normalizeInput($as_number);
-        $ixs        = IXMember::getMembers($as_number);
+        $as_number = $this->ipUtils->normalizeInput($as_number);
+        $ixs       = IXMember::getMembers($as_number);
 
         return $this->sendData($ixs);
     }
@@ -113,8 +113,8 @@ class ApiV1Controller extends ApiBaseController
      */
     public function asnPrefixes($as_number)
     {
-        $as_number  = $this->ipUtils->normalizeInput($as_number);
-        $prefixes   = ASN::getPrefixes($as_number);
+        $as_number = $this->ipUtils->normalizeInput($as_number);
+        $prefixes  = ASN::getPrefixes($as_number);
 
         return $this->sendData($prefixes);
     }
@@ -124,8 +124,8 @@ class ApiV1Controller extends ApiBaseController
      */
     public function asnUpstreams($as_number)
     {
-        $as_number  = $this->ipUtils->normalizeInput($as_number);
-        $upstreams  = ASN::getUpstreams($as_number);
+        $as_number = $this->ipUtils->normalizeInput($as_number);
+        $upstreams = ASN::getUpstreams($as_number);
 
         return $this->sendData($upstreams);
     }
@@ -135,8 +135,8 @@ class ApiV1Controller extends ApiBaseController
      */
     public function asnDownstreams($as_number)
     {
-        $as_number  = $this->ipUtils->normalizeInput($as_number);
-        $downstreams  = ASN::getDownstreams($as_number);
+        $as_number   = $this->ipUtils->normalizeInput($as_number);
+        $downstreams = ASN::getDownstreams($as_number);
 
         return $this->sendData($downstreams);
     }
@@ -169,7 +169,7 @@ class ApiV1Controller extends ApiBaseController
 
             $prefixWhois = $prefix;
         } else {
-            $prefix = $prefixes[0];
+            $prefix      = $prefixes[0];
             $prefixWhois = $prefixWhoisClass::where('ip', $prefix->ip)->where('cidr', $prefix->cidr)->first();
         }
 
@@ -178,15 +178,15 @@ class ApiV1Controller extends ApiBaseController
             return $this->respond($data);
         }
 
-        $allocation = $this->ipUtils->getAllocationEntry($prefix->ip, $prefix->cidr);
-        $geoip = $this->ipUtils->geoip($prefix->ip);
+        $allocation      = $this->ipUtils->getAllocationEntry($prefix->ip, $prefix->cidr);
+        $geoip           = $this->ipUtils->geoip($prefix->ip);
         $relatedPrefixes = $this->ipUtils->getRealatedPrefixes($prefix->ip, $prefix->cidr);
 
-        $output['prefix']           = $prefix->ip . '/' . $prefix->cidr;
-        $output['ip']               = $prefix->ip;
-        $output['cidr']             = $prefix->cidr;
-        $output['asns']             = [];
-        $asnArray                   = [];
+        $output['prefix'] = $prefix->ip . '/' . $prefix->cidr;
+        $output['ip']     = $prefix->ip;
+        $output['cidr']   = $prefix->cidr;
+        $output['asns']   = [];
+        $asnArray         = [];
         foreach ($prefixes as $prefixData) {
             if (isset($asnArray[$prefixData->asn]) === true) {
                 // Make sure we dont have said upstream already in our array
@@ -199,59 +199,59 @@ class ApiV1Controller extends ApiBaseController
         }
 
         foreach ($asnArray as $baseAsn => $upstreamArray) {
-            $asn = ASN::where('asn', $baseAsn)->first();
-            $asnData['asn'] = $baseAsn;
-            $asnData['name'] = $asn->name;
-            $asnData['description'] = $asn->description;
-            $asnData['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
+            $asn                         = ASN::where('asn', $baseAsn)->first();
+            $asnData['asn']              = $baseAsn;
+            $asnData['name']             = $asn->name;
+            $asnData['description']      = $asn->description;
+            $asnData['country_code']     = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
             $asnData['prefix_upstreams'] = [];
 
             foreach ($upstreamArray as $upstreamAsn) {
-                $asn = ASN::where('asn', $upstreamAsn)->first();
-                $upstreamAsnData['asn'] = $upstreamAsn;
-                $upstreamAsnData['name'] = isset($asn->name) ? $asn->name : null;
-                $upstreamAsnData['description'] = isset($asn->description) ? $asn->description : null;
+                $asn                             = ASN::where('asn', $upstreamAsn)->first();
+                $upstreamAsnData['asn']          = $upstreamAsn;
+                $upstreamAsnData['name']         = isset($asn->name) ? $asn->name : null;
+                $upstreamAsnData['description']  = isset($asn->description) ? $asn->description : null;
                 $upstreamAsnData['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
-                
+
                 $asnData['prefix_upstreams'][] = $upstreamAsnData;
             }
 
             $output['asns'][] = $asnData;
         }
 
-        $output['name']             = $prefixWhois ? $prefixWhois->name : null;
-        $output['description_short']= $prefixWhois ? $prefixWhois->description : null;
-        $output['description_full'] = $prefixWhois ? $prefixWhois->description_full : null;
-        $output['email_contacts']   = $prefixWhois ? $prefixWhois->email_contacts : null;
-        $output['abuse_contacts']   = $prefixWhois ? $prefixWhois->abuse_contacts : null;
-        $output['owner_address']    = $prefixWhois ? $prefixWhois->owner_address : null;
+        $output['name']              = $prefixWhois ? $prefixWhois->name : null;
+        $output['description_short'] = $prefixWhois ? $prefixWhois->description : null;
+        $output['description_full']  = $prefixWhois ? $prefixWhois->description_full : null;
+        $output['email_contacts']    = $prefixWhois ? $prefixWhois->email_contacts : null;
+        $output['abuse_contacts']    = $prefixWhois ? $prefixWhois->abuse_contacts : null;
+        $output['owner_address']     = $prefixWhois ? $prefixWhois->owner_address : null;
 
         $output['country_codes']['whois_country_code']          = $prefixWhois ? $prefixWhois->counrty_code : null;
         $output['country_codes']['rir_allocation_country_code'] = $allocation ? $allocation->country_code : null;
         $output['country_codes']['maxmind_country_code']        = $geoip ? $geoip->country->isoCode : null;
 
-        $output['rir_allocation']['rir_name']           = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
-        $output['rir_allocation']['country_code']       = isset($allocation->country_code) ? $allocation->country_code : null;
-        $output['rir_allocation']['ip']                 = isset($allocation->ip) ? $allocation->ip : null;
-        $output['rir_allocation']['cidr']               = isset($allocation->cidr) ? $allocation->cidr : null;
-        $output['rir_allocation']['prefix']             = isset($allocation->ip) && isset($allocation->cidr) ? $allocation->ip . '/' . $allocation->cidr : null;
-        $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
-        $output['rir_allocation']['allocation_status']  = isset($allocation->status) ? $allocation->status : 'unknown';
+        $output['rir_allocation']['rir_name']          = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
+        $output['rir_allocation']['country_code']      = isset($allocation->country_code) ? $allocation->country_code : null;
+        $output['rir_allocation']['ip']                = isset($allocation->ip) ? $allocation->ip : null;
+        $output['rir_allocation']['cidr']              = isset($allocation->cidr) ? $allocation->cidr : null;
+        $output['rir_allocation']['prefix']            = isset($allocation->ip) && isset($allocation->cidr) ? $allocation->ip . '/' . $allocation->cidr : null;
+        $output['rir_allocation']['date_allocated']    = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
+        $output['rir_allocation']['allocation_status'] = isset($allocation->status) ? $allocation->status : 'unknown';
 
-        $output['maxmind']['country_code']  = $geoip ? $geoip->country->isoCode : null;
-        $output['maxmind']['city']          = $geoip ? $geoip->city->name : null;
+        $output['maxmind']['country_code'] = $geoip ? $geoip->country->isoCode : null;
+        $output['maxmind']['city']         = $geoip ? $geoip->city->name : null;
 
         $output['related_prefixes'] = [];
         foreach ($relatedPrefixes as $relatedPrefix) {
             $relatedPrefixWhois = $relatedPrefix->whois();
 
-            $relatedPrefixData['prefix']    = $relatedPrefix->ip . '/' . $relatedPrefix->cidr;
-            $relatedPrefixData['ip']        = $relatedPrefix->ip;
-            $relatedPrefixData['cidr']      = $relatedPrefix->cidr;
+            $relatedPrefixData['prefix'] = $relatedPrefix->ip . '/' . $relatedPrefix->cidr;
+            $relatedPrefixData['ip']     = $relatedPrefix->ip;
+            $relatedPrefixData['cidr']   = $relatedPrefix->cidr;
 
-            $relatedPrefixData['name']          = $relatedPrefixWhois ? $relatedPrefixWhois->name : null;
-            $relatedPrefixData['description']   = $relatedPrefixWhois ? $relatedPrefixWhois->description : null;
-            $relatedPrefixData['country_code']  = $relatedPrefixWhois ? $relatedPrefixWhois->counrty_code : null;
+            $relatedPrefixData['name']         = $relatedPrefixWhois ? $relatedPrefixWhois->name : null;
+            $relatedPrefixData['description']  = $relatedPrefixWhois ? $relatedPrefixWhois->description : null;
+            $relatedPrefixData['country_code'] = $relatedPrefixWhois ? $relatedPrefixWhois->counrty_code : null;
 
             $output['related_prefixes'][] = $relatedPrefixData;
         }
@@ -264,7 +264,7 @@ class ApiV1Controller extends ApiBaseController
             $output['dns'] = $this->ipUtils->getPrefixDns($output['prefix']);
         }
 
-        $output['date_updated']   = (string) ($prefixWhois ? $prefixWhois->updated_at : $prefix->updated_at);
+        $output['date_updated'] = (string) ($prefixWhois ? $prefixWhois->updated_at : $prefix->updated_at);
 
         return $this->sendData($output);
     }
@@ -281,8 +281,8 @@ class ApiV1Controller extends ApiBaseController
     }
 
     /*
-    * URI: /ip/{ip}
-    */
+     * URI: /ip/{ip}
+     */
     public function ip($ip)
     {
         // Check if the IP is in bogon range
@@ -294,57 +294,57 @@ class ApiV1Controller extends ApiBaseController
             $allocation = null;
             $ptrRecord  = null;
 
-            $rirIp      = $bogonParts[0];
-            $rirCidr    = $bogonParts[1];
-            $rirPrefix  = $bogon;
+            $rirIp     = $bogonParts[0];
+            $rirCidr   = $bogonParts[1];
+            $rirPrefix = $bogon;
         } else {
             $prefixes   = $this->ipUtils->getBgpPrefixes($ip);
             $geoip      = $this->ipUtils->geoip($ip);
             $allocation = $this->ipUtils->getAllocationEntry($ip);
             $ptrRecord  = $this->dns->getPtr($ip);
 
-            $rirIp      = isset($allocation->ip) ? $allocation->ip : null;
-            $rirCidr    = isset($allocation->cidr) ? $allocation->cidr : null;
-            $rirPrefix  = isset($allocation->ip) && isset($allocation->cidr) ? $allocation->ip . '/' . $allocation->cidr : null;
+            $rirIp     = isset($allocation->ip) ? $allocation->ip : null;
+            $rirCidr   = isset($allocation->cidr) ? $allocation->cidr : null;
+            $rirPrefix = isset($allocation->ip) && isset($allocation->cidr) ? $allocation->ip . '/' . $allocation->cidr : null;
         }
 
-        $output['ip']           = $ip;
-        $output['ptr_record']   = $ptrRecord;
+        $output['ip']         = $ip;
+        $output['ptr_record'] = $ptrRecord;
 
         $output['prefixes'] = [];
         foreach ($prefixes as $prefix) {
             $prefixWhois = $prefix->whois;
-            $asn = ASN::where('asn',$prefix->asn)->first();
+            $asn         = ASN::where('asn', $prefix->asn)->first();
 
-            $prefixOutput['prefix']         = $prefix->ip . '/' . $prefix->cidr;
-            $prefixOutput['ip']             = $prefix->ip;
-            $prefixOutput['cidr']           = $prefix->cidr;
-            $prefixOutput['asn']['asn']     = $prefix->asn;
-            $prefixOutput['asn']['name']    = $asn->name;
-            $prefixOutput['asn']['description']     = $asn->description;
-            $prefixOutput['asn']['country_code']    = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
-            $prefixOutput['name']           = isset($prefixWhois->name) ? $prefixWhois->name : null;
-            $prefixOutput['description']    = isset($prefixWhois->description) ? $prefixWhois->description : null;
-            $prefixOutput['country_code']   = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
+            $prefixOutput['prefix']              = $prefix->ip . '/' . $prefix->cidr;
+            $prefixOutput['ip']                  = $prefix->ip;
+            $prefixOutput['cidr']                = $prefix->cidr;
+            $prefixOutput['asn']['asn']          = $prefix->asn;
+            $prefixOutput['asn']['name']         = $asn->name;
+            $prefixOutput['asn']['description']  = $asn->description;
+            $prefixOutput['asn']['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
+            $prefixOutput['name']                = isset($prefixWhois->name) ? $prefixWhois->name : null;
+            $prefixOutput['description']         = isset($prefixWhois->description) ? $prefixWhois->description : null;
+            $prefixOutput['country_code']        = isset($prefixWhois->counrty_code) ? $prefixWhois->counrty_code : null;
 
-            $output['prefixes'][]  = $prefixOutput;
+            $output['prefixes'][] = $prefixOutput;
         }
 
         // Lets sort out the prefix array from smallest to largest
-        usort($output['prefixes'], function($a, $b) {
+        usort($output['prefixes'], function ($a, $b) {
             return $b['cidr'] - $a['cidr'];
         });
 
-        $output['rir_allocation']['rir_name']           = isset($allocation->rir_name) && empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
-        $output['rir_allocation']['country_code']       = isset($allocation->country_code) ? $allocation->country_code : null;
-        $output['rir_allocation']['ip']                 = $rirIp;
-        $output['rir_allocation']['cidr']               = $rirCidr;
-        $output['rir_allocation']['prefix']             = $rirPrefix;
-        $output['rir_allocation']['date_allocated']     = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00': null;
-        $output['rir_allocation']['allocation_status']  = isset($allocation->status) ? $allocation->status : 'unknown';
+        $output['rir_allocation']['rir_name']          = isset($allocation->rir_name) && empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
+        $output['rir_allocation']['country_code']      = isset($allocation->country_code) ? $allocation->country_code : null;
+        $output['rir_allocation']['ip']                = $rirIp;
+        $output['rir_allocation']['cidr']              = $rirCidr;
+        $output['rir_allocation']['prefix']            = $rirPrefix;
+        $output['rir_allocation']['date_allocated']    = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
+        $output['rir_allocation']['allocation_status'] = isset($allocation->status) ? $allocation->status : 'unknown';
 
-        $output['maxmind']['country_code']  = $geoip ? $geoip->country->isoCode : null;
-        $output['maxmind']['city']          = $geoip ? $geoip->city->name : null;
+        $output['maxmind']['country_code'] = $geoip ? $geoip->country->isoCode : null;
+        $output['maxmind']['city']         = $geoip ? $geoip->city->name : null;
 
         return $this->sendData($output);
     }
@@ -377,7 +377,7 @@ class ApiV1Controller extends ApiBaseController
             $asnInfo = $member->asn_info;
 
             $memberInfo['asn']          = $member->asn;
-            $memberInfo['name']         = $asnInfo ? $asnInfo->name: null;
+            $memberInfo['name']         = $asnInfo ? $asnInfo->name : null;
             $memberInfo['description']  = $asnInfo ? $asnInfo->description : null;
             $memberInfo['country_code'] = $asnInfo ? $asnInfo->counrty_code : null;
             $memberInfo['ipv4_address'] = $member->ipv4_address;
@@ -388,7 +388,7 @@ class ApiV1Controller extends ApiBaseController
         }
 
         $output['members_count'] = count($members);
-        $output['members'] = $members;
+        $output['members']       = $members;
 
         return $this->sendData($output);
     }
@@ -406,19 +406,19 @@ class ApiV1Controller extends ApiBaseController
         $asns = ASN::paginate($limit);
 
         foreach ($asns as $asn) {
-            $asnData['asn']                  = $asn->asn;
-            $asnData['name']                 = $asn->name;
-            $asnData['description_short']    = $asn->description;
-            $asnData['country_code']         = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
+            $asnData['asn']               = $asn->asn;
+            $asnData['name']              = $asn->name;
+            $asnData['description_short'] = $asn->description;
+            $asnData['country_code']      = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
 
             $output[] = $asnData;
         }
 
-        $data = $this->makeStatus();
-        $data['results_count']  = $asns->total();
-        $data['current_page']   = $asns->currentPage();
-        $data['limit']          = $asns->perPage();
-        $data['data']           = $output;
+        $data                  = $this->makeStatus();
+        $data['results_count'] = $asns->total();
+        $data['current_page']  = $asns->currentPage();
+        $data['limit']         = $asns->perPage();
+        $data['data']          = $output;
 
         return $this->respond($data);
     }
@@ -435,105 +435,105 @@ class ApiV1Controller extends ApiBaseController
 
         $elasticQuery['filtered']['query'] = [
             'bool' => [
-                'should' => [
+                'should'               => [
                     ['wildcard' => [
                         'name' => [
-                            'value' => '*'.$queryTerm.'*',
+                            'value' => '*' . $queryTerm . '*',
                             'boost' => 2,
-                        ]
+                        ],
                     ]],
                     ['wildcard' => [
                         'description' => [
-                            'value' => '*'.$queryTerm.'*',
-                        ]
+                            'value' => '*' . $queryTerm . '*',
+                        ],
                     ]],
                     ['wildcard' => [
                         'name_full' => [
-                            'value' => '*'.$queryTerm.'*',
-                        ]
+                            'value' => '*' . $queryTerm . '*',
+                        ],
                     ]],
                     ['multi_match' => [
-                        'query' => $queryTerm,
-                        'fields' => ['asn^5']
+                        'query'  => $queryTerm,
+                        'fields' => ['asn^5'],
                     ]],
                 ],
                 'minimum_should_match' => 1,
-            ]
+            ],
         ];
 
         $asnSort = [
             ['asn' => [
-                'order' => 'asc'
-            ]]
+                'order' => 'asc',
+            ]],
         ];
 
         $ipSort = [
             ['ip' => [
-                'order' => 'asc'
-            ]]
+                'order' => 'asc',
+            ]],
         ];
 
-        $asns = ASN::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 100, $offset = null, $asnSort);
+        $asns         = ASN::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 100, $offset = null, $asnSort);
         $ipv4Prefixes = IPv4PrefixWhois::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 200, $offset = null, $ipSort);
         $ipv6Prefixes = IPv6PrefixWhois::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 200, $offset = null, $ipSort);
         $ixs          = IX::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 200, $offset = null, $ipSort);
 
         $data['asns'] = [];
         foreach ($asns as $asn) {
-            $asnData['asn']                 = $asn->asn;
-            $asnData['name']                = $asn->name;
-            $asnData['description']   = $asn->description;
-            $asnData['country_code']        = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
-            $asnData['email_contacts']      = $asn->email_contacts;
-            $asnData['abuse_contacts']      = $asn->abuse_contacts;
-            $asnData['rir_name']         = $asn->rir->name;
+            $asnData['asn']            = $asn->asn;
+            $asnData['name']           = $asn->name;
+            $asnData['description']    = $asn->description;
+            $asnData['country_code']   = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
+            $asnData['email_contacts'] = $asn->email_contacts;
+            $asnData['abuse_contacts'] = $asn->abuse_contacts;
+            $asnData['rir_name']       = $asn->rir->name;
 
             $data['asns'][] = $asnData;
         }
 
         $data['ipv4_prefixes'] = [];
         foreach ($ipv4Prefixes as $prefix) {
-            $prefixData['prefix']   = $prefix->ip . '/' . $prefix->cidr;
-            $prefixData['ip']       = $prefix->ip;
-            $prefixData['cidr']     = $prefix->cidr;
-            $prefixData['name']     = $prefix->name;
-            $prefixData['country_code']     = empty($prefix->counrty_code) !== true ? $prefix->counrty_code : null;
-            $prefixData['description']      = $prefix->description;
-            $prefixData['email_contacts']   = $prefix->email_contacts;
-            $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
-            $prefixData['rir_name']         = $prefix->rir->name;
-            $prefixData['parent_prefix']    = $prefix->parent_ip . '/' . $prefix->parent_cidr;
-            $prefixData['parent_ip']        = $prefix->parent_ip;
-            $prefixData['parent_cidr']      = $prefix->parent_cidr;
+            $prefixData['prefix']         = $prefix->ip . '/' . $prefix->cidr;
+            $prefixData['ip']             = $prefix->ip;
+            $prefixData['cidr']           = $prefix->cidr;
+            $prefixData['name']           = $prefix->name;
+            $prefixData['country_code']   = empty($prefix->counrty_code) !== true ? $prefix->counrty_code : null;
+            $prefixData['description']    = $prefix->description;
+            $prefixData['email_contacts'] = $prefix->email_contacts;
+            $prefixData['abuse_contacts'] = $prefix->abuse_contacts;
+            $prefixData['rir_name']       = $prefix->rir->name;
+            $prefixData['parent_prefix']  = $prefix->parent_ip . '/' . $prefix->parent_cidr;
+            $prefixData['parent_ip']      = $prefix->parent_ip;
+            $prefixData['parent_cidr']    = $prefix->parent_cidr;
 
             $data['ipv4_prefixes'][] = $prefixData;
         }
 
         $data['ipv6_prefixes'] = [];
         foreach ($ipv6Prefixes as $prefix) {
-            $prefixData['prefix']   = $prefix->ip . '/' . $prefix->cidr;
-            $prefixData['ip']       = $prefix->ip;
-            $prefixData['cidr']     = $prefix->cidr;
-            $prefixData['name']     = $prefix->name;
-            $prefixData['country_code']     = empty($prefix->counrty_code) !== true ? $prefix->counrty_code : null;
-            $prefixData['description']      = $prefix->description;
-            $prefixData['email_contacts']   = $prefix->email_contacts;
-            $prefixData['abuse_contacts']   = $prefix->abuse_contacts;
-            $prefixData['rir_name']         = $prefix->rir->name;
-            $prefixData['parent_prefix']    = $prefix->parent_ip . '/' . $prefix->parent_cidr;
-            $prefixData['parent_ip']        = $prefix->parent_ip;
-            $prefixData['parent_cidr']      = $prefix->parent_cidr;
+            $prefixData['prefix']         = $prefix->ip . '/' . $prefix->cidr;
+            $prefixData['ip']             = $prefix->ip;
+            $prefixData['cidr']           = $prefix->cidr;
+            $prefixData['name']           = $prefix->name;
+            $prefixData['country_code']   = empty($prefix->counrty_code) !== true ? $prefix->counrty_code : null;
+            $prefixData['description']    = $prefix->description;
+            $prefixData['email_contacts'] = $prefix->email_contacts;
+            $prefixData['abuse_contacts'] = $prefix->abuse_contacts;
+            $prefixData['rir_name']       = $prefix->rir->name;
+            $prefixData['parent_prefix']  = $prefix->parent_ip . '/' . $prefix->parent_cidr;
+            $prefixData['parent_ip']      = $prefix->parent_ip;
+            $prefixData['parent_cidr']    = $prefix->parent_cidr;
 
             $data['ipv6_prefixes'][] = $prefixData;
         }
 
         $data['internet_exchanges'] = [];
         foreach ($ixs as $ix) {
-            $ixData['ix_id']            = $ix->id;
-            $ixData['name']             = $ix->name;
-            $ixData['name_full']        = $ix->name_full;
-            $ixData['country_code']     = $ix->counrty_code;
-            $ixData['city']             = $ix->city;
+            $ixData['ix_id']        = $ix->id;
+            $ixData['name']         = $ix->name;
+            $ixData['name_full']    = $ix->name_full;
+            $ixData['country_code'] = $ix->counrty_code;
+            $ixData['city']         = $ix->city;
 
             $data['internet_exchanges'][] = $ixData;
         }
@@ -547,16 +547,15 @@ class ApiV1Controller extends ApiBaseController
      */
     public function getLiveDns($hostname)
     {
-        $pslManager = new PublicSuffixListManager();
+        $pslManager   = new PublicSuffixListManager();
         $domainParser = new Parser($pslManager->getList());
 
-        $hostname = strtolower($hostname);
+        $hostname   = strtolower($hostname);
         $baseDomain = $domainParser->getRegisterableDomain($hostname);
-        $ipUtils = $this->ipUtils;
+        $ipUtils    = $this->ipUtils;
 
-        $records = Cache::remember($hostname, 60*24, function() use ($ipUtils, $hostname)
-        {
-            $dns = new Dns(['8.8.8.8', '8.8.4.4', 2]);
+        $records = Cache::remember($hostname, 60 * 24, function () use ($ipUtils, $hostname) {
+            $dns     = new Dns(['8.8.8.8', '8.8.4.4', 2]);
             $records = $dns->getDomainRecords($hostname, $testNameserver = false);
             ksort($records);
 
@@ -567,21 +566,21 @@ class ApiV1Controller extends ApiBaseController
                     if ($geoip->country->isoCode) {
                         $country_code = $geoip->country->isoCode;
                         $country_name = $geoip->country->name;
-                        $city_name = $geoip->city->name;
+                        $city_name    = $geoip->city->name;
                     } else {
-                        $ipDec = $this->ipUtils->ip2dec($address);
+                        $ipDec  = $this->ipUtils->ip2dec($address);
                         $prefix = IPv4BgpPrefix::where('ip_dec_start', '<=', $ipDec)
-                            ->where('ip_dec_end', '>=',  $ipDec)
+                            ->where('ip_dec_end', '>=', $ipDec)
                             ->orderBy('cidr', 'asc')
                             ->first();
                         if ($prefix && $prefixWhois = $prefix->whois()) {
                             $country_code = $prefixWhois->counrty_code;
-                            $country_name = $prefixWhois->counrty_code ? trans('countries.'.$prefixWhois->counrty_code) : null;
-                            $city_name = null;
+                            $country_name = $prefixWhois->counrty_code ? trans('countries.' . $prefixWhois->counrty_code) : null;
+                            $city_name    = null;
                         } else {
                             $country_code = null;
                             $country_name = 'Unknown';
-                            $city_name = null;
+                            $city_name    = null;
                         }
                     }
 
@@ -604,21 +603,21 @@ class ApiV1Controller extends ApiBaseController
                     if ($geoip->country->isoCode) {
                         $country_code = $geoip->country->isoCode;
                         $country_name = $geoip->country->name;
-                        $city_name = $geoip->city->name;
+                        $city_name    = $geoip->city->name;
                     } else {
-                        $ipDec = $this->ipUtils->ip2dec($address);
+                        $ipDec  = $this->ipUtils->ip2dec($address);
                         $prefix = IPv6BgpPrefix::where('ip_dec_start', '<=', $ipDec)
-                            ->where('ip_dec_end', '>=',  $ipDec)
+                            ->where('ip_dec_end', '>=', $ipDec)
                             ->orderBy('cidr', 'asc')
                             ->first();
                         if ($prefix && $prefixWhois = $prefix->whois()) {
                             $country_code = $prefixWhois->counrty_code;
-                            $country_name = $prefixWhois->counrty_code ? trans('countries.'.$prefixWhois->counrty_code) : null;
-                            $city_name = null;
+                            $country_name = $prefixWhois->counrty_code ? trans('countries.' . $prefixWhois->counrty_code) : null;
+                            $city_name    = null;
                         } else {
                             $country_code = null;
                             $country_name = 'Unknown';
-                            $city_name = null;
+                            $city_name    = null;
                         }
                     }
 
@@ -637,9 +636,9 @@ class ApiV1Controller extends ApiBaseController
             return $records;
         });
 
-        $data['hostname']       = $hostname;
-        $data['base_domain']    = $baseDomain;
-        $data['dns_records']    = $records;
+        $data['hostname']    = $hostname;
+        $data['base_domain'] = $baseDomain;
+        $data['dns_records'] = $records;
 
         return $this->sendData($data);
     }
@@ -653,22 +652,22 @@ class ApiV1Controller extends ApiBaseController
         $data['urls'] = [];
 
         $asns = DB::table('asns')->pluck('asn');
-        foreach($asns as $asn) {
+        foreach ($asns as $asn) {
             $data['urls'][] = '/asn/' . $asn;
         }
 
         $ipv4Prefixes = DB::table('ipv4_prefix_whois')->select('ip', 'cidr')->get();
-        foreach($ipv4Prefixes as $prefix) {
+        foreach ($ipv4Prefixes as $prefix) {
             $data['urls'][] = '/prefix/' . $prefix->ip . '/' . $prefix->cidr;
         }
 
         $ipv6Prefixes = DB::table('ipv6_prefix_whois')->select('ip', 'cidr')->get();
-        foreach($ipv6Prefixes as $prefix) {
+        foreach ($ipv6Prefixes as $prefix) {
             $data['urls'][] = '/prefix/' . $prefix->ip . '/' . $prefix->cidr;
         }
 
         $ixs = DB::table('ixs')->pluck('id');
-        foreach($ixs as $ix) {
+        foreach ($ixs as $ix) {
             $data['urls'][] = '/ix/' . $ix;
         }
 
@@ -680,21 +679,21 @@ class ApiV1Controller extends ApiBaseController
      */
     public function countriesReport()
     {
-        $ipv4CidrCount = $this->ipUtils->IPv4cidrIpCount();
+        $ipv4CidrCount  = $this->ipUtils->IPv4cidrIpCount();
         $countriesStats = [];
 
-        $allocatedAsns = $this->ipUtils->getAllocatedAsns();
+        $allocatedAsns     = $this->ipUtils->getAllocatedAsns();
         $allocatedPrefixes = $this->ipUtils->getAllocatedPrefixes();
         // Get all routes (BGP)
 
         // Group ASNs
         foreach ($allocatedAsns as $allocatedAsn) {
             if (isset($countriesStats[$allocatedAsn->country_code]) !== true && is_null($allocatedAsn->country_code) !== true) {
-                $countriesStats[$allocatedAsn->country_code]['country_code'] = $allocatedAsn->country_code;
-                $countriesStats[$allocatedAsn->country_code]['allocated_asn_count'] = 0;
+                $countriesStats[$allocatedAsn->country_code]['country_code']                = $allocatedAsn->country_code;
+                $countriesStats[$allocatedAsn->country_code]['allocated_asn_count']         = 0;
                 $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_prefix_count'] = 0;
                 $countriesStats[$allocatedAsn->country_code]['allocated_ipv6_prefix_count'] = 0;
-                $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_ip_count'] = 0;
+                $countriesStats[$allocatedAsn->country_code]['allocated_ipv4_ip_count']     = 0;
             }
 
             if (is_null($allocatedAsn->country_code) !== true) {
@@ -704,11 +703,11 @@ class ApiV1Controller extends ApiBaseController
 
         foreach ($allocatedPrefixes as $allocatedPrefix) {
             if (isset($countriesStats[$allocatedPrefix->country_code]) !== true && is_null($allocatedPrefix->country_code) !== true) {
-                $countriesStats[$allocatedPrefix->country_code]['country_code'] = $allocatedPrefix->country_code;
-                $countriesStats[$allocatedPrefix->country_code]['allocated_asn_count'] = 0;
+                $countriesStats[$allocatedPrefix->country_code]['country_code']                = $allocatedPrefix->country_code;
+                $countriesStats[$allocatedPrefix->country_code]['allocated_asn_count']         = 0;
                 $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_prefix_count'] = 0;
                 $countriesStats[$allocatedPrefix->country_code]['allocated_ipv6_prefix_count'] = 0;
-                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count'] = 0;
+                $countriesStats[$allocatedPrefix->country_code]['allocated_ipv4_ip_count']     = 0;
             }
 
             if (is_null($allocatedAsn->country_code) !== true) {
@@ -733,7 +732,7 @@ class ApiV1Controller extends ApiBaseController
         $asns = DB::table('asns')->select(array('asn', 'name', 'description_full', 'counrty_code'))->get();
 
         $data['results_count'] = count($asns);
-        $data['asns'] = [];
+        $data['asns']          = [];
 
         foreach ($asns as $asn) {
             $description = json_decode($asn->description_full);
@@ -744,9 +743,9 @@ class ApiV1Controller extends ApiBaseController
             }
 
             $data['asns'][] = [
-                'asn' => $asn->asn,
-                'name' => $asn->name,
-                'description' =>  $description,
+                'asn'          => $asn->asn,
+                'name'         => $asn->name,
+                'description'  => $description,
                 'country_code' => $asn->counrty_code,
             ];
         }
