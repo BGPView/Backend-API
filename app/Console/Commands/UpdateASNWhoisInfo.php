@@ -11,11 +11,14 @@ use App\Services\Whois;
 use Carbon\Carbon;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Console\Command;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Facades\DB;
 use League\CLImate\CLImate;
 
 class UpdateASNWhoisInfo extends Command
 {
+
+    use DispatchesJobs;
 
     private $cli;
 
@@ -134,7 +137,7 @@ class UpdateASNWhoisInfo extends Command
             // Lets check if the ASN has already been looked at in the past
             if (isset($seenAsns[$as_number]) !== true) {
                 // Dispatch a new job into queue
-                dispatch(new EnterASNs($as_number, $rir_id));
+                $this->dispatch(new EnterASNs($as_number, $rir_id));
             }
         }
 
