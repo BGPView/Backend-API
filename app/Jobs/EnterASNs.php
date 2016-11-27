@@ -9,6 +9,7 @@ use App\Services\Whois;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use League\CLImate\CLImate;
 
 class EnterASNs extends Job implements ShouldQueue
 {
@@ -23,6 +24,7 @@ class EnterASNs extends Job implements ShouldQueue
     {
         $this->as_number = $as_number;
         $this->rir_id = $rir_id;
+        $this->cli = new CLImate();
     }
 
     /**
@@ -35,7 +37,7 @@ class EnterASNs extends Job implements ShouldQueue
         $rir_id = $this->rir_id;
         $as_number = $this->as_number;
 
-        $this->info('Looking up and adding: AS' . $as_number);
+        $this->cli->br()->comment('Looking up and adding: AS' . $as_number);
 
         $asnWhois = new Whois($as_number);
         $parsedWhois = $asnWhois->parse();
@@ -87,7 +89,6 @@ class EnterASNs extends Job implements ShouldQueue
             $asnEmail->save();
         }
 
-        $this->info($asn->asn . ' - ' . $asn->description . ' ['.$asn->name.']');
-        $this->warn('--------------');
+        $this->cli->br()->comment($asn->asn . ' - ' . $asn->description . ' ['.$asn->name.']')->br();
     }
 }
