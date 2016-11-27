@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Helpers\IpUtils;
 use App\Jobs\EnterASNs;
+use App\Jobs\UpdateASNs;
 use App\Models\ASN;
 use App\Models\ASNEmail;
 use App\Models\IXMember;
@@ -147,7 +148,7 @@ class UpdateASNWhoisInfo extends Command
         $oldAsns->shuffle();
 
         foreach ($oldAsns as $oldAsn) {
-            $this->dispatch(new EnterASNs($oldAsn, $this->getPeeringDbInfo($oldAsn->asn)));
+            $this->dispatch(new UpdateASNs($oldAsn, $this->getPeeringDbInfo($oldAsn->asn)));
 
         }
 
