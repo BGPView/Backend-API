@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Helpers\IpUtils;
 use App\Jobs\EnterPrefixes;
+use App\Jobs\UpdatePrefixes;
 use App\Models\IPv4PrefixWhoisEmail;
 use App\Models\IPv4BgpPrefix;
 use App\Models\IPv4PrefixWhois;
@@ -89,8 +90,6 @@ class UpdatePrefixWhoisData extends Command
         $this->bench->start();
         $this->cli->br()->comment('===================================================');
         $threeWeeksAgo = Carbon::now()->subWeeks(3)->timestamp;
-        $ipv4Cidrs = $this->ipUtils->IPv4cidrIpCount();
-        $ipv6Cidrs = $this->ipUtils->IPv6cidrIpCount();
 
         $this->cli->br()->comment('Getting all the IPv' . $ipVersion . 'prefixes from the BGP table');
 
@@ -150,7 +149,6 @@ class UpdatePrefixWhoisData extends Command
         $ipVersion = (string) $ipVersion;
         $this->bench->start();
         $this->cli->br()->comment('===================================================');
-        $threeWeeksAgo = Carbon::now()->subWeeks(3)->timestamp;
 
         $this->cli->br()->comment('Getting all OLD IPv' . $ipVersion . 'prefixes from the whois table');
 
@@ -159,49 +157,9 @@ class UpdatePrefixWhoisData extends Command
 
         foreach ($oldPrefixes as $oldPrefix) {
             $this->cli->br()->comment('===================================================');
-            $this->cli->br()->comment('Updating prefix whois info - ' . $oldPrefix->ip . '/' . $oldPrefix->cidr)->br();
+            $this->cli->br()->comment('Updating prefix queue - ' . $oldPrefix->ip . '/' . $oldPrefix->cidr)->br();
 
-            $ipWhois = new Whois($oldPrefix->ip, $oldPrefix->cidr);
-            $parsedWhois = $ipWhois->parse();
-
-            // If null, lets skip
-            if (is_null($parsedWhois) === true) {
-                $this->cli->br()->error('Seems that whois server returned no results for prefix');
-                continue;
-            }
-
-            $oldPrefix->name = $parsedWhois->name;
-            $oldPrefix->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
-            $oldPrefix->description_full = json_encode($parsedWhois->description);
-            $oldPrefix->counrty_code = $parsedWhois->counrty_code;
-            $oldPrefix->owner_address = json_encode($parsedWhois->address);
-            $oldPrefix->raw_whois = $ipWhois->raw();
-            $oldPrefix->save();
-
-            // Save Prefix Emails
-            $oldPrefix->emails()->delete();
-            foreach ($parsedWhois->emails as $email) {
-                $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhoisEmail';
-                $prefixEmail = new $className;
-                $prefixEmail->prefix_whois_id = $oldPrefix->id;
-                $prefixEmail->email_address = $email;
-
-                // Check if its an abuse email
-                if (in_array($email, $parsedWhois->abuse_emails)) {
-                    $prefixEmail->abuse_email = true;
-                }
-
-                $prefixEmail->save();
-            }
-
-            dump([
-                'name' => $oldPrefix->name,
-                'description' => $oldPrefix->description,
-                'description_full' => $oldPrefix->description_full,
-                'counrty_code' => $oldPrefix->counrty_code,
-                'owner_address' => $oldPrefix->owner_address,
-            ]);
-
+            $this->dispatch(new UpdatePrefixes($ipVersion, $oldPrefix));
         }
 
         $this->output->newLine(1);
