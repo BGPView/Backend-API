@@ -137,7 +137,7 @@ class UpdateASNWhoisInfo extends Command
             // Lets check if the ASN has already been looked at in the past
             if (isset($seenAsns[$as_number]) !== true) {
                 // Dispatch a new job into queue
-                $this->dispatch(new EnterASNs($as_number, $rir_id));
+                $this->dispatch(new EnterASNs($as_number, $rir_id, $this->peeringDBData));
             }
         }
 

@@ -15,12 +15,17 @@ class EnterASNs extends Job implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
 
+    protected $as_number;
+    protected $rir_id;
+    protected $cli;
+    protected $peeringDBData;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($as_number, $rir_id)
+    public function __construct($as_number, $rir_id, $peeringDBData)
     {
         $this->as_number = $as_number;
         $this->rir_id = $rir_id;
@@ -90,5 +95,20 @@ class EnterASNs extends Job implements ShouldQueue
         }
 
         $this->cli->br()->comment($asn->asn . ' - ' . $asn->description . ' ['.$asn->name.']')->br();
+    }
+
+    private function getPeeringDbInfo($asn)
+    {
+        foreach ($this->peeringDBData as $data) {
+            if ($data->asn === $asn) {
+                foreach ($data as $key => $value) {
+                    if (empty($value) === true) {
+                        $data->$key = null;
+                    }
+                }
+                return $data;
+            }
+        }
+        return null;
     }
 }
