@@ -6,9 +6,9 @@ use App\Jobs\Job;
 use App\Models\ASN;
 use App\Models\ASNEmail;
 use App\Services\Whois;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use League\CLImate\CLImate;
 
 class EnterASNs extends Job implements ShouldQueue
@@ -27,10 +27,10 @@ class EnterASNs extends Job implements ShouldQueue
      */
     public function __construct($as_number, $rir_id, $peeringDBData)
     {
-        $this->as_number = $as_number;
-        $this->rir_id = $rir_id;
+        $this->as_number     = $as_number;
+        $this->rir_id        = $rir_id;
         $this->peeringDBData = $peeringDBData;
-        $this->cli = new CLImate();
+        $this->cli           = new CLImate();
     }
 
     /**
@@ -40,12 +40,12 @@ class EnterASNs extends Job implements ShouldQueue
      */
     public function handle()
     {
-        $rir_id = $this->rir_id;
+        $rir_id    = $this->rir_id;
         $as_number = $this->as_number;
 
         $this->cli->br()->comment('Looking up and adding: AS' . $as_number);
 
-        $asnWhois = new Whois($as_number);
+        $asnWhois    = new Whois($as_number);
         $parsedWhois = $asnWhois->parse();
 
         $asn = new ASN();
@@ -54,37 +54,37 @@ class EnterASNs extends Job implements ShouldQueue
         if (is_null($parsedWhois) === true) {
 
             // Save the null entry
-            $asn->rir_id = $rir_id;
-            $asn->asn = $as_number;
+            $asn->rir_id    = $rir_id;
+            $asn->asn       = $as_number;
             $asn->raw_whois = $asnWhois->raw();
             $asn->save();
 
             return;
         }
 
-        $asn->rir_id = $rir_id;
-        $asn->asn = $as_number;
-        $asn->name = empty($parsedWhois->name) !== true ? $parsedWhois->name : null;
-        $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $asn->name;
+        $asn->rir_id           = $rir_id;
+        $asn->asn              = $as_number;
+        $asn->name             = empty($parsedWhois->name) !== true ? $parsedWhois->name : null;
+        $asn->description      = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $asn->name;
         $asn->description_full = count($parsedWhois->description) > 0 ? json_encode($parsedWhois->description) : json_encode([$asn->description]);
 
         // Insert PeerDB Info if we get any
         if ($peerDb = $this->peeringDBData) {
-            $asn->website = $peerDb->website;
-            $asn->looking_glass = $peerDb->looking_glass;
+            $asn->website            = $peerDb->website;
+            $asn->looking_glass      = $peerDb->looking_glass;
             $asn->traffic_estimation = $peerDb->info_traffic;
-            $asn->traffic_ratio = $peerDb->info_ratio;
+            $asn->traffic_ratio      = $peerDb->info_ratio;
         }
 
-        $asn->counrty_code = $parsedWhois->counrty_code;
+        $asn->counrty_code  = $parsedWhois->counrty_code;
         $asn->owner_address = json_encode($parsedWhois->address);
-        $asn->raw_whois = $asnWhois->raw();
+        $asn->raw_whois     = $asnWhois->raw();
         $asn->save();
 
         // Save ASN Emails
         foreach ($parsedWhois->emails as $email) {
-            $asnEmail = new ASNEmail();
-            $asnEmail->asn_id = $asn->id;
+            $asnEmail                = new ASNEmail();
+            $asnEmail->asn_id        = $asn->id;
             $asnEmail->email_address = $email;
 
             // Check if its an abuse email
@@ -95,6 +95,6 @@ class EnterASNs extends Job implements ShouldQueue
             $asnEmail->save();
         }
 
-        $this->cli->br()->comment($asn->asn . ' - ' . $asn->description . ' ['.$asn->name.']');
+        $this->cli->br()->comment($asn->asn . ' - ' . $asn->description . ' [' . $asn->name . ']');
     }
 }

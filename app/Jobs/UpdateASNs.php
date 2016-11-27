@@ -6,9 +6,9 @@ use App\Jobs\Job;
 use App\Models\ASN;
 use App\Models\ASNEmail;
 use App\Services\Whois;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use League\CLImate\CLImate;
 
 class UpdateASNs extends Job implements ShouldQueue
@@ -26,9 +26,9 @@ class UpdateASNs extends Job implements ShouldQueue
      */
     public function __construct($oldAsn, $peeringDBData)
     {
-        $this->oldAsn = $oldAsn;
+        $this->oldAsn        = $oldAsn;
         $this->peeringDBData = $peeringDBData;
-        $this->cli = new CLImate();
+        $this->cli           = new CLImate();
     }
 
     /**
@@ -43,7 +43,7 @@ class UpdateASNs extends Job implements ShouldQueue
         $oldAsn->emails()->delete();
 
         $this->cli->br()->comment('Updating: AS' . $oldAsn->asn);
-        $asnWhois = new Whois($oldAsn->asn);
+        $asnWhois    = new Whois($oldAsn->asn);
         $parsedWhois = $asnWhois->parse();
 
         // Skip null results
@@ -52,27 +52,27 @@ class UpdateASNs extends Job implements ShouldQueue
             return;
         }
 
-        $oldAsn->name = $parsedWhois->name;
-        $oldAsn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $parsedWhois->name;
+        $oldAsn->name             = $parsedWhois->name;
+        $oldAsn->description      = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $parsedWhois->name;
         $oldAsn->description_full = count($parsedWhois->description) > 0 ? json_encode($parsedWhois->description) : json_encode([$oldAsn->description]);
 
         // If we have the PeerDB info lets update it.
         if ($peerDb = $this->peeringDBData) {
-            $oldAsn->website = $peerDb->website;
-            $oldAsn->looking_glass = $peerDb->looking_glass;
+            $oldAsn->website            = $peerDb->website;
+            $oldAsn->looking_glass      = $peerDb->looking_glass;
             $oldAsn->traffic_estimation = $peerDb->info_traffic;
-            $oldAsn->traffic_ratio = $peerDb->info_ratio;
+            $oldAsn->traffic_ratio      = $peerDb->info_ratio;
         }
 
-        $oldAsn->counrty_code = $parsedWhois->counrty_code;
+        $oldAsn->counrty_code  = $parsedWhois->counrty_code;
         $oldAsn->owner_address = json_encode($parsedWhois->address);
-        $oldAsn->raw_whois = $asnWhois->raw();
+        $oldAsn->raw_whois     = $asnWhois->raw();
         $oldAsn->save();
 
         // Save ASN Emails
         foreach ($parsedWhois->emails as $email) {
-            $asnEmail = new ASNEmail();
-            $asnEmail->asn_id = $oldAsn->id;
+            $asnEmail                = new ASNEmail();
+            $asnEmail->asn_id        = $oldAsn->id;
             $asnEmail->email_address = $email;
 
             // Check if its an abuse email
