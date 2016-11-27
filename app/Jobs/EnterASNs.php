@@ -69,7 +69,7 @@ class EnterASNs extends Job implements ShouldQueue
         $asn->description_full = count($parsedWhois->description) > 0 ? json_encode($parsedWhois->description) : json_encode([$asn->description]);
 
         // Insert PeerDB Info if we get any
-        if ($peerDb = $this->getPeeringDbInfo($asn->asn)) {
+        if ($peerDb = $this->peeringDBData) {
             $asn->website = $peerDb->website;
             $asn->looking_glass = $peerDb->looking_glass;
             $asn->traffic_estimation = $peerDb->info_traffic;
@@ -95,21 +95,6 @@ class EnterASNs extends Job implements ShouldQueue
             $asnEmail->save();
         }
 
-        $this->cli->br()->comment($asn->asn . ' - ' . $asn->description . ' ['.$asn->name.']')->br();
-    }
-
-    private function getPeeringDbInfo($asn)
-    {
-        foreach ($this->peeringDBData as $data) {
-            if ($data->asn === $asn) {
-                foreach ($data as $key => $value) {
-                    if (empty($value) === true) {
-                        $data->$key = null;
-                    }
-                }
-                return $data;
-            }
-        }
-        return null;
+        $this->cli->br()->comment($asn->asn . ' - ' . $asn->description . ' ['.$asn->name.']');
     }
 }

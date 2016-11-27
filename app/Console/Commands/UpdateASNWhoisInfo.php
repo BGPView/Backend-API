@@ -117,7 +117,7 @@ class UpdateASNWhoisInfo extends Command
     private function updateASN()
     {
         $this->cli->br()->comment('===================================================');
-        $this->cli->br()->comment('Adding newly allocated ASNs')->br();
+        $this->cli->br()->comment('Adding newly allocated ASNs to queue')->br();
 
         $sourceAsns = $this->getAllAsns();
 
@@ -137,7 +137,7 @@ class UpdateASNWhoisInfo extends Command
             // Lets check if the ASN has already been looked at in the past
             if (isset($seenAsns[$as_number]) !== true) {
                 // Dispatch a new job into queue
-                $this->dispatch(new EnterASNs($as_number, $rir_id, $this->peeringDBData));
+                $this->dispatch(new EnterASNs($as_number, $rir_id, $this->getPeeringDbInfo($as_number)));
             }
         }
 
@@ -147,48 +147,8 @@ class UpdateASNWhoisInfo extends Command
         $oldAsns->shuffle();
 
         foreach ($oldAsns as $oldAsn) {
-            $oldAsn->emails()->delete();
+            $this->dispatch(new EnterASNs($oldAsn, $this->getPeeringDbInfo($oldAsn->asn)));
 
-            $this->cli->br()->comment('Updating: AS' . $oldAsn->asn);
-            $asnWhois = new Whois($oldAsn->asn);
-            $parsedWhois = $asnWhois->parse();
-
-            // Skip null results
-            if (is_null($parsedWhois) === true) {
-                $oldAsn->touch();
-                continue;
-            }
-
-            $oldAsn->name = $parsedWhois->name;
-            $oldAsn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $parsedWhois->name;
-            $oldAsn->description_full = count($parsedWhois->description) > 0 ? json_encode($parsedWhois->description) : json_encode([$oldAsn->description]);
-
-            // If we have the PeerDB info lets update it.
-            if ($peerDb = $this->getPeeringDbInfo($oldAsn->asn)) {
-                $oldAsn->website = $peerDb->website;
-                $oldAsn->looking_glass = $peerDb->looking_glass;
-                $oldAsn->traffic_estimation = $peerDb->info_traffic;
-                $oldAsn->traffic_ratio = $peerDb->info_ratio;
-            }
-
-            $oldAsn->counrty_code = $parsedWhois->counrty_code;
-            $oldAsn->owner_address = json_encode($parsedWhois->address);
-            $oldAsn->raw_whois = $asnWhois->raw();
-            $oldAsn->save();
-
-            // Save ASN Emails
-            foreach ($parsedWhois->emails as $email) {
-                $asnEmail = new ASNEmail;
-                $asnEmail->asn_id = $oldAsn->id;
-                $asnEmail->email_address = $email;
-
-                // Check if its an abuse email
-                if (in_array($email, $parsedWhois->abuse_emails)) {
-                    $asnEmail->abuse_email = true;
-                }
-
-                $asnEmail->save();
-            }
         }
 
 
