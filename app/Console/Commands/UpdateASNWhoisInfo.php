@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\IpUtils;
+use App\Jobs\EnterASNs;
 use App\Models\ASN;
 use App\Models\ASNEmail;
 use App\Models\IXMember;
@@ -132,59 +133,8 @@ class UpdateASNWhoisInfo extends Command
         foreach ($asns as $as_number => $rir_id) {
             // Lets check if the ASN has already been looked at in the past
             if (isset($seenAsns[$as_number]) !== true) {
-                $this->cli->br()->comment('Looking up and adding: AS' . $as_number);
-
-                $asnWhois = new Whois($as_number);
-                $parsedWhois = $asnWhois->parse();
-
-                $asn = new ASN;
-
-                // Skip null results
-                if (is_null($parsedWhois) === true) {
-
-                    // Save the null entry
-                    $asn->rir_id = $rir_id;
-                    $asn->asn = $as_number;
-                    $asn->raw_whois = $asnWhois->raw();
-                    $asn->save();
-
-                    continue;
-                }
-
-                $asn->rir_id = $rir_id;
-                $asn->asn = $as_number;
-                $asn->name = empty($parsedWhois->name) !== true ? $parsedWhois->name : null;
-                $asn->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $asn->name;
-                $asn->description_full = count($parsedWhois->description) > 0 ? json_encode($parsedWhois->description) : json_encode([$asn->description]);
-
-                // Insert PeerDB Info if we get any
-                if ($peerDb = $this->getPeeringDbInfo($asn->asn)) {
-                    $asn->website = $peerDb->website;
-                    $asn->looking_glass = $peerDb->looking_glass;
-                    $asn->traffic_estimation = $peerDb->info_traffic;
-                    $asn->traffic_ratio = $peerDb->info_ratio;
-                }
-
-                $asn->counrty_code = $parsedWhois->counrty_code;
-                $asn->owner_address = json_encode($parsedWhois->address);
-                $asn->raw_whois = $asnWhois->raw();
-                $asn->save();
-
-                // Save ASN Emails
-                foreach ($parsedWhois->emails as $email) {
-                    $asnEmail = new ASNEmail;
-                    $asnEmail->asn_id = $asn->id;
-                    $asnEmail->email_address = $email;
-
-                    // Check if its an abuse email
-                    if (in_array($email, $parsedWhois->abuse_emails)) {
-                        $asnEmail->abuse_email = true;
-                    }
-
-                    $asnEmail->save();
-                }
-
-                $this->cli->br()->comment($asn->asn . ' - ' . $asn->description . ' ['.$asn->name.']')->br();
+                // Dispatch a new job into queue
+                dispatch(new EnterASNs($as_number, $rir_id));
             }
         }
 
