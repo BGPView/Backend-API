@@ -29,6 +29,7 @@ class EnterASNs extends Job implements ShouldQueue
     {
         $this->as_number = $as_number;
         $this->rir_id = $rir_id;
+        $this->peeringDBData = $peeringDBData;
         $this->cli = new CLImate();
     }
 
