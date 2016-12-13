@@ -383,12 +383,11 @@ class IpUtils
             $smallestAssignmentDiff = $smallestAssignment->end - $smallestAssignment->start;
 
             if ($smallestAssignmentDiff > $assignmentDiff) {
-                $smallestAssignmentDiff = $assignmentDiff;
+                $smallestAssignment = $assignment;
             }
-
         }
 
-        return $smallestAssignmentDiff;
+        return $smallestAssignment;
     }
 
     public function getAllocationEntry($input, $cidr = null)
