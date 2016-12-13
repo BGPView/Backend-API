@@ -76,7 +76,7 @@ class ApiV1Controller extends ApiBaseController
         }
 
         if ($request->has('with_ixs') === true) {
-            $output['internet_exchanges'] = IXMember::getMembers($asnData->asn);
+            $output['internet_exchanges'] = IXMember::getMembers($as_number);
         }
         if ($request->has('with_peers') === true) {
             $output['peers'] = ASN::getPeers($as_number);
@@ -91,7 +91,7 @@ class ApiV1Controller extends ApiBaseController
             $output['downstreams'] = ASN::getDownstreams($as_number);
         }
         if ($request->has('with_raw_whois') === true) {
-            $output['raw_whois'] = $asnData->raw_whois;
+            $output['raw_whois'] = isset($asnData->raw_whois) ? $asnData->raw_whois : null;
         }
 
         $output['date_updated'] = isset($asnData->updated_at) ? (string) $asnData->updated_at : null;
