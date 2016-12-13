@@ -12,6 +12,7 @@ use App\Models\IPv6PrefixWhois;
 use App\Models\ROA;
 use Elasticsearch\ClientBuilder;
 use GeoIp2\Database\Reader;
+use Illuminate\Support\Facades\DB;
 
 class IpUtils
 {
@@ -644,10 +645,11 @@ class IpUtils
         $ipDecEnd = bcsub(bcadd($ipDecStart, $ipAmount), 1);
 
         // Let look for any valid ROA range
-        $roas = ROA::where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '>=', $ipDecEnd)->get();
+        $r =new DB()
+        $roas = DB::table('roa_table')->where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '>=', $ipDecEnd)->get();
 
         // Check if we have the ASN in the ROA list
-        if ($roas->count() > 0) {
+        if (count($roas) > 0) {
             // Go through all the matching prefixes and see if they match in size and ASN
             foreach ($roas as $roa) {
                 if ($cidr <= $roa->max_length && $asn == $roa->asn) {
