@@ -43,18 +43,18 @@ class ApiV1Controller extends ApiBaseController
             return $this->respond($data);
         }
 
-        $output['asn']                = $asnData->asn;
-        $output['name']               = $asnData->name;
-        $output['description_short']  = $asnData->description;
-        $output['description_full']   = $asnData->description_full;
-        $output['country_code']       = empty($asnData->counrty_code) !== true ? $asnData->counrty_code : null;
-        $output['website']            = $asnData->website;
-        $output['email_contacts']     = $asnData->email_contacts;
-        $output['abuse_contacts']     = $asnData->abuse_contacts;
-        $output['looking_glass']      = $asnData->looking_glass;
-        $output['traffic_estimation'] = $asnData->traffic_estimation;
-        $output['traffic_ratio']      = $asnData->traffic_ratio;
-        $output['owner_address']      = $asnData->owner_address;
+        $output['asn']                = $as_number;
+        $output['name']               = isset($asnData->name) ? $asnData->name : null;
+        $output['description_short']  = isset($asnData->description_short) ? $asnData->description_short : null;
+        $output['description_full']   = isset($asnData->description_full) ? $asnData->description_full : null;
+        $output['country_code']       = isset($asnData->counrty_code) ? $asnData->counrty_code : null;
+        $output['website']            = isset($asnData->website) ? $asnData->website : null;
+        $output['email_contacts']     = isset($asnData->email_contacts) ? $asnData->email_contacts : null;
+        $output['abuse_contacts']     = isset($asnData->abuse_contacts) ? $asnData->abuse_contacts : null;
+        $output['looking_glass']      = isset($asnData->looking_glass) ? $asnData->looking_glass : null;
+        $output['traffic_estimation'] = isset($asnData->traffic_estimation) ? $asnData->traffic_estimation : null;
+        $output['traffic_ratio']      = isset($asnData->traffic_ratio) ? $asnData->traffic_ratio : null;
+        $output['owner_address']      = isset($asnData->owner_address) ? $asnData->owner_address : null;
 
         $output['rir_allocation']['rir_name']          = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
         $output['rir_allocation']['country_code']      = isset($allocation->country_code) ? $allocation->country_code : null;
