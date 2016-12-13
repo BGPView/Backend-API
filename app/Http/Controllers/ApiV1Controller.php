@@ -85,7 +85,7 @@ class ApiV1Controller extends ApiBaseController
             $output['raw_whois'] = $asnData->raw_whois;
         }
 
-        $output['date_updated'] = (string) $asnData->updated_at;
+        $output['date_updated'] = isset($asnData->updated_at) ? (string) $asnData->updated_at : null;
         return $this->sendData($output);
     }
 
