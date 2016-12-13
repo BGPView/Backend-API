@@ -369,7 +369,25 @@ class IpUtils
             $input = $this->ip2dec($input);
         }
 
-        return IanaAssignment::where('type', $type)->where('start', '<=', $input)->where('end', '>=', $input)->first();
+        $assignments = IanaAssignment::where('type', $type)->where('start', '<=', $input)->where('end', '>=', $input)->get();
+
+        $smallestAssignment = false;
+        foreach ($assignments as $assignment) {
+            if ($smallestAssignment === false) {
+                $smallestAssignment = $assignment;
+                continue;
+            }
+
+            $assignmentDiff = $assignment->end - $assignment->start;
+            $smallestAssignmentDiff = $smallestAssignment->end - $smallestAssignment->start;
+
+            if ($smallestAssignmentDiff > $assignmentDiff) {
+                $smallestAssignmentDiff = $assignmentDiff;
+            }
+
+        }
+
+        return $smallestAssignmentDiff
     }
 
     public function getAllocationEntry($input, $cidr = null)
