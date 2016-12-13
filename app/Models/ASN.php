@@ -163,9 +163,13 @@ class ASN extends Model
                 $peerAsn = $peer->asn_1 == $as_number ? $peer->asn_2 : $peer->asn_1;
                 $asn     = self::where('asn', $peerAsn)->first();
 
+                if (is_null($asn) === true) {
+                    $assignment = (new IpUtils())->getIanaAssignmentEntry($as_number);
+                }
+
                 $peerAsnInfo['asn']          = $peerAsn;
-                $peerAsnInfo['name']         = is_null($asn) ? null : $asn->name;
-                $peerAsnInfo['description']  = is_null($asn) ? null : $asn->description;
+                $peerAsnInfo['name']         = is_null($asn) ? 'IANA - ' . strtoupper($assignment->status) : $asn->name;
+                $peerAsnInfo['description']  = is_null($asn) ? $assignment->description : $asn->description;
                 $peerAsnInfo['country_code'] = is_null($asn) ? null : $asn->counrty_code;
 
                 $output[$ipVersion][] = $peerAsnInfo;
@@ -305,10 +309,15 @@ class ASN extends Model
             $asnOutput['asn'] = $steam->$oderKey;
 
             if ($asnMeta === true) {
-                $asnData                   = self::where('asn', $steam->$oderKey)->first();
-                $asnOutput['name']         = isset($asnData->name) ? $asnData->name : null;
-                $asnOutput['description']  = isset($asnData->description) ? $asnData->description : null;
-                $asnOutput['country_code'] = isset($asnData->counrty_code) ? $asnData->counrty_code : null;
+                $asnData = self::where('asn', $steam->$oderKey)->first();
+
+                if (is_null($asnData) === true) {
+                    $assignment = $ipUtils->getIanaAssignmentEntry($as_number);
+                }
+
+                $asnOutput['name']         = is_null($asnData) ? 'IANA - ' . strtoupper($assignment->status) : $asnData->name;
+                $asnOutput['description']  = is_null($asnData) ? $assignment->description : $asnData->description;
+                $asnOutput['country_code'] = is_null($asnData) ? null : $asnData->counrty_code;
             }
 
             $asnOutput['bgp_paths'][] = $steam->bgp_path;

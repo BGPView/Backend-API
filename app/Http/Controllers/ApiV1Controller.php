@@ -68,7 +68,7 @@ class ApiV1Controller extends ApiBaseController
 
         // override the ASN data with assignment data if there is no ASNData
         if (is_null($asnData) === true) {
-            $output['name']              = strtoupper($ianaAssignment->status);
+            $output['name']              = 'IANA - ' . strtoupper($ianaAssignment->status);
             $output['description_short'] = $ianaAssignment->description;
             $output['description_full']  = $ianaAssignment->description;
             $output['email_contacts']    = ['iana@iana.org'];
