@@ -54,7 +54,7 @@ class ApiV1Controller extends ApiBaseController
         $output['looking_glass']      = isset($asnData->looking_glass) ? $asnData->looking_glass : null;
         $output['traffic_estimation'] = isset($asnData->traffic_estimation) ? $asnData->traffic_estimation : null;
         $output['traffic_ratio']      = isset($asnData->traffic_ratio) ? $asnData->traffic_ratio : null;
-        $output['owner_address']      = isset($asnData->owner_address) ? $asnData->owner_address : null;
+        $output['owner_address']      = isset($asnData->owner_address) ? $asnData->owner_address : [];
 
         $output['rir_allocation']['rir_name']          = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
         $output['rir_allocation']['country_code']      = isset($allocation->country_code) ? $allocation->country_code : null;
@@ -73,6 +73,12 @@ class ApiV1Controller extends ApiBaseController
             $output['description_full']  = $ianaAssignment->description;
             $output['email_contacts']    = ['iana@iana.org'];
             $output['abuse_contacts']    = ['abuse@iana.org'];
+            $output['owner_address']     = [
+                'Internet Assigned Numbers Authority',
+                '12025 Waterfront Drive, Suite 300',
+                'Los Angeles CA 90094',
+                'USA',
+            ];
         }
 
         if ($request->has('with_ixs') === true) {
