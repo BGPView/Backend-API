@@ -38,7 +38,7 @@ class ApiV1Controller extends ApiBaseController
         $allocation     = $this->ipUtils->getAllocationEntry($as_number);
         $ianaAssignment = $this->ipUtils->getIanaAssignmentEntry($as_number);
 
-        if (is_null($asnData) && $ianaAssignment === false) {
+        if (is_null($asnData) === true && $ianaAssignment === false) {
             $data = $this->makeStatus('Could not find ASN', false);
             return $this->respond($data);
         }
@@ -65,6 +65,15 @@ class ApiV1Controller extends ApiBaseController
         $output['iana_assignment']['description']   = $ianaAssignment->description;
         $output['iana_assignment']['whois_server']  = $ianaAssignment->whois_server;
         $output['iana_assignment']['date_assigned'] = $ianaAssignment->date_assigned;
+
+        // override the ASN data with assignment data if there is no ASNData
+        if (is_null($asnData) === true) {
+            $output['name']              = strtoupper($ianaAssignment->status);
+            $output['description_short'] = $ianaAssignment->description;
+            $output['description_full']  = $ianaAssignment->description;
+            $output['email_contacts']    = ['iana@iana.org'];
+            $output['abuse_contacts']    = ['abuse@iana.org'];
+        }
 
         if ($request->has('with_ixs') === true) {
             $output['internet_exchanges'] = IXMember::getMembers($asnData->asn);
