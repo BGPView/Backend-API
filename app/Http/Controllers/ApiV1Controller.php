@@ -34,10 +34,11 @@ class ApiV1Controller extends ApiBaseController
         // lets only use the AS number.
         $as_number = $this->ipUtils->normalizeInput($as_number);
 
-        $asnData    = ASN::with('emails')->where('asn', $as_number)->first();
-        $allocation = $this->ipUtils->getAllocationEntry($as_number);
+        $asnData        = ASN::with('emails')->where('asn', $as_number)->first();
+        $allocation     = $this->ipUtils->getAllocationEntry($as_number);
+        $ianaAssignment = $this->ipUtils->getIanaAssignmentEntry($as_number);
 
-        if (is_null($asnData)) {
+        if (is_null($asnData) && $ianaAssignment === false) {
             $data = $this->makeStatus('Could not find ASN', false);
             return $this->respond($data);
         }
@@ -59,6 +60,11 @@ class ApiV1Controller extends ApiBaseController
         $output['rir_allocation']['country_code']      = isset($allocation->country_code) ? $allocation->country_code : null;
         $output['rir_allocation']['date_allocated']    = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
         $output['rir_allocation']['allocation_status'] = isset($allocation->status) ? $allocation->status : 'unknown';
+
+        $output['iana_assignment']['status']        = $ianaAssignment->status;
+        $output['iana_assignment']['description']   = $ianaAssignment->description;
+        $output['iana_assignment']['whois_server']  = $ianaAssignment->whois_server;
+        $output['iana_assignment']['date_assigned'] = $ianaAssignment->date_assigned;
 
         if ($request->has('with_ixs') === true) {
             $output['internet_exchanges'] = IXMember::getMembers($asnData->asn);
