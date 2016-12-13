@@ -42,10 +42,10 @@ class IpUtils
         ];
 
         foreach ($bogons as $bogonPrefix) {
-            list ($subnet, $bits) = explode('/', $bogonPrefix);
-            $ip = ip2long($ipAddress);
-            $subnet = ip2long($subnet);
-            $mask = -1 << (32 - $bits);
+            list($subnet, $bits) = explode('/', $bogonPrefix);
+            $ip                  = ip2long($ipAddress);
+            $subnet              = ip2long($subnet);
+            $mask                = -1 << (32 - $bits);
             $subnet &= $mask; # nb: in case the supplied subnet wasn't correctly aligned
 
             if (($ip & $mask) == $subnet) {
@@ -61,39 +61,39 @@ class IpUtils
     {
         // 'cidr' => 'IP count'
         $array = [
-            '0'     =>  '4294967296',
-            '1'		=>	'2147483648',
-            '2'		=>	'1073741824',
-            '3'		=>	'536870912',
-            '4'		=>	'268435456',
-            '5'		=>	'134217728',
-            '6'		=>	'67108864',
-            '7'		=>	'33554432',
-            '8'		=>	'16777216',
-            '9'		=>	'8388608',
-            '10'	=> 	'4194304',
-            '11'	=> 	'2097152',
-            '12'	=> 	'1048576',
-            '13'	=> 	'524288',
-            '14'	=> 	'262144',
-            '15'	=> 	'131072',
-            '16'	=> 	'65536',
-            '17'	=> 	'32768',
-            '18'	=> 	'16384',
-            '19'	=> 	'8192',
-            '20'	=> 	'4096',
-            '21'	=> 	'2048',
-            '22'	=> 	'1024',
-            '23'	=> 	'512',
-            '24'	=> 	'256',
-            '25'	=> 	'128',
-            '26'	=> 	'64',
-            '27'	=> 	'32',
-            '28'	=> 	'16',
-            '29'	=> 	'8',
-            '30'	=> 	'4',
-            '31'	=> 	'2',
-            '32'	=> 	'1',
+            '0'  => '4294967296',
+            '1'  => '2147483648',
+            '2'  => '1073741824',
+            '3'  => '536870912',
+            '4'  => '268435456',
+            '5'  => '134217728',
+            '6'  => '67108864',
+            '7'  => '33554432',
+            '8'  => '16777216',
+            '9'  => '8388608',
+            '10' => '4194304',
+            '11' => '2097152',
+            '12' => '1048576',
+            '13' => '524288',
+            '14' => '262144',
+            '15' => '131072',
+            '16' => '65536',
+            '17' => '32768',
+            '18' => '16384',
+            '19' => '8192',
+            '20' => '4096',
+            '21' => '2048',
+            '22' => '1024',
+            '23' => '512',
+            '24' => '256',
+            '25' => '128',
+            '26' => '64',
+            '27' => '32',
+            '28' => '16',
+            '29' => '8',
+            '30' => '4',
+            '31' => '2',
+            '32' => '1',
         ];
 
         if ($reverse === true) {
@@ -136,106 +136,106 @@ class IpUtils
             '102' => '67108864',
             '101' => '134217728',
             '100' => '268435456',
-            '99' => '536870912',
-            '98' => '1073741824',
-            '97' => '2147483648',
-            '96' => '4294967296',
-            '95' => '8589934592',
-            '94' => '17179869184',
-            '93' => '34359738368',
-            '92' => '68719476736',
-            '91' => '137438953472',
-            '90' => '274877906944',
-            '89' => '549755813888',
-            '88' => '1099511627776',
-            '87' => '2199023255552',
-            '86' => '4398046511104',
-            '85' => '8796093022208',
-            '84' => '17592186044416',
-            '83' => '35184372088832',
-            '82' => '70368744177664',
-            '81' => '140737488355328',
-            '80' => '281474976710656',
-            '79' => '562949953421312',
-            '78' => '1125899906842624',
-            '77' => '2251799813685248',
-            '76' => '4503599627370496',
-            '75' => '9007199254740992',
-            '74' => '18014398509481985',
-            '73' => '36028797018963968',
-            '72' => '72057594037927936',
-            '71' => '144115188075855872',
-            '70' => '288230376151711744',
-            '69' => '576460752303423488',
-            '68' => '1152921504606846976',
-            '67' => '2305843009213693952',
-            '66' => '4611686018427387904',
-            '65' => '9223372036854775808',
-            '64' => '18446744073709551616',
-            '63' => '36893488147419103232',
-            '62' => '73786976294838206464',
-            '61' => '147573952589676412928',
-            '60' => '295147905179352825856',
-            '59' => '590295810358705651712',
-            '58' => '1180591620717411303424',
-            '57' => '2361183241434822606848',
-            '56' => '4722366482869645213696',
-            '55' => '9444732965739290427392',
-            '54' => '18889465931478580854784',
-            '53' => '37778931862957161709568',
-            '52' => '75557863725914323419136',
-            '51' => '151115727451828646838272',
-            '50' => '302231454903657293676544',
-            '49' => '604462909807314587353088',
-            '48' => '1208925819614629174706176',
-            '47' => '2417851639229258349412352',
-            '46' => '4835703278458516698824704',
-            '45' => '9671406556917033397649408',
-            '44' => '19342813113834066795298816',
-            '43' => '38685626227668133590597632',
-            '42' => '77371252455336267181195264',
-            '41' => '154742504910672534362390528',
-            '40' => '309485009821345068724781056',
-            '39' => '618970019642690137449562112',
-            '38' => '1237940039285380274899124224',
-            '37' => '2475880078570760549798248448',
-            '36' => '4951760157141521099596496896',
-            '35' => '9903520314283042199192993792',
-            '34' => '19807040628566084398385987584',
-            '33' => '39614081257132168796771975168',
-            '32' => '79228162514264337593543950336',
-            '31' => '158456325028528675187087900672',
-            '30' => '316912650057057350374175801344',
-            '29' => '633825300114114700748351602688',
-            '28' => '1267650600228229401496703205376',
-            '27' => '2535301200456458802993406410752',
-            '26' => '5070602400912917605986812821504',
-            '25' => '10141204801825835211973625643008',
-            '24' => '20282409603651670423947251286016',
-            '23' => '40564819207303340847894502572032',
-            '22' => '81129638414606681695789005144064',
-            '21' => '162259276829213363391578010288128',
-            '20' => '324518553658426726783156020576256',
-            '19' => '649037107316853453566312041152512',
-            '18' => '1298074214633706907132624082305024',
-            '17' => '2596148429267413814265248164610048',
-            '16' => '5192296858534827628530496329220096',
-            '15' => '10384593717069655257060992658440192',
-            '14' => '20769187434139310514121985316880384',
-            '13' => '41538374868278621028243970633760768',
-            '12' => '83076749736557242056487941267521536',
-            '11' => '166153499473114484112975882535043072',
-            '10' => '332306998946228968225951765070086144',
-            '9' => '664613997892457936451903530140172288',
-            '8' => '1329227995784915872903807060280344576',
-            '7' => '2658455991569831745807614120560689152',
-            '6' => '5316911983139663491615228241121378304',
-            '5' => '10633823966279326983230456482242756608',
-            '4' => '21267647932558653966460912964485513216',
-            '3' => '42535295865117307932921825928921026432',
-            '2' => '85070591730234615865843651857942052864',
-            '1' => '170141183460469231731687303715884105728',
-            '0' => '340282366920938463463374607431768211456',
+            '99'  => '536870912',
+            '98'  => '1073741824',
+            '97'  => '2147483648',
+            '96'  => '4294967296',
+            '95'  => '8589934592',
+            '94'  => '17179869184',
+            '93'  => '34359738368',
+            '92'  => '68719476736',
+            '91'  => '137438953472',
+            '90'  => '274877906944',
+            '89'  => '549755813888',
+            '88'  => '1099511627776',
+            '87'  => '2199023255552',
+            '86'  => '4398046511104',
+            '85'  => '8796093022208',
+            '84'  => '17592186044416',
+            '83'  => '35184372088832',
+            '82'  => '70368744177664',
+            '81'  => '140737488355328',
+            '80'  => '281474976710656',
+            '79'  => '562949953421312',
+            '78'  => '1125899906842624',
+            '77'  => '2251799813685248',
+            '76'  => '4503599627370496',
+            '75'  => '9007199254740992',
+            '74'  => '18014398509481985',
+            '73'  => '36028797018963968',
+            '72'  => '72057594037927936',
+            '71'  => '144115188075855872',
+            '70'  => '288230376151711744',
+            '69'  => '576460752303423488',
+            '68'  => '1152921504606846976',
+            '67'  => '2305843009213693952',
+            '66'  => '4611686018427387904',
+            '65'  => '9223372036854775808',
+            '64'  => '18446744073709551616',
+            '63'  => '36893488147419103232',
+            '62'  => '73786976294838206464',
+            '61'  => '147573952589676412928',
+            '60'  => '295147905179352825856',
+            '59'  => '590295810358705651712',
+            '58'  => '1180591620717411303424',
+            '57'  => '2361183241434822606848',
+            '56'  => '4722366482869645213696',
+            '55'  => '9444732965739290427392',
+            '54'  => '18889465931478580854784',
+            '53'  => '37778931862957161709568',
+            '52'  => '75557863725914323419136',
+            '51'  => '151115727451828646838272',
+            '50'  => '302231454903657293676544',
+            '49'  => '604462909807314587353088',
+            '48'  => '1208925819614629174706176',
+            '47'  => '2417851639229258349412352',
+            '46'  => '4835703278458516698824704',
+            '45'  => '9671406556917033397649408',
+            '44'  => '19342813113834066795298816',
+            '43'  => '38685626227668133590597632',
+            '42'  => '77371252455336267181195264',
+            '41'  => '154742504910672534362390528',
+            '40'  => '309485009821345068724781056',
+            '39'  => '618970019642690137449562112',
+            '38'  => '1237940039285380274899124224',
+            '37'  => '2475880078570760549798248448',
+            '36'  => '4951760157141521099596496896',
+            '35'  => '9903520314283042199192993792',
+            '34'  => '19807040628566084398385987584',
+            '33'  => '39614081257132168796771975168',
+            '32'  => '79228162514264337593543950336',
+            '31'  => '158456325028528675187087900672',
+            '30'  => '316912650057057350374175801344',
+            '29'  => '633825300114114700748351602688',
+            '28'  => '1267650600228229401496703205376',
+            '27'  => '2535301200456458802993406410752',
+            '26'  => '5070602400912917605986812821504',
+            '25'  => '10141204801825835211973625643008',
+            '24'  => '20282409603651670423947251286016',
+            '23'  => '40564819207303340847894502572032',
+            '22'  => '81129638414606681695789005144064',
+            '21'  => '162259276829213363391578010288128',
+            '20'  => '324518553658426726783156020576256',
+            '19'  => '649037107316853453566312041152512',
+            '18'  => '1298074214633706907132624082305024',
+            '17'  => '2596148429267413814265248164610048',
+            '16'  => '5192296858534827628530496329220096',
+            '15'  => '10384593717069655257060992658440192',
+            '14'  => '20769187434139310514121985316880384',
+            '13'  => '41538374868278621028243970633760768',
+            '12'  => '83076749736557242056487941267521536',
+            '11'  => '166153499473114484112975882535043072',
+            '10'  => '332306998946228968225951765070086144',
+            '9'   => '664613997892457936451903530140172288',
+            '8'   => '1329227995784915872903807060280344576',
+            '7'   => '2658455991569831745807614120560689152',
+            '6'   => '5316911983139663491615228241121378304',
+            '5'   => '10633823966279326983230456482242756608',
+            '4'   => '21267647932558653966460912964485513216',
+            '3'   => '42535295865117307932921825928921026432',
+            '2'   => '85070591730234615865843651857942052864',
+            '1'   => '170141183460469231731687303715884105728',
+            '0'   => '340282366920938463463374607431768211456',
         ];
 
         if ($reverse === true) {
@@ -266,7 +266,7 @@ class IpUtils
         // IPv6 address
         if (strpos($ip_address, ':') !== false) {
             $network = inet_pton($ip_address);
-            $parts = unpack('N*', $network);
+            $parts   = unpack('N*', $network);
 
             foreach ($parts as &$part) {
                 if ($part < 0) {
@@ -304,13 +304,13 @@ class IpUtils
         }
 
         // Decimal format
-        $parts = array();
+        $parts    = array();
         $parts[1] = bcdiv($decimal, '79228162514264337593543950336', 0);
-        $decimal = bcsub($decimal, bcmul($parts[1], '79228162514264337593543950336'));
+        $decimal  = bcsub($decimal, bcmul($parts[1], '79228162514264337593543950336'));
         $parts[2] = bcdiv($decimal, '18446744073709551616', 0);
-        $decimal = bcsub($decimal, bcmul($parts[2], '18446744073709551616'));
+        $decimal  = bcsub($decimal, bcmul($parts[2], '18446744073709551616'));
         $parts[3] = bcdiv($decimal, '4294967296', 0);
-        $decimal = bcsub($decimal, bcmul($parts[3], '4294967296'));
+        $decimal  = bcsub($decimal, bcmul($parts[3], '4294967296'));
         $parts[4] = $decimal;
 
         foreach ($parts as &$part) {
@@ -351,7 +351,7 @@ class IpUtils
 
         if ($type === 'asn') {
             if ($showAs === true) {
-                return 'AS'.str_ireplace('as', '', $input);
+                return 'AS' . str_ireplace('as', '', $input);
             }
             return (int) str_ireplace('as', '', $input);
         }
@@ -361,7 +361,7 @@ class IpUtils
 
     public function getIanaAssignmentEntry($input)
     {
-        $type = $this->getInputType($input);
+        $type  = $this->getInputType($input);
         $input = $this->normalizeInput($input);
 
         // If the input is an IP address lets convert it to dec
@@ -378,7 +378,7 @@ class IpUtils
                 continue;
             }
 
-            $assignmentDiff = $assignment->end - $assignment->start;
+            $assignmentDiff         = $assignment->end - $assignment->start;
             $smallestAssignmentDiff = $smallestAssignment->end - $smallestAssignment->start;
 
             if ($smallestAssignmentDiff > $assignmentDiff) {
@@ -392,7 +392,7 @@ class IpUtils
 
     public function getAllocationEntry($input, $cidr = null)
     {
-        $type = $this->getInputType($input);
+        $type   = $this->getInputType($input);
         $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
 
         // Try to do IP lookups
@@ -401,9 +401,9 @@ class IpUtils
 
             $searchParams = [
                 'index' => 'rir_allocations',
-                'type' => 'prefixes',
-                'body' => [
-                    'sort' => [
+                'type'  => 'prefixes',
+                'body'  => [
+                    'sort'   => [
                         'date_allocated' => [
                             'order' => 'asc',
                         ],
@@ -414,22 +414,22 @@ class IpUtils
                                 [
                                     'range' => [
                                         'ip_dec_start' => [
-                                            'lte' => $ipDec
+                                            'lte' => $ipDec,
                                         ],
-                                    ]
+                                    ],
                                 ],
                                 [
                                     'range' => [
                                         'ip_dec_end' => [
-                                            'gte' => $ipDec
+                                            'gte' => $ipDec,
                                         ],
                                     ],
                                 ],
                                 [
                                     'match' => [
                                         'ip_version' => (int) $type,
-                                    ]
-                                ]
+                                    ],
+                                ],
                             ],
                         ],
                     ],
@@ -437,7 +437,7 @@ class IpUtils
             ];
 
             $searchResults = $client->search($searchParams);
-            $allocations = $this->cleanEsResults($searchResults);
+            $allocations   = $this->cleanEsResults($searchResults);
 
             if (count($allocations) === 1) {
                 return $allocations[0];
@@ -486,22 +486,22 @@ class IpUtils
 
         $searchParams = [
             'index' => 'rir_allocations',
-            'type' => 'asns',
-            'body' => [
-                'sort' => [
+            'type'  => 'asns',
+            'body'  => [
+                'sort'  => [
                     'date_allocated' => [
                         'order' => 'desc',
                     ],
                 ],
                 'query' => [
                     'match' => [
-                        'asn' => $input
-                    ]
+                        'asn' => $input,
+                    ],
                 ],
             ],
         ];
 
-        $searchResults = $client->search($searchParams);
+        $searchResults   = $client->search($searchParams);
         $asnsAllocations = $this->cleanEsResults($searchResults);
 
         if (count($asnsAllocations) < 1) {
@@ -571,7 +571,7 @@ class IpUtils
 
             if (count($response['hits']['hits']) > 0) {
                 $results = $this->cleanEsResults($response);
-                $entries  = array_merge($entries, $results);
+                $entries = array_merge($entries, $results);
                 // Get new scroll_id
                 $scroll_id = $response['_scroll_id'];
             } else {
@@ -602,11 +602,10 @@ class IpUtils
             $class = IPv6BgpPrefix::class;
         }
 
-
         $ipDec = $this->ip2dec($input);
 
         $prefixes = $class::where('ip_dec_start', '<=', $ipDec)
-            ->where('ip_dec_end', '>=',  $ipDec)
+            ->where('ip_dec_end', '>=', $ipDec)
             ->orderBy('cidr', 'asc')
             ->get();
 
@@ -633,8 +632,8 @@ class IpUtils
     public function checkROA($asn, $prefix)
     {
         $ipParts = explode('/', $prefix);
-        $ip = $ipParts[0];
-        $cidr = $ipParts[1];
+        $ip      = $ipParts[0];
+        $cidr    = $ipParts[1];
 
         $ipDecStart = $this->ip2dec($ip);
         if ($this->getInputType($ip) == 4) {
@@ -652,8 +651,8 @@ class IpUtils
             // Go through all the matching prefixes and see if they match in size and ASN
             foreach ($roas as $roa) {
                 if ($cidr <= $roa->max_length && $asn == $roa->asn) {
-                     return 1;
-                 }
+                    return 1;
+                }
             }
             // Invalid ROA
             return -1;
@@ -666,38 +665,38 @@ class IpUtils
     public function getPrefixDns($prefix, $count = false)
     {
         $dnsModel = new DNSRecord;
-        $rrTypes = array_flip($dnsModel::$rrTypes);
+        $rrTypes  = array_flip($dnsModel::$rrTypes);
 
-        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
+        $client      = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
         $prefixParts = explode('/', $prefix);
 
         if ($this->getInputType($prefixParts[0]) === 4) {
             $startIpDec = $this->ip2dec($prefixParts[0]);
-            $endIpDec = $startIpDec + $this->IPv4cidrIpCount()[$prefixParts[1]];
+            $endIpDec   = $startIpDec + $this->IPv4cidrIpCount()[$prefixParts[1]];
         } else {
-            $startIpDec = number_format($this->ip2dec($prefixParts[0]), 0 , '', '');
-            $endIpDec = $startIpDec + $this->IPv6cidrIpCount()[$prefixParts[1]];
-            $endIpDec = number_format($endIpDec, 0 , '', '');
+            $startIpDec = number_format($this->ip2dec($prefixParts[0]), 0, '', '');
+            $endIpDec   = $startIpDec + $this->IPv6cidrIpCount()[$prefixParts[1]];
+            $endIpDec   = number_format($endIpDec, 0, '', '');
         }
 
         $searchParams = [
             'index' => config('elasticquent.default_index') . '_dns',
-            'type' => $dnsModel->getTable(),
-            'body' => [
+            'type'  => $dnsModel->getTable(),
+            'body'  => [
                 'query' => [
                     'bool' => [
                         'must' => [
                             [
                                 'range' => [
                                     'ip_dec' => [
-                                        'gte' => $startIpDec
+                                        'gte' => $startIpDec,
                                     ],
-                                ]
+                                ],
                             ],
                             [
                                 'range' => [
                                     'ip_dec' => [
-                                        'lte' => $endIpDec
+                                        'lte' => $endIpDec,
                                     ],
                                 ],
                             ],
@@ -724,15 +723,15 @@ class IpUtils
     public function getRealatedPrefixes($ip, $cidr)
     {
         if ($this->getInputType($ip) === 4) {
-            $ipArrayCount = $this->IPv4cidrIpCount();
+            $ipArrayCount   = $this->IPv4cidrIpCount();
             $bgpPrefixClass = IPv4BgpPrefix::class;
         } else {
-            $ipArrayCount = $this->IPv6cidrIpCount();
+            $ipArrayCount   = $this->IPv6cidrIpCount();
             $bgpPrefixClass = IPv6BgpPrefix::class;
         }
 
         $startDec = $this->ip2dec($ip);
-        $endDec = bcsub(bcadd($startDec, $ipArrayCount[$cidr]), 1);
+        $endDec   = bcsub(bcadd($startDec, $ipArrayCount[$cidr]), 1);
 
         return $bgpPrefixClass::where('ip_dec_start', '>=', $startDec)->where('ip_dec_end', '<=', $endDec)->where('cidr', '!=', $cidr)->get();
     }
@@ -740,8 +739,7 @@ class IpUtils
     public function getContacts($resource)
     {
         $resource = explode('/', $resource, 2)[0];
-        $type = $this->getInputType($resource);
-
+        $type     = $this->getInputType($resource);
 
         if ($type === 4) {
             $class = IPv4PrefixWhois::class;
@@ -752,13 +750,13 @@ class IpUtils
         }
 
         if ($type === 'asn') {
-            $resource = str_ireplace('as', '', $resource);
+            $resource     = str_ireplace('as', '', $resource);
             $resourceData = $class::with('rir')->where('asn', $resource)->first();
         } else {
             $ipDec = $this->ip2dec($resource);
 
             $resourceData = $class::with('rir')->where('ip_dec_start', '<=', $ipDec)
-                ->where('ip_dec_end', '>=',  $ipDec)
+                ->where('ip_dec_end', '>=', $ipDec)
                 ->orderBy('cidr', 'asc')
                 ->first();
         }
@@ -774,8 +772,8 @@ class IpUtils
     {
         // Get the IP count in the prefix
         $startIpDec = $this->ip2dec($startIp);
-        $endIpDec = $this->ip2dec($endIp);
-        $ipCount = bcadd(bcsub($endIpDec, $startIpDec), 1);
+        $endIpDec   = $this->ip2dec($endIp);
+        $ipCount    = bcadd(bcsub($endIpDec, $startIpDec), 1);
 
         // Lets check if v6 or v4
         if ($this->getInputType($startIp) === 6) {
@@ -799,32 +797,31 @@ class IpUtils
         $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
 
         $allocatedAsns = [];
-        $params = [
+        $params        = [
             'search_type' => 'scan',
-            'scroll' => '30s',
-            'size' => 10000,
-            'index' => 'rir_allocations',
-            'type'  => 'asns',
+            'scroll'      => '30s',
+            'size'        => 10000,
+            'index'       => 'rir_allocations',
+            'type'        => 'asns',
         ];
 
         if (is_null($country_code) !== true) {
             $params['body']['query']['match']['country_code'] = $country_code;
         }
 
-
-        $docs = $client->search($params);
+        $docs      = $client->search($params);
         $scroll_id = $docs['_scroll_id'];
 
         while (true) {
             $response = $client->scroll(
                 array(
                     "scroll_id" => $scroll_id,
-                    "scroll" => "30s"
+                    "scroll"    => "30s",
                 )
             );
 
             if (count($response['hits']['hits']) > 0) {
-                $results = $this->cleanEsResults($response);
+                $results       = $this->cleanEsResults($response);
                 $allocatedAsns = array_merge($allocatedAsns, $results);
 
                 // Get new scroll_id
@@ -846,11 +843,11 @@ class IpUtils
         // Get all allocated IP prefixes
         $params = [
             'search_type' => 'scan',
-            'scroll' => '30s',
-            'size' => 10000,
-            'index' => 'rir_allocations',
-            'type'  => 'prefixes',
-            'body' => [
+            'scroll'      => '30s',
+            'size'        => 10000,
+            'index'       => 'rir_allocations',
+            'type'        => 'prefixes',
+            'body'        => [
                 'filter' => [
                     'bool' => [
                         'should' => [
@@ -874,19 +871,19 @@ class IpUtils
             $params['body']['filter']['bool']['must'][] = ['match' => ['ip_version' => $ipVersion]];
         }
 
-        $docs = $client->search($params);
+        $docs      = $client->search($params);
         $scroll_id = $docs['_scroll_id'];
 
         while (true) {
             $response = $client->scroll(
                 array(
                     "scroll_id" => $scroll_id,
-                    "scroll" => "30s"
+                    "scroll"    => "30s",
                 )
             );
 
             if (count($response['hits']['hits']) > 0) {
-                $results = $this->cleanEsResults($response);
+                $results     = $this->cleanEsResults($response);
                 $rirPrefixes = array_merge($rirPrefixes, $results);
 
                 // Get new scroll_id
