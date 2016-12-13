@@ -645,7 +645,6 @@ class IpUtils
         $ipDecEnd = bcsub(bcadd($ipDecStart, $ipAmount), 1);
 
         // Let look for any valid ROA range
-        $r =new DB()
         $roas = DB::table('roa_table')->where('ip_dec_start', '<=', $ipDecStart)->where('ip_dec_end', '>=', $ipDecEnd)->get();
 
         // Check if we have the ASN in the ROA list
