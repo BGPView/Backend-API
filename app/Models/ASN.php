@@ -149,6 +149,7 @@ class ASN extends Model
 
     public static function getPeers($as_number)
     {
+        $ipUtils               = new IpUtils();
         $peerSet['ipv4_peers'] = IPv4Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
         $peerSet['ipv6_peers'] = IPv6Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
         $output['ipv4_peers']  = [];
@@ -164,11 +165,11 @@ class ASN extends Model
                 $asn     = self::where('asn', $peerAsn)->first();
 
                 if (is_null($asn) === true) {
-                    $assignment = (new IpUtils())->getIanaAssignmentEntry($as_number);
+                    $assignment = $ipUtils->getIanaAssignmentEntry($peerAsn);
                 }
 
                 $peerAsnInfo['asn']          = $peerAsn;
-                $peerAsnInfo['name']         = is_null($asn) ? 'IANA - ' . strtoupper($assignment->status) : $asn->name;
+                $peerAsnInfo['name']         = is_null($asn) ? 'IANA-' . strtoupper($assignment->status) : $asn->name;
                 $peerAsnInfo['description']  = is_null($asn) ? $assignment->description : $asn->description;
                 $peerAsnInfo['country_code'] = is_null($asn) ? null : $asn->counrty_code;
 
@@ -312,10 +313,10 @@ class ASN extends Model
                 $asnData = self::where('asn', $steam->$oderKey)->first();
 
                 if (is_null($asnData) === true) {
-                    $assignment = $ipUtils->getIanaAssignmentEntry($as_number);
+                    $assignment = $ipUtils->getIanaAssignmentEntry($steam->$oderKey);
                 }
 
-                $asnOutput['name']         = is_null($asnData) ? 'IANA - ' . strtoupper($assignment->status) : $asnData->name;
+                $asnOutput['name']         = is_null($asnData) ? 'IANA-' . strtoupper($assignment->status) : $asnData->name;
                 $asnOutput['description']  = is_null($asnData) ? $assignment->description : $asnData->description;
                 $asnOutput['country_code'] = is_null($asnData) ? null : $asnData->counrty_code;
             }
