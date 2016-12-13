@@ -388,7 +388,7 @@ class IpUtils
 
         }
 
-        return $smallestAssignmentDiff
+        return $smallestAssignmentDiff;
     }
 
     public function getAllocationEntry($input, $cidr = null)
