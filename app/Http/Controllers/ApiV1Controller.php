@@ -282,7 +282,7 @@ class ApiV1Controller extends ApiBaseController
             $output['dns'] = $this->ipUtils->getPrefixDns($output['prefix']);
         }
 
-        $output['date_updated'] = (string) ($prefixWhois ? $prefixWhois->updated_at : $prefix->updated_at);
+        $output['date_updated'] = (string) (isset($prefixWhois) ? $prefixWhois->updated_at : isset($prefix->updated_at) ? $prefix->updated_at : null);
 
         return $this->sendData($output);
     }
