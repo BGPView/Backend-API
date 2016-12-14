@@ -39,12 +39,12 @@ then
         RIB_FOLDER=`curl ftp://$BASE_URL/ | tail -2 | head -1 | awk '{print $(NF)}'`
         RIB_FILE=`curl ftp://$BASE_URL/$RIB_FOLDER/RIBS/ | tail -1 | awk '{print $(NF)}'`
 fi
-process_rib $BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE "wget -6 -O"
+# process_rib $BASE_URL/$RIB_FOLDER/RIBS/$RIB_FILE "wget -6 -O"
 
 
 # Static local BGP MRT
-./scripts/bgpdump -m /var/lib/bird-dump/v4 | grep  -v "|W|\||STATE|">> ./storage/bgp_lines.txt;
-./scripts/bgpdump -m /var/lib/bird-dump/v6 | grep  -v "|W|\||STATE|">> ./storage/bgp_lines.txt;
+eval birdc $(cat ./scripts/birdc_output_routes.sh) >> ./storage/bgp_lines.txt;
+eval birdc6 $(cat ./scripts/birdc_output_routes.sh) >> ./storage/bgp_lines.txt;
 
 ###############################################################################################
 
