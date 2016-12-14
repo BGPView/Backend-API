@@ -252,24 +252,35 @@ class UpdateBgpData extends ReindexRIRWhois
         }
 
         // ================================================================
-        $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v4)');
-        $newV4Prefixes = rtrim($newV4Prefixes, ',') . ';';
-        DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $newV4Prefixes);
+        if (empty($newV4Prefixes) !== true) {
+            $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v4)');
+            $newV4Prefixes = rtrim($newV4Prefixes, ',') . ';';
+            DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $newV4Prefixes);
+        }
 
-        $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v6)');
-        $newV6Prefixes = rtrim($newV6Prefixes, ',') . ';';
-        DB::statement('INSERT INTO ipv6_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $newV6Prefixes);
-        // ================================================================
-        $this->cli->br()->comment('Inserting all remaining bgp table entries in one bulk query');
-        $this->esClient->bulk($params);
-        // ================================================================
-        $this->cli->br()->comment('Inserting all peers in one bulk query (v4)');
-        $newV4Peers = rtrim($newV4Peers, ',') . ';';
-        DB::statement('INSERT INTO ipv4_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES ' . $newV4Peers);
+        if (empty($newV6Prefixes) !== true) {
+            $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v6)');
+            $newV6Prefixes = rtrim($newV6Prefixes, ',') . ';';
+            DB::statement('INSERT INTO ipv6_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $newV6Prefixes);
+        }
 
-        $this->cli->br()->comment('Inserting all peers in one bulk query (v6)');
-        $newV6Peers = rtrim($newV6Peers, ',') . ';';
-        DB::statement('INSERT INTO ipv6_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES ' . $newV6Peers);
+        // ================================================================
+        if (empty($params) !== true) {
+            $this->cli->br()->comment('Inserting all remaining bgp table entries in one bulk query');
+            $this->esClient->bulk($params);
+        }
+        // ================================================================
+        if (empty($newV4Peers) !== true) {
+            $this->cli->br()->comment('Inserting all peers in one bulk query (v4)');
+            $newV4Peers = rtrim($newV4Peers, ',') . ';';
+            DB::statement('INSERT INTO ipv4_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES ' . $newV4Peers);
+        }
+
+        if (empty($newV6Peers) !== true) {
+            $this->cli->br()->comment('Inserting all peers in one bulk query (v6)');
+            $newV6Peers = rtrim($newV6Peers, ',') . ';';
+            DB::statement('INSERT INTO ipv6_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES ' . $newV6Peers);
+        }
         // ================================================================
 
         $this->output->newLine(1);
