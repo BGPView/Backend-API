@@ -45,7 +45,7 @@ class ApiV1Controller extends ApiBaseController
 
         $output['asn']                = $as_number;
         $output['name']               = isset($asnData->name) ? $asnData->name : null;
-        $output['description_short']  = isset($asnData->description_short) ? $asnData->description_short : null;
+        $output['description_short']  = isset($asnData->description) ? $asnData->description : null;
         $output['description_full']   = isset($asnData->description_full) ? $asnData->description_full : null;
         $output['country_code']       = isset($asnData->counrty_code) ? $asnData->counrty_code : null;
         $output['website']            = isset($asnData->website) ? $asnData->website : null;
