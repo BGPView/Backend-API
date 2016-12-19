@@ -7,10 +7,13 @@ use App\Jobs\GenerateAsnGraphs;
 use App\Models\ASN;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Console\Command;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Ubench;
 
 class GenerateGraphs extends Command
 {
+    use DispatchesJobs;
+
     /**
      * The name and signature of the console command.
      *
@@ -20,7 +23,7 @@ class GenerateGraphs extends Command
     protected $bench;
     protected $esClient;
     protected $ipUtils;
-    protected $maxLineThickness = 4.5;
+
 
     /**
      * Create a new command instance.
@@ -67,19 +70,7 @@ class GenerateGraphs extends Command
     {
         $this->info('Generating graph images per ASN');
         foreach ($asns as $asn) {
-            $upstreams = ASN::getUpstreams($asn, $asnMeta = false);
-
-            if (count($upstreams['ipv4_upstreams']) > 0) {
-                $this->dispatch(new GenerateAsnGraphs($asn, 'IPv4', $upstreams['ipv4_upstreams']));
-            }
-            if (count($upstreams['ipv6_upstreams']) > 0) {
-                $this->dispatch(new GenerateAsnGraphs($asn, 'IPv6', $upstreams['ipv6_upstreams']));
-            }
-            
-            $combined = array_merge($upstreams['ipv4_upstreams'], $upstreams['ipv6_upstreams']);
-            if (count($combined) > 0) {
-                $this->dispatch(new GenerateAsnGraphs($asn, 'Combined', $combined));
-            }
+            $this->dispatch(new GenerateAsnGraphs($asn));
         }
     }
 

@@ -13,21 +13,18 @@ class GenerateAsnGraphs extends Job implements ShouldQueue
     use InteractsWithQueue, SerializesModels;
 
     protected $input_asn;
-    protected $ip_version;
-    protected $upstreams;
     protected $cli;
+    protected $maxLineThickness = 4.5;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($inputAsn, $ipVersion, $upstreams)
+    public function __construct($inputAsn)
     {
-        $this->input_asn  = $inputAsn;
-        $this->ip_version = $ipVersion;
-        $this->upstreams  = $upstreams;
-        $this->cli        = new CLImate();
+        $this->input_asn = $inputAsn;
+        $this->cli       = new CLImate();
     }
 
     /**
@@ -37,10 +34,23 @@ class GenerateAsnGraphs extends Job implements ShouldQueue
      */
     public function handle()
     {
-        $inputAsn  = $this->input_asn;
-        $ipVersion = $this->ip_version;
-        $upstreams = $this->upstreams;
+        $upstreams = ASN::getUpstreams($this->input_asn, $asnMeta = false);
 
+        if (count($upstreams['ipv4_upstreams']) > 0) {
+            $this->processAsnGraph($this->input_asn, 'IPv4', $upstreams['ipv4_upstreams']);
+        }
+        if (count($upstreams['ipv6_upstreams']) > 0) {
+            $this->processAsnGraph($this->input_asn, 'IPv6', $upstreams['ipv6_upstreams']);
+        }
+
+        $combined = array_merge($upstreams['ipv4_upstreams'], $upstreams['ipv6_upstreams']);
+        if (count($combined) > 0) {
+            $this->processAsnGraph($this->input_asn, 'Combined', $combined);
+        }
+    }
+
+    private function processAsnGraph($inputAsn, $ipVersion, $upstreams)
+    {
         $relations = [];
         foreach ($upstreams as $upstream) {
             foreach ($upstream['bgp_paths'] as $path) {
@@ -141,6 +151,6 @@ class GenerateAsnGraphs extends Job implements ShouldQueue
 
         exec('echo \'' . $outputGraphvizText . '\' | dot -Tsvg -o ' . public_path() . '/assets/graphs/AS' . $inputAsn . '_' . $ipVersion . '.svg');
 
-        $this->cli->br()->comment('Generated graph for AS' . $this->input_asn . ' [' . $this->ip_version . ']');
+        $this->cli->comment('Generated graph for AS' . $inputAsn . ' [' . $ipVersion . ']');
     }
 }
