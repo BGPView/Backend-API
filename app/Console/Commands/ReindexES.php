@@ -3,10 +3,13 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Ubench;
 
 class ReindexES extends Command
 {
+    use DispatchesJobs;
+
     /**
      * The name and signature of the console command.
      *
