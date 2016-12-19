@@ -1,0 +1,122 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Models\ASN;
+use App\Models\IPv4PrefixWhois;
+use App\Models\IPv6PrefixWhois;
+use App\Models\IX;
+use Elasticsearch\ClientBuilder;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Config;
+use League\CLImate\CLImate;
+
+class ReindexES extends Job implements ShouldQueue
+{
+    use InteractsWithQueue, SerializesModels;
+
+    protected $cli;
+    protected $batchAmount = 50000;
+
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->cli = new CLImate();
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        // Setting a brand new index name
+        $entityIndexName = config('elasticquent.default_index');
+        $versionedIndex  = $entityIndexName . '_' . time();
+        Config::set('elasticquent.default_index', $versionedIndex);
+
+        // create new index
+        ASN::createIndex();
+
+        $this->reindexClass(IPv4PrefixWhois::class);
+        $this->reindexClass(IPv6PrefixWhois::class);
+        $this->reindexClass(IX::class, $withRelated = false);
+        $this->reindexClass(ASN::class);
+
+        $this->hotSwapIndices($versionedIndex, $entityIndexName);
+    }
+
+    private function reindexClass($class, $withRelated = true)
+    {
+        $class::putMapping($ignoreConflicts = true);
+
+        $this->cli->comment('=====================================');
+        $this->cli->comment('Getting total count for ' . $class);
+        $total = $class::count();
+        $this->cli->comment('Total: ' . number_format($total));
+        $batches = floor($total / $this->batchAmount);
+        $this->cli->comment('Batch Count: ' . $batches);
+
+        for ($i = 0; $i <= $batches; $i++) {
+            $this->cli->comment('Indexing Batch number ' . $i . ' on ' . $class);
+
+            if ($withRelated === true) {
+                $class::with('emails')->with('rir')->offset($i * $this->batchAmount)->limit($this->batchAmount)->get()->addToIndex();
+            } else {
+                $class::offset($i * $this->batchAmount)->limit($this->batchAmount)->get()->addToIndex();
+            }
+        }
+    }
+
+    private function hotSwapIndices($versionedIndex, $entityIndexName)
+    {
+        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
+
+        $indexExists       = $client->indices()->exists(['index' => $entityIndexName]);
+        $previousIndexName = null;
+        $indices           = $client->indices()->getAliases();
+
+        foreach ($indices as $indexName => $indexData) {
+            if (array_key_exists('aliases', $indexData) && isset($indexData['aliases'][$entityIndexName])) {
+                $previousIndexName = $indexName;
+                break;
+            }
+        }
+
+        if ($indexExists === true && $previousIndexName === null) {
+            $client->indices()->delete([
+                'index' => $entityIndexName,
+            ]);
+
+            $client->indices()->putAlias([
+                'name'  => $entityIndexName,
+                'index' => $versionedIndex,
+            ]);
+        } else {
+            if ($previousIndexName !== null) {
+                $client->indices()->deleteAlias([
+                    'name'  => $entityIndexName,
+                    'index' => $previousIndexName,
+                ]);
+            }
+            $client->indices()->putAlias([
+                'name'  => $entityIndexName,
+                'index' => $versionedIndex,
+            ]);
+
+            if ($previousIndexName !== null) {
+                $client->indices()->delete([
+                    'index' => $previousIndexName,
+                ]);
+            }
+        }
+    }
+}
