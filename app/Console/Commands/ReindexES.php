@@ -40,7 +40,7 @@ class ReindexES extends Command
     {
         $this->bench->start();
 
-//
+        $this->dispatch(new \App\Jobs\ReindexES());
 
         $this->output->newLine(1);
         $this->bench->end();
