@@ -61,10 +61,10 @@ class ApiV1Controller extends ApiBaseController
         $output['rir_allocation']['date_allocated']    = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
         $output['rir_allocation']['allocation_status'] = isset($allocation->status) ? $allocation->status : null;
 
-        $output['iana_assignment']['assignment_status']        = $ianaAssignment->status;
-        $output['iana_assignment']['description']   = $ianaAssignment->description;
-        $output['iana_assignment']['whois_server']  = $ianaAssignment->whois_server;
-        $output['iana_assignment']['date_assigned'] = $ianaAssignment->date_assigned;
+        $output['iana_assignment']['assignment_status'] = $ianaAssignment->status;
+        $output['iana_assignment']['description']       = $ianaAssignment->description;
+        $output['iana_assignment']['whois_server']      = $ianaAssignment->whois_server;
+        $output['iana_assignment']['date_assigned']     = $ianaAssignment->date_assigned;
 
         // override the ASN data with assignment data if there is no ASNData
         if (is_null($asnData) === true) {
