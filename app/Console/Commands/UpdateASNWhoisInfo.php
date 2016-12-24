@@ -144,7 +144,7 @@ class UpdateASNWhoisInfo extends Command
 
 
         // Ok, now that we are done with new allocations, lets update the old records
-        $oldAsns = ASN::where('updated_at', '<', Carbon::now()->subMonth())->orderBy('updated_at', 'ASC')->limit(2000)->get();
+        $oldAsns = ASN::where('updated_at', '<', Carbon::now()->subWeek())->orderBy('updated_at', 'ASC')->limit(8000)->get();
         $oldAsns->shuffle();
 
         foreach ($oldAsns as $oldAsn) {

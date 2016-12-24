@@ -153,7 +153,7 @@ class UpdatePrefixWhoisData extends Command
         $this->cli->br()->comment('Getting all OLD IPv' . $ipVersion . 'prefixes from the whois table');
 
         $className = 'App\Models\IPv' . $ipVersion . 'PrefixWhois';
-        $oldPrefixes = $className::where('updated_at', '<', Carbon::now()->subMonth())->orderBy('updated_at', 'ASC')->limit(2000)->get();
+        $oldPrefixes = $className::where('updated_at', '<', Carbon::now()->subWeek(2))->orderBy('updated_at', 'ASC')->limit(8000)->get();
 
         foreach ($oldPrefixes as $oldPrefix) {
             $this->cli->br()->comment('===================================================');
