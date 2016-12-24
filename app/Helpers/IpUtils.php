@@ -9,7 +9,6 @@ use App\Models\IPv4BgpPrefix;
 use App\Models\IPv4PrefixWhois;
 use App\Models\IPv6BgpPrefix;
 use App\Models\IPv6PrefixWhois;
-use App\Models\ROA;
 use Elasticsearch\ClientBuilder;
 use GeoIp2\Database\Reader;
 use Illuminate\Support\Facades\DB;
@@ -367,7 +366,8 @@ class IpUtils
 
         // If the input is an IP address lets convert it to dec
         if ($type === 4 || $type === 6) {
-            $input = $this->ip2dec($input);
+            $ip    = explode('/', $input)[0];
+            $input = $this->ip2dec($ip);
         }
 
         $assignments = IanaAssignment::where('type', $type)->where('start', '<=', $input)->where('end', '>=', $input)->get();
