@@ -218,18 +218,22 @@ class ApiV1Controller extends ApiBaseController
         }
 
         foreach ($asnArray as $baseAsn => $upstreamArray) {
-            $asn                         = ASN::where('asn', $baseAsn)->first();
+            $asn            = ASN::where('asn', $baseAsn)->first();
+            $ianaAssignment = $this->ipUtils->getIanaAssignmentEntry($baseAsn);
+
             $asnData['asn']              = $baseAsn;
-            $asnData['name']             = $asn->name;
-            $asnData['description']      = $asn->description;
+            $asnData['name']             = isset($asn->name) ? $asn->name : 'IANA-' . strtoupper($ianaAssignment->status);
+            $asnData['description']      = isset($asn->description) ? $asn->description : $ianaAssignment->description;
             $asnData['country_code']     = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
             $asnData['prefix_upstreams'] = [];
 
             foreach ($upstreamArray as $upstreamAsn) {
-                $asn                             = ASN::where('asn', $upstreamAsn)->first();
+                $asn            = ASN::where('asn', $upstreamAsn)->first();
+                $ianaAssignment = $this->ipUtils->getIanaAssignmentEntry($upstreamAsn);
+
                 $upstreamAsnData['asn']          = $upstreamAsn;
-                $upstreamAsnData['name']         = isset($asn->name) ? $asn->name : null;
-                $upstreamAsnData['description']  = isset($asn->description) ? $asn->description : null;
+                $upstreamAsnData['name']         = isset($asn->name) ? $asn->name : 'IANA-' . strtoupper($ianaAssignment->status);
+                $upstreamAsnData['description']  = isset($asn->description) ? $asn->description : $ianaAssignment->description;
                 $upstreamAsnData['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
 
                 $asnData['prefix_upstreams'][] = $upstreamAsnData;
