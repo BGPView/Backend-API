@@ -341,15 +341,16 @@ class ApiV1Controller extends ApiBaseController
 
         $output['prefixes'] = [];
         foreach ($prefixes as $prefix) {
-            $prefixWhois = $prefix->whois;
-            $asn         = ASN::where('asn', $prefix->asn)->first();
+            $prefixWhois    = $prefix->whois;
+            $asn            = ASN::where('asn', $prefix->asn)->first();
+            $ianaAssignment = $this->ipUtils->getIanaAssignmentEntry($prefix->asn);
 
             $prefixOutput['prefix']              = $prefix->ip . '/' . $prefix->cidr;
             $prefixOutput['ip']                  = $prefix->ip;
             $prefixOutput['cidr']                = $prefix->cidr;
             $prefixOutput['asn']['asn']          = $prefix->asn;
-            $prefixOutput['asn']['name']         = $asn->name;
-            $prefixOutput['asn']['description']  = $asn->description;
+            $prefixOutput['asn']['name']         = isset($asn->name) ? $asn->name : 'IANA-' . strtoupper($ianaAssignment->status);
+            $prefixOutput['asn']['description']  = isset($asn->description) ? $asn->description : 'IANA-' . strtoupper($ianaAssignment->status);
             $prefixOutput['asn']['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
             $prefixOutput['name']                = isset($prefixWhois->name) ? $prefixWhois->name : null;
             $prefixOutput['description']         = isset($prefixWhois->description) ? $prefixWhois->description : null;
