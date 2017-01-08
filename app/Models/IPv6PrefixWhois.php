@@ -98,6 +98,10 @@ class IPv6PrefixWhois extends Model {
             return [];
         }
 
+        if (is_string($value) !== true) {
+            return $value;
+        }
+
         return json_decode($value);
     }
 

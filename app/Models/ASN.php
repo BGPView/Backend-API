@@ -96,6 +96,10 @@ class ASN extends Model
         if (is_null($value) === true) {
             return [];
         }
+
+        if (is_string($value) !== true) {
+            return $value;
+        }
         
         return json_decode($value);
     }
