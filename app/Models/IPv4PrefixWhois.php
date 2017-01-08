@@ -82,7 +82,7 @@ class IPv4PrefixWhois extends Model {
     {
         $descriptionLines = $this->description_full;
         foreach ($descriptionLines as $descriptionLine) {
-            if (!preg_match('/[^A-Za-z0-9]/', $descriptionLine)) {
+            if (preg_match("/[A-Za-z0-9]/i", $descriptionLine)) {
                 return $descriptionLine;
             }
         }
