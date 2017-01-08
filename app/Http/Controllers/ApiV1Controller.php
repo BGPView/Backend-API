@@ -406,7 +406,9 @@ class ApiV1Controller extends ApiBaseController
         $output['country_code'] = empty($ix->counrty_code) !== true ? $ix->counrty_code : null;
         $output['url_stats']    = $ix->url_stats;
 
-        $members = [];
+        $members         = [];
+        $uniqueMemberAsn = 0;
+
         foreach ($ix->members as $member) {
             $asnInfo = $member->asn_info;
 
@@ -418,10 +420,12 @@ class ApiV1Controller extends ApiBaseController
             $memberInfo['ipv6_address'] = $member->ipv6_address;
             $memberInfo['speed']        = $member->speed;
 
+            $uniqueMemberAsn[$member->asn] = $member->asn;
+
             $members[] = $memberInfo;
         }
 
-        $output['members_count'] = count($members);
+        $output['members_count'] = count($uniqueMemberAsn);
         $output['members']       = $members;
 
         return $this->sendData($output);
