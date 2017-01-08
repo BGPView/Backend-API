@@ -792,6 +792,49 @@ class IpUtils
         return $startIp . '/' . $cidrSize;
     }
 
+    public function getBgpAsns()
+    {
+        $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
+
+        $bgpAsns = [];
+        $params  = [
+            'search_type' => 'scan',
+            'scroll'      => '30s',
+            'size'        => 10000,
+            'index'       => 'bgp_data',
+            'type'        => 'full_table',
+        ];
+
+        $docs      = $client->search($params);
+        $scroll_id = $docs['_scroll_id'];
+
+        while (true) {
+            $response = $client->scroll(
+                array(
+                    "scroll_id" => $scroll_id,
+                    "scroll"    => "30s",
+                )
+            );
+
+            if (count($response['hits']['hits']) > 0) {
+                $results = $this->cleanEsResults($response);
+                foreach ($results as $result) {
+                    if (isset($bgpAsns[$result->asn]) !== true) {
+                        $bgpAsns[$result->asn] = $result;
+                    }
+                }
+                // Get new scroll_id
+                $scroll_id = $response['_scroll_id'];
+            } else {
+                // All done scrolling over data
+                break;
+            }
+        }
+
+        return collect($bgpAsns);
+
+    }
+
     public function getAllocatedAsns($country_code = null)
     {
         $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();

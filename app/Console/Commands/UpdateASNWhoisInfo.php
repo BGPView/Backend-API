@@ -6,9 +6,7 @@ use App\Helpers\IpUtils;
 use App\Jobs\EnterASNs;
 use App\Jobs\UpdateASNs;
 use App\Models\ASN;
-use App\Models\ASNEmail;
 use App\Models\IXMember;
-use App\Services\Whois;
 use Carbon\Carbon;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Console\Command;
@@ -46,11 +44,11 @@ class UpdateASNWhoisInfo extends Command
     /**
      * Create a new command instance.
      */
-    public function __construct(CLImate $cli, IpUtils $ipUtils )
+    public function __construct(CLImate $cli, IpUtils $ipUtils)
     {
         parent::__construct();
-        $this->cli = $cli;
-        $this->ipUtils = $ipUtils;
+        $this->cli      = $cli;
+        $this->ipUtils  = $ipUtils;
         $this->esClient = ClientBuilder::create()->setHosts(config('elasticsearch.hosts'))->build();
     }
 
@@ -77,9 +75,9 @@ class UpdateASNWhoisInfo extends Command
         curl_setopt($ch, CURLOPT_TIMEOUT, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_ENCODING , "gzip");
+        curl_setopt($ch, CURLOPT_ENCODING, "gzip");
 
-        if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')){
+        if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')) {
             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         }
 
@@ -108,9 +106,11 @@ class UpdateASNWhoisInfo extends Command
     {
 
         $allocatedAsns = $this->ipUtils->getAllocatedAsns();
+        $bgpAsns       = $this->ipUtils->getBgpAsns();
 
         $sourceAsns['allocated_asns'] = $allocatedAsns->shuffle();
-        $sourceAsns['ix_asns'] = IXMember::all()->shuffle();
+        $sourceAsns['bgp_asns']       = $bgpAsns->shuffle();
+        $sourceAsns['ix_asns']        = IXMember::all()->shuffle();
 
         return $sourceAsns;
     }
@@ -142,7 +142,6 @@ class UpdateASNWhoisInfo extends Command
             }
         }
 
-
         // Ok, now that we are done with new allocations, lets update the old records
         $oldAsns = ASN::where('updated_at', '<', Carbon::now()->subWeek())->orderBy('updated_at', 'ASC')->limit(8000)->get();
         $oldAsns->shuffle();
@@ -151,7 +150,6 @@ class UpdateASNWhoisInfo extends Command
             $this->dispatch(new UpdateASNs($oldAsn, $this->getPeeringDbInfo($oldAsn->asn)));
 
         }
-
 
     }
 }
