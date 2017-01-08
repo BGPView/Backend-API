@@ -99,9 +99,11 @@ class ASN extends Model
     public function getDescriptionAttribute()
     {
         $descriptionLines = $this->description_full;
-        foreach ($descriptionLines as $descriptionLine) {
-            if (preg_match("/[A-Za-z0-9]/i", $descriptionLine)) {
-                return $descriptionLine;
+        if (is_null($descriptionLines) !== true) {
+            foreach ($descriptionLines as $descriptionLine) {
+                if (preg_match("/[A-Za-z0-9]/i", $descriptionLine)) {
+                    return $descriptionLine;
+                }
             }
         }
 
