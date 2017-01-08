@@ -407,7 +407,7 @@ class ApiV1Controller extends ApiBaseController
         $output['url_stats']    = $ix->url_stats;
 
         $members         = [];
-        $uniqueMemberAsn = 0;
+        $uniqueMemberAsn = [];
 
         foreach ($ix->members as $member) {
             $asnInfo = $member->asn_info;
