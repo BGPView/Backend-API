@@ -96,6 +96,18 @@ class ASN extends Model
         return json_decode($value);
     }
 
+    public function getDescriptionAttribute()
+    {
+        $descriptionLines = $this->description_full;
+        foreach ($descriptionLines as $descriptionLine) {
+            if (!preg_match('/[^A-Za-z0-9]/', $descriptionLine)) {
+                return $descriptionLine;
+            }
+        }
+
+        return $this->name;
+    }
+
     public function getOwnerAddressAttribute($value)
     {
         if (is_null($value) === true) {

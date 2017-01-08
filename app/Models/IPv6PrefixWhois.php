@@ -78,6 +78,18 @@ class IPv6PrefixWhois extends Model {
         return $this->belongsTo('App\Models\IPv6BgpPrefix', 'bgp_prefix_id', 'id');
     }
 
+    public function getDescriptionAttribute()
+    {
+        $descriptionLines = $this->description_full;
+        foreach ($descriptionLines as $descriptionLine) {
+            if (!preg_match('/[^A-Za-z0-9]/', $descriptionLine)) {
+                return $descriptionLine;
+            }
+        }
+
+        return $this->name;
+    }
+    
     public function getDescriptionFullAttribute($value)
     {
         return json_decode($value);
