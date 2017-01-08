@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Elasticquent\ElasticquentTrait;
 use Illuminate\Database\Eloquent\Model;
+use League\CLImate\TerminalObject\Dynamic\Padding;
 
 class IPv4PrefixWhois extends Model {
 
@@ -94,6 +95,10 @@ class IPv4PrefixWhois extends Model {
 
     public function getDescriptionFullAttribute($value)
     {
+        if (is_null($value) === true) {
+            return [];
+        }
+
         return json_decode($value);
     }
 

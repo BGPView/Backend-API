@@ -94,6 +94,10 @@ class IPv6PrefixWhois extends Model {
 
     public function getDescriptionFullAttribute($value)
     {
+        if (is_null($value) === true) {
+            return [];
+        }
+
         return json_decode($value);
     }
 
