@@ -25,7 +25,7 @@ class UpdateIXs extends Command
      *
      * @var string
      */
-    protected $signature = 'zIPLookup:update-ix-info';
+    protected $signature = 'zBGPView:update-ix-info';
 
     /**
      * The console command description.
@@ -195,7 +195,7 @@ class UpdateIXs extends Command
         $this->cli->br()->comment('Cloning ix_members table schema');
         DB::statement('CREATE TABLE ix_members_temp LIKE ix_members');
 
-        $this->cli->br()->comment('Entering ' . count($this->ix_memebrs) . ' IX members into DB');
+        $this->cli->br()->comment('Entering ' . number_format(count($this->ix_memebrs)) . ' IX members into DB');
         foreach ($this->ix_memebrs as $member) {
 
             if (empty($member->asn) === true) {
@@ -208,7 +208,7 @@ class UpdateIXs extends Command
             $member->ipaddr4 = $member->ipaddr4 ? '"' . $member->ipaddr4 . '"' : 'NULL';
             $member->ipaddr6 = $member->ipaddr6 ? '"' . $member->ipaddr6 . '"' : 'NULL';
 
-            $memberList .= '('.$member->ixlan_id.',
+            $memberList .= '('.$member->ix_id.',
                             '.(int) $member->speed.',
                             '.$member->asn.',
                             '.$member->ipaddr4.',
