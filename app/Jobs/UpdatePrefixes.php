@@ -47,7 +47,6 @@ class UpdatePrefixes extends Job implements ShouldQueue
         }
 
         $oldPrefix->name = $parsedWhois->name;
-        $oldPrefix->description = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : null;
         $oldPrefix->description_full = json_encode($parsedWhois->description);
         $oldPrefix->counrty_code = $parsedWhois->counrty_code;
         $oldPrefix->owner_address = json_encode($parsedWhois->address);

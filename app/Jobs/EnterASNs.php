@@ -65,7 +65,6 @@ class EnterASNs extends Job implements ShouldQueue
         $asn->rir_id           = $rir_id;
         $asn->asn              = $as_number;
         $asn->name             = empty($parsedWhois->name) !== true ? $parsedWhois->name : null;
-        $asn->description      = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $asn->name;
         $asn->description_full = count($parsedWhois->description) > 0 ? json_encode($parsedWhois->description) : json_encode([$asn->description]);
 
         // Insert PeerDB Info if we get any

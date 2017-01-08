@@ -53,7 +53,6 @@ class UpdateASNs extends Job implements ShouldQueue
         }
 
         $oldAsn->name             = $parsedWhois->name;
-        $oldAsn->description      = isset($parsedWhois->description[0]) ? $parsedWhois->description[0] : $parsedWhois->name;
         $oldAsn->description_full = count($parsedWhois->description) > 0 ? json_encode($parsedWhois->description) : json_encode([$oldAsn->description]);
 
         // If we have the PeerDB info lets update it.
