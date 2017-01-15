@@ -27,7 +27,7 @@ return [
     'BH' => 'Bahrain',
     'BI' => 'Burundi',
     'BJ' => 'Benin',
-    'BL' => 'Saint Barth�lemy',
+    'BL' => 'Saint Barthelemy',
     'BM' => 'Bermuda',
     'BN' => 'Brunei Darussalam',
     'BO' => 'Bolivia',
