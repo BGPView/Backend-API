@@ -92,6 +92,13 @@ class BgpParser
             }
         }
 
-        return $peers;
+        // Remove any dupe peers
+        foreach ($peers as $key => $peerSet) {
+            if ($peerSet[0] === $peerSet[1]) {
+                unset($peers[$key]);
+            }
+        }
+
+        return array_values($peers);
     }
 }
