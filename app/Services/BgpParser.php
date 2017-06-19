@@ -38,6 +38,11 @@ class BgpParser
         $input = trim(preg_replace('/\s*{[^)]*}/', '', $input));
         $bgpParts = explode('|', $input);
 
+        // Ignore control messages
+        if (count($bgpParts) === 5) {
+            return null;
+        }
+
         // Remove AS-SETS
         $bgpParts[6] = trim(preg_replace('/s*{[^)]*}/', '', $bgpParts[6]));
         $pathArr = explode(' ', $bgpParts[6]);
