@@ -49,7 +49,7 @@ class BgpParser
 
         $bgpPrefixData = new \stdClass();
         $bgpPrefixData->prefix = $bgpParts[5];
-        $bgpPrefixData->ip = $prefixParts[0];
+        $bgpPrefixData->ip = filter_var($prefixParts[0], FILTER_VALIDATE_IP) ? $prefixParts[0] : null;
         $bgpPrefixData->cidr = $prefixParts[1];
         $bgpPrefixData->source = $bgpParts[8];
         $bgpPrefixData->asn = end($pathArr);

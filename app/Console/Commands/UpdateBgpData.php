@@ -138,7 +138,7 @@ class UpdateBgpData extends ReindexRIRWhois
                 $parsedLine = $this->bgpParser->parse($line);
 
                 // if we dont see an ASN then lets skip
-                if (empty($parsedLine->asn) === true) {
+                if (empty($parsedLine->asn) === true || empty($parsedLine->ip) === true) {
                     continue;
                 }
 
