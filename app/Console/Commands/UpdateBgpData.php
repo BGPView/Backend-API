@@ -107,25 +107,25 @@ class UpdateBgpData extends ReindexRIRWhois
 
         // Cleaning up old temp table
         $this->cli->br()->comment('Drop old v4 TEMP table');
-        DB::statement('DROP TABLE IF EXISTS ipv4_bgp_prefixes_temp');
-        DB::statement('DROP TABLE IF EXISTS backup_ipv4_bgp_prefixes');
-        DB::statement('DROP TABLE IF EXISTS ipv4_peers_temp');
-        DB::statement('DROP TABLE IF EXISTS backup_ipv4_peers');
+        DB::unprepared('DROP TABLE IF EXISTS ipv4_bgp_prefixes_temp');
+        DB::unprepared('DROP TABLE IF EXISTS backup_ipv4_bgp_prefixes');
+        DB::unprepared('DROP TABLE IF EXISTS ipv4_peers_temp');
+        DB::unprepared('DROP TABLE IF EXISTS backup_ipv4_peers');
 
         $this->cli->br()->comment('Drop old v6 TEMP table');
-        DB::statement('DROP TABLE IF EXISTS ipv6_bgp_prefixes_temp');
-        DB::statement('DROP TABLE IF EXISTS backup_ipv6_bgp_prefixes');
-        DB::statement('DROP TABLE IF EXISTS ipv6_peers_temp');
-        DB::statement('DROP TABLE IF EXISTS backup_ipv6_peers');
+        DB::unprepared('DROP TABLE IF EXISTS ipv6_bgp_prefixes_temp');
+        DB::unprepared('DROP TABLE IF EXISTS backup_ipv6_bgp_prefixes');
+        DB::unprepared('DROP TABLE IF EXISTS ipv6_peers_temp');
+        DB::unprepared('DROP TABLE IF EXISTS backup_ipv6_peers');
 
         // Creating a new temp table to store our new BGP data
         $this->cli->br()->comment('Cloning ipv4_bgp_prefixes table schema');
-        DB::statement('CREATE TABLE ipv4_bgp_prefixes_temp LIKE ipv4_bgp_prefixes');
-        DB::statement('CREATE TABLE ipv4_peers_temp LIKE ipv4_peers');
+        DB::unprepared('CREATE TABLE ipv4_bgp_prefixes_temp LIKE ipv4_bgp_prefixes');
+        DB::unprepared('CREATE TABLE ipv4_peers_temp LIKE ipv4_peers');
 
         $this->cli->br()->comment('Cloning ipv6_bgp_prefixes table schema');
-        DB::statement('CREATE TABLE ipv6_bgp_prefixes_temp LIKE ipv6_bgp_prefixes');
-        DB::statement('CREATE TABLE ipv6_peers_temp LIKE ipv6_peers');
+        DB::unprepared('CREATE TABLE ipv6_bgp_prefixes_temp LIKE ipv6_bgp_prefixes');
+        DB::unprepared('CREATE TABLE ipv6_peers_temp LIKE ipv6_peers');
 
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Processing input lines');
@@ -196,7 +196,7 @@ class UpdateBgpData extends ReindexRIRWhois
                     if ($$prefixCounter > 250000) {
                         $this->cli->br()->comment('Inserting another 250,000 prefixes in one bulk query (' . $ipVersion . ')');
                         $$newPrefixes = rtrim($$newPrefixes, ',') . ';';
-                        DB::statement('INSERT INTO ipv' . $ipVersion . '_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $$newPrefixes);
+                        DB::unprepared('INSERT INTO ipv' . $ipVersion . '_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $$newPrefixes);
                         $$newPrefixes   = "";
                         $$prefixCounter = 0;
                     }
@@ -255,13 +255,13 @@ class UpdateBgpData extends ReindexRIRWhois
         if (empty($newV4Prefixes) !== true) {
             $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v4)');
             $newV4Prefixes = rtrim($newV4Prefixes, ',') . ';';
-            DB::statement('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $newV4Prefixes);
+            DB::unprepared('INSERT INTO ipv4_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $newV4Prefixes);
         }
 
         if (empty($newV6Prefixes) !== true) {
             $this->cli->br()->comment('Inserting all remaining prefixes in one bulk query (v6)');
             $newV6Prefixes = rtrim($newV6Prefixes, ',') . ';';
-            DB::statement('INSERT INTO ipv6_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $newV6Prefixes);
+            DB::unprepared('INSERT INTO ipv6_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $newV6Prefixes);
         }
 
         // ================================================================
@@ -273,13 +273,13 @@ class UpdateBgpData extends ReindexRIRWhois
         if (empty($newV4Peers) !== true) {
             $this->cli->br()->comment('Inserting all peers in one bulk query (v4)');
             $newV4Peers = rtrim($newV4Peers, ',') . ';';
-            DB::statement('INSERT INTO ipv4_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES ' . $newV4Peers);
+            DB::unprepared('INSERT INTO ipv4_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES ' . $newV4Peers);
         }
 
         if (empty($newV6Peers) !== true) {
             $this->cli->br()->comment('Inserting all peers in one bulk query (v6)');
             $newV6Peers = rtrim($newV6Peers, ',') . ';';
-            DB::statement('INSERT INTO ipv6_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES ' . $newV6Peers);
+            DB::unprepared('INSERT INTO ipv6_peers_temp (asn_1,asn_2,updated_at,created_at) VALUES ' . $newV6Peers);
         }
         // ================================================================
 
@@ -294,22 +294,22 @@ class UpdateBgpData extends ReindexRIRWhois
         // Rename temp table to take over
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Swapping v4 TEMP table with production table');
-        DB::statement('RENAME TABLE ipv4_bgp_prefixes TO backup_ipv4_bgp_prefixes, ipv4_bgp_prefixes_temp TO ipv4_bgp_prefixes;');
-        DB::statement('RENAME TABLE ipv4_peers TO backup_ipv4_peers, ipv4_peers_temp TO ipv4_peers;');
+        DB::unprepared('RENAME TABLE ipv4_bgp_prefixes TO backup_ipv4_bgp_prefixes, ipv4_bgp_prefixes_temp TO ipv4_bgp_prefixes;');
+        DB::unprepared('RENAME TABLE ipv4_peers TO backup_ipv4_peers, ipv4_peers_temp TO ipv4_peers;');
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Swapping v6 TEMP table with production table');
-        DB::statement('RENAME TABLE ipv6_bgp_prefixes TO backup_ipv6_bgp_prefixes, ipv6_bgp_prefixes_temp TO ipv6_bgp_prefixes;');
-        DB::statement('RENAME TABLE ipv6_peers TO backup_ipv6_peers, ipv6_peers_temp TO ipv6_peers;');
+        DB::unprepared('RENAME TABLE ipv6_bgp_prefixes TO backup_ipv6_bgp_prefixes, ipv6_bgp_prefixes_temp TO ipv6_bgp_prefixes;');
+        DB::unprepared('RENAME TABLE ipv6_peers TO backup_ipv6_peers, ipv6_peers_temp TO ipv6_peers;');
 
         // Delete old table
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Removing old production 4 prefix table');
-        DB::statement('DROP TABLE backup_ipv4_bgp_prefixes');
-        DB::statement('DROP TABLE backup_ipv4_peers');
+        DB::unprepared('DROP TABLE backup_ipv4_bgp_prefixes');
+        DB::unprepared('DROP TABLE backup_ipv4_peers');
         $this->cli->br()->comment('===================================================');
         $this->cli->br()->comment('Removing old production 6 prefix table');
-        DB::statement('DROP TABLE backup_ipv6_bgp_prefixes');
-        DB::statement('DROP TABLE backup_ipv6_peers');
+        DB::unprepared('DROP TABLE backup_ipv6_bgp_prefixes');
+        DB::unprepared('DROP TABLE backup_ipv6_peers');
 
         // Remove RIB file
         $this->cli->br()->comment('===================================================');
@@ -342,3 +342,4 @@ class UpdateBgpData extends ReindexRIRWhois
         ];
     }
 }
+
