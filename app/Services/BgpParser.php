@@ -85,6 +85,11 @@ class BgpParser
     private function getPeers($pathArr)
     {
         $peers = [];
+
+        if (count($pathArr) < 2) {
+            return [];
+        }
+
         foreach ($pathArr as $key => $asnHop) {
             // Lets check if next ASN actually exists
             if (isset($pathArr[$key + 1]) === true) {
@@ -96,7 +101,7 @@ class BgpParser
 
         // Remove any dupe peers
         foreach ($peers as $key => $peerSet) {
-            if ($peerSet[0] === $peerSet[1]) {
+            if ($peerSet[0] === $peerSet[1] || empty($peerSet[0]) || empty($peerSet[1])) {
                 unset($peers[$key]);
             }
         }
