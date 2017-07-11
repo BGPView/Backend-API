@@ -39,7 +39,9 @@ class BgpParser
         $bgpParts = explode('|', $input);
 
         // Remove AS-SETS
-        $bgpParts[6] = trim(preg_replace('/s*{[^)]*}/', '', $bgpParts[6]));
+        $bgpParts[6] = preg_replace('/s*{[^)]*}/', '', $bgpParts[6]);
+        // Remove any non numeric chars
+        $bgpParts[6] = trim(preg_replace('/[^0-9 ]/', '', $bgpParts[6]));
         $pathArr = explode(' ', $bgpParts[6]);
 
         $peers = $this->getPeers($pathArr);
@@ -102,3 +104,4 @@ class BgpParser
         return array_values($peers);
     }
 }
+
