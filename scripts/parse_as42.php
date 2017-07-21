@@ -98,7 +98,11 @@ foreach ([4, 6] as $ipVersions) {
 
                     // Only add the file if we are dealing with dates are in last 24 hours
                     if ($fileTime > 0 && (time() - 86400) < $fileTime) {
-                        $dumpUrls[] = $finalUrl;
+                        $dumpUrls[] = [
+                            'url'  => $finalUrl,
+                            'date' => $date,
+                            'name' => $files[1][0],
+                        ];
                     }
 
                 }
@@ -109,60 +113,20 @@ foreach ([4, 6] as $ipVersions) {
 
 foreach ($dumpUrls as $dumpUrl) {
     // read raw file
-    $fileContent = gzdecode(file_get_contents($dumpUrl));
+    $fileContent = gzdecode(file_get_contents($dumpUrl['url']));
 
-    // Make sure we have an actual file that has SHOW IP BGP in there
-    if (isset(explode('Path', $fileContent)[1]) !== true) {
-        continue;
-    }
+    // Make temp file
+    $tempFile = tempnam(sys_get_temp_dir(), 'pch_dump');
 
-    // Split on the word 'Path' and 'Total' to get the actual BGP dump
-    $fileContent = trim(explode('Path', $fileContent)[1]);
-    $fileContent = trim(explode('Total', $fileContent)[0]);
+    file_put_contents($tempFile, $fileContent);
 
-    // Split on * as its an entry on table
-    $entries = explode('*', $fileContent);
+    exec('cat '.$tempFile .' | awk -fscripts/pch.awk', $outputLines);
 
-    // Will be used if there is now displayed prefix (as in multiple paths for same prefix
-    $lastKnownPrefix = null;
+    // Delete file
+    unlink($tempFile);
 
-    foreach ($entries as $entry) {
-        $entry      = trim(str_replace(['>', 'i', 'e', 'g'], '', $entry));
-        $entry      = preg_replace('/\s+/', ' ', $entry);
-        $entryParts = explode(' ', $entry);
-
-        // Check that first part is a prefix
-        if (strpos($entryParts[0], '/') !== false) {
-            $lastKnownPrefix = $entryParts[0];
-            $ipSource        = $entryParts[1];
-            // Remove the non path related parts
-            unset($entryParts[0]);
-            unset($entryParts[1]);
-            unset($entryParts[2]);
-            unset($entryParts[3]);
-
-            $bgpPath = implode(' ', $entryParts);
-            echo "|||||" . $lastKnownPrefix . "|" . $bgpPath . "||" . $ipSource . "||||||" . PHP_EOL;
-        } else if ($lastKnownPrefix !== null) {
-
-            // If the first and second entries are IP addresses lets remove the first entry.
-            if (filter_var($entryParts[0], FILTER_VALIDATE_IP) && filter_var($entryParts[1], FILTER_VALIDATE_IP)) {
-                unset($entryParts[0]);
-                $entryParts = array_values($entryParts);
-            }
-
-            array_unshift($entryParts, $lastKnownPrefix);
-
-            $ipSource = $entryParts[1];
-
-            // Remove the non path related parts
-            unset($entryParts[0]);
-            unset($entryParts[1]);
-            unset($entryParts[2]);
-            unset($entryParts[3]);
-
-            $bgpPath = implode(' ', $entryParts);
-            echo "|||||" . $lastKnownPrefix . "|" . $bgpPath . "||" . $ipSource . "||||||" . PHP_EOL;
-        }
+    $outputLines = array_unique($outputLines);
+    foreach ($outputLines as $outputLine) {
+        echo $outputLine.PHP_EOL;
     }
 }
