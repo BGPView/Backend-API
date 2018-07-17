@@ -39,11 +39,11 @@ class IX extends Model {
      */
     protected $mappingProperties = [
         'name' => [
-            'type' => 'string',
+            'type' => 'text',
             'analyzer' => 'string_lowercase'
         ],
         'name_full' => [
-            'type' => 'string',
+            'type' => 'text',
             'analyzer' => 'string_lowercase'
         ],
     ];

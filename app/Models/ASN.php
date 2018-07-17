@@ -42,15 +42,15 @@ class ASN extends Model
      */
     protected $mappingProperties = [
         'name'        => [
-            'type'     => 'string',
+            'type'     => 'text',
             'analyzer' => 'string_lowercase',
         ],
         'description' => [
-            'type'     => 'string',
+            'type'     => 'text',
             'analyzer' => 'string_lowercase',
         ],
         'asn'         => [
-            'type'   => 'string',
+            'type'   => 'text',
             'fields' => [
                 'sort' => ['type' => 'long'],
             ],

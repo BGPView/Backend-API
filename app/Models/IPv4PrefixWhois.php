@@ -40,11 +40,11 @@ class IPv4PrefixWhois extends Model {
      */
     protected $mappingProperties = [
         'name' => [
-            'type' => 'string',
+            'type' => 'text',
             'analyzer' => 'string_lowercase'
         ],
         'description' => [
-            'type' => 'string',
+            'type' => 'text',
             'analyzer' => 'string_lowercase'
         ],
     ];
