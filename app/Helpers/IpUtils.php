@@ -532,7 +532,6 @@ class IpUtils
         $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
 
         $params = [
-            'search_type' => 'scan',
             'scroll'      => '30s',
             'size'        => 10000,
             'index'       => 'bgp_data',
@@ -798,7 +797,6 @@ class IpUtils
 
         $bgpAsns = [];
         $params  = [
-            'search_type' => 'scan',
             'scroll'      => '30s',
             'size'        => 10000,
             'index'       => 'bgp_data',
@@ -841,7 +839,6 @@ class IpUtils
 
         $allocatedAsns = [];
         $params        = [
-            'search_type' => 'scan',
             'scroll'      => '30s',
             'size'        => 10000,
             'index'       => 'rir_allocations_asns',
@@ -885,7 +882,6 @@ class IpUtils
         $rirPrefixes = [];
         // Get all allocated IP prefixes
         $params = [
-            'search_type' => 'scan',
             'scroll'      => '30s',
             'size'        => 10000,
             'index'       => 'rir_allocations_prefixes',

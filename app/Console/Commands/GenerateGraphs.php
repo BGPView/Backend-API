@@ -79,7 +79,6 @@ class GenerateGraphs extends Command
         $this->info('Getting all ASNs from ES');
         $bgpAsns = [];
         $params  = [
-            'search_type' => 'scan',
             'scroll'      => '30s',
             'size'        => 10000,
             'index'       => 'bgp_data',

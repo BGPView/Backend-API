@@ -276,7 +276,6 @@ class ASN extends Model
         $ipUtils = new IpUtils();
 
         $params = [
-            'search_type' => 'scan',
             'scroll'      => '30s',
             'size'        => 10000,
             'index'       => 'bgp_data',
