@@ -50,6 +50,8 @@ class UpdateBgpData extends ReindexRIRWhois
      */
     public function handle()
     {
+        return $this->cli->red("This command was replaced by the Go app for BGP data processing/updating")->br();
+
         $this->cli->br();
         $this->cli->red("########################################################################")->br();
         $this->cli->red("###  MAKE SURE 'max_allowed_packet' IS SET < 1G IN YOUR my.cnf file  ###")->br();
@@ -330,12 +332,12 @@ class UpdateBgpData extends ReindexRIRWhois
             'mappings' => [
                 'full_table' => [
                     'properties' => [
-                        'ip_version'   => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'ip'           => ['type' => 'string', 'index' => 'not_analyzed'],
-                        'cidr'         => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'asn'          => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'upstream_asn' => ['type' => 'integer', 'index' => 'not_analyzed'],
-                        'bgp_path'     => ['type' => 'string', 'index' => 'not_analyzed'],
+                        'ip_version'   => ['type' => 'integer', 'index' => false],
+                        'ip'           => ['type' => 'keyword', 'index' => false],
+                        'cidr'         => ['type' => 'integer', 'index' => false],
+                        'asn'          => ['type' => 'integer', 'index' => false],
+                        'upstream_asn' => ['type' => 'integer', 'index' => false],
+                        'bgp_path'     => ['type' => 'keyword', 'index' => false],
                     ],
                 ],
             ],
