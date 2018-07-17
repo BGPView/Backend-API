@@ -400,7 +400,7 @@ class IpUtils
             $ipDec = $this->ip2dec($input);
 
             $searchParams = [
-                'index' => 'rir_allocations',
+                'index' => 'rir_allocations_prefixes',
                 'type'  => 'prefixes',
                 'body'  => [
                     'sort'   => [
@@ -485,7 +485,7 @@ class IpUtils
         $input = str_ireplace("AS", "", $input);
 
         $searchParams = [
-            'index' => 'rir_allocations',
+            'index' => 'rir_allocations_asns',
             'type'  => 'asns',
             'body'  => [
                 'sort'  => [
@@ -844,7 +844,7 @@ class IpUtils
             'search_type' => 'scan',
             'scroll'      => '30s',
             'size'        => 10000,
-            'index'       => 'rir_allocations',
+            'index'       => 'rir_allocations_asns',
             'type'        => 'asns',
         ];
 
@@ -888,7 +888,7 @@ class IpUtils
             'search_type' => 'scan',
             'scroll'      => '30s',
             'size'        => 10000,
-            'index'       => 'rir_allocations',
+            'index'       => 'rir_allocations_prefixes',
             'type'        => 'prefixes',
             'body'        => [
                 'filter' => [
