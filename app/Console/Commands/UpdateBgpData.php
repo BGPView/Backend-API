@@ -332,12 +332,12 @@ class UpdateBgpData extends ReindexRIRWhois
             'mappings' => [
                 'full_table' => [
                     'properties' => [
-                        'ip_version'   => ['type' => 'integer', 'index' => false],
-                        'ip'           => ['type' => 'keyword', 'index' => false],
-                        'cidr'         => ['type' => 'integer', 'index' => false],
-                        'asn'          => ['type' => 'integer', 'index' => false],
-                        'upstream_asn' => ['type' => 'integer', 'index' => false],
-                        'bgp_path'     => ['type' => 'keyword', 'index' => false],
+                        'ip_version'   => ['type' => 'integer'],
+                        'ip'           => ['type' => 'keyword'],
+                        'cidr'         => ['type' => 'integer'],
+                        'asn'          => ['type' => 'integer'],
+                        'upstream_asn' => ['type' => 'integer'],
+                        'bgp_path'     => ['type' => 'keyword'],
                     ],
                 ],
             ],
