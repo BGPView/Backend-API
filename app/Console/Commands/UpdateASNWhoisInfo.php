@@ -122,6 +122,8 @@ class UpdateASNWhoisInfo extends Command
 
         $sourceAsns = $this->getAllAsns();
 
+        $this->cli->br()->comment('There are '.count($sourceAsns).' ASNs to go through')->br();
+
         $asns = [];
         foreach ($sourceAsns as $sourceAsn) {
             foreach ($sourceAsn as $asnObj) {
