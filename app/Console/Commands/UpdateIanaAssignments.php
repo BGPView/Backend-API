@@ -29,7 +29,7 @@ class UpdateIanaAssignments extends Command
      *
      * @var string
      */
-    protected $signature = 'zIPLookup:update-iana-assignments';
+    protected $signature = 'zBGPView:update-iana-assignments';
 
     /**
      * The console command description.

@@ -13,7 +13,7 @@ class UpdateRoaTable extends Command
      *
      * @var string
      */
-    protected $signature = 'zIPLookup:update-roa-table';
+    protected $signature = 'zBGPView:update-roa-table';
     protected $rpkiServer;
     protected $ipUtils;
 

@@ -23,7 +23,7 @@ class UpdateDNSTable extends Command
      *
      * @var string
      */
-    protected $signature = 'zIPLookup:update-dns-table';
+    protected $signature = 'zBGPView:update-dns-table';
 
     /**
      * The console command description.

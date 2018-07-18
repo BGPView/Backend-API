@@ -22,7 +22,7 @@ class UpdateBgpData extends ReindexRIRWhois
      *
      * @var string
      */
-    protected $signature = 'zIPLookup:update-bgp-data';
+    protected $signature = 'zBGPView:update-bgp-data';
 
     /**
      * The console command description.

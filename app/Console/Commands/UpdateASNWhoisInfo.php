@@ -32,7 +32,7 @@ class UpdateASNWhoisInfo extends Command
      *
      * @var string
      */
-    protected $signature = 'zIPLookup:update-asn-whois';
+    protected $signature = 'zBGPView:update-asn-whois';
 
     /**
      * The console command description.

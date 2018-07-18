@@ -12,7 +12,7 @@ class UpdateMaxmindDB extends Command
      *
      * @var string
      */
-    protected $signature = 'zIPLookup:update-maxmind-database';
+    protected $signature = 'zBGPView:update-maxmind-database';
 
     /**
      * The console command description.
