@@ -100,6 +100,7 @@ class EnterPrefixes extends Job implements ShouldQueue
         }
 
         dump([
+            'prefix'           => $newPrefixWhois->ip . '/' . $newPrefixWhois->cidr,
             'name'             => $newPrefixWhois->name,
             'description'      => $newPrefixWhois->description,
             'description_full' => $newPrefixWhois->description_full,
