@@ -14,34 +14,34 @@ class MakeAsnBigInt extends Migration
     {
         Schema::table('asns', function($table)
         {
-            $table->bigInteger('asn')->change();
+            $table->bigInteger('asn')->unsigned()->change();
         });
 
         Schema::table('ipv4_bgp_prefixes', function($table)
         {
-            $table->bigInteger('asn')->change();
+            $table->bigInteger('asn')->unsigned()->change();
         });
 
         Schema::table('ipv6_bgp_prefixes', function($table)
         {
-            $table->bigInteger('asn')->change();
+            $table->bigInteger('asn')->unsigned()->change();
         });
 
         Schema::table('ix_members', function($table)
         {
-            $table->bigInteger('asn')->change();
+            $table->bigInteger('asn')->unsigned()->change();
         });
 
         Schema::table('ipv4_peers', function($table)
         {
-            $table->bigInteger('asn_1')->change();
-            $table->bigInteger('asn_2')->change();
+            $table->bigInteger('asn_1')->unsigned()->change();
+            $table->bigInteger('asn_2')->unsigned()->change();
         });
 
         Schema::table('ipv6_peers', function($table)
         {
-            $table->bigInteger('asn_1')->change();
-            $table->bigInteger('asn_2')->change();
+            $table->bigInteger('asn_1')->unsigned()->change();
+            $table->bigInteger('asn_2')->unsigned()->change();
         });
     }
 
