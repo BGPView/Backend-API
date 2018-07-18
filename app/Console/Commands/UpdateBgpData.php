@@ -37,9 +37,9 @@ class UpdateBgpData extends ReindexRIRWhois
     public function __construct(CLImate $cli, BgpParser $bgpParser, IpUtils $ipUtils)
     {
         parent::__construct();
-        $this->cli            = $cli;
-        $this->bgpParser      = $bgpParser;
-        $this->ipUtils        = $ipUtils;
+        $this->cli = $cli;
+        $this->bgpParser = $bgpParser;
+        $this->ipUtils = $ipUtils;
         $this->versionedIndex = $this->indexName . '_' . time();
     }
 
@@ -50,7 +50,26 @@ class UpdateBgpData extends ReindexRIRWhois
      */
     public function handle()
     {
-        return $this->cli->red("This command was replaced by the Go app for BGP data processing/updating")->br();
+
+        $this->bench->start();
+
+        $this->cli->br()->comment('===================================================');
+
+        $this->cli->red('Executing ' . base_path() . '/scripts/update_bgp_ribs.sh')->br();
+        exec('bash ' . base_path() . '/scripts/update_bgp_ribs.sh');
+
+        $this->output->newLine(1);
+        $this->bench->end();
+        $this->cli->info(sprintf(
+            'Time: %s, Memory: %s',
+            $this->bench->getTime(),
+            $this->bench->getMemoryPeak()
+        ))->br();
+
+        return;
+
+        // ########################## EVERYTHING BELOW THIS SHOULD NOT RUN ##########################
+
 
         $this->cli->br();
         $this->cli->red("########################################################################")->br();
@@ -149,27 +168,27 @@ class UpdateBgpData extends ReindexRIRWhois
 
                 // Now lets set all the variable names
                 if ($v4) {
-                    $ipVersion          = 4;
+                    $ipVersion = 4;
                     $ipvAmountCidrArray = 'ipv4AmountCidrArray';
-                    $seenPrefixes       = 'seenV4Prefixes';
-                    $seenTableEntries   = 'seenV4TableEntries';
-                    $seenPeers          = 'seenV4Peers';
-                    $newPeers           = 'newV4Peers';
-                    $newPrefixes        = 'newV4Prefixes';
-                    $newTableEntries    = 'newV4TableEntries';
-                    $counter            = 'v4counter';
-                    $prefixCounter      = 'v4PrefixCounter';
+                    $seenPrefixes = 'seenV4Prefixes';
+                    $seenTableEntries = 'seenV4TableEntries';
+                    $seenPeers = 'seenV4Peers';
+                    $newPeers = 'newV4Peers';
+                    $newPrefixes = 'newV4Prefixes';
+                    $newTableEntries = 'newV4TableEntries';
+                    $counter = 'v4counter';
+                    $prefixCounter = 'v4PrefixCounter';
                 } else {
-                    $ipVersion          = 6;
+                    $ipVersion = 6;
                     $ipvAmountCidrArray = 'ipv6AmountCidrArray';
-                    $seenPrefixes       = 'seenV6Prefixes';
-                    $seenTableEntries   = 'seenV6TableEntries';
-                    $seenPeers          = 'seenV6Peers';
-                    $newPeers           = 'newV6Peers';
-                    $newPrefixes        = 'newV6Prefixes';
-                    $newTableEntries    = 'newV6TableEntries';
-                    $counter            = 'v6counter';
-                    $prefixCounter      = 'v6PrefixCounter';
+                    $seenPrefixes = 'seenV6Prefixes';
+                    $seenTableEntries = 'seenV6TableEntries';
+                    $seenPeers = 'seenV6Peers';
+                    $newPeers = 'newV6Peers';
+                    $newPrefixes = 'newV6Prefixes';
+                    $newTableEntries = 'newV6TableEntries';
+                    $counter = 'v6counter';
+                    $prefixCounter = 'v6PrefixCounter';
                 }
 
                 // Lets try process the peers
@@ -199,7 +218,7 @@ class UpdateBgpData extends ReindexRIRWhois
                         $this->cli->br()->comment('Inserting another 250,000 prefixes in one bulk query (' . $ipVersion . ')');
                         $$newPrefixes = rtrim($$newPrefixes, ',') . ';';
                         DB::unprepared('INSERT INTO ipv' . $ipVersion . '_bgp_prefixes_temp (ip,cidr,ip_dec_start,ip_dec_end,asn,roa_status,updated_at,created_at) VALUES ' . $$newPrefixes);
-                        $$newPrefixes   = "";
+                        $$newPrefixes = "";
                         $$prefixCounter = 0;
                     }
                 }
@@ -242,7 +261,7 @@ class UpdateBgpData extends ReindexRIRWhois
                     $this->esClient->bulk($params);
                     // Reset the batching
                     $params['body'] = [];
-                    $$counter       = 0;
+                    $$counter = 0;
                 }
 
                 // Lets make note of the table entry we have seen
