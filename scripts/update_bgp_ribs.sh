@@ -71,11 +71,9 @@ process_rib http://data.ris.ripe.net/rrc21/latest-bview.gz "axel -o" &
 ###############################################################################################
 
 
-if pgrep -x "wget|axel|bgpdump" > /dev/null
-then
-    echo "Running"
-else
-    echo "Stopped"
-fi
+while pgrep -x "wget|axel|bgpdump" > /dev/null;
+do
+    sleep 3
+done
 
 exit 0
