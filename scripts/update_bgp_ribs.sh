@@ -70,6 +70,7 @@ process_rib http://data.ris.ripe.net/rrc20/latest-bview.gz "axel -o" &
 process_rib http://data.ris.ripe.net/rrc21/latest-bview.gz "axel -o" &
 ###############################################################################################
 
+sleep 5
 
 while pgrep -x "wget|axel|bgpdump" > /dev/null;
 do
