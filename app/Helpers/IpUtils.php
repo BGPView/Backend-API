@@ -408,7 +408,7 @@ class IpUtils
                             'order' => 'asc',
                         ],
                     ],
-                    'filter' => [
+                    'query' => [
                         'bool' => [
                             'must' => [
                                 [
@@ -537,7 +537,7 @@ class IpUtils
             'index'       => 'bgp_data',
             'type'        => 'full_table',
             'body'        => [
-                'filter' => [
+                'query' => [
                     'bool' => [
                         'must' => [
                             [
@@ -887,7 +887,7 @@ class IpUtils
             'index'       => 'rir_allocations_prefixes',
             'type'        => 'prefixes',
             'body'        => [
-                'filter' => [
+                'query' => [
                     'bool' => [
                         'should' => [
                             [
@@ -907,7 +907,7 @@ class IpUtils
         ];
 
         if (is_null($ipVersion) !== true) {
-            $params['body']['filter']['bool']['must'][] = ['match' => ['ip_version' => $ipVersion]];
+            $params['body']['query']['bool']['must'][] = ['match' => ['ip_version' => $ipVersion]];
         }
 
         $docs      = $client->search($params);
