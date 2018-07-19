@@ -68,6 +68,8 @@ process_rib http://data.ris.ripe.net/rrc18/latest-bview.gz "axel -o" &
 process_rib http://data.ris.ripe.net/rrc19/latest-bview.gz "axel -o" &
 process_rib http://data.ris.ripe.net/rrc20/latest-bview.gz "axel -o" &
 process_rib http://data.ris.ripe.net/rrc21/latest-bview.gz "axel -o" &
+process_rib http://data.ris.ripe.net/rrc22/latest-bview.gz "axel -o" &
+process_rib http://data.ris.ripe.net/rrc23/latest-bview.gz "axel -o" &
 ###############################################################################################
 
 sleep 5
