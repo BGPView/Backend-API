@@ -36,7 +36,7 @@ class UpdatePrefixWhoisData extends Command
      *
      * @var string
      */
-    protected $signature = 'zBGPView:update-prefix-whois-data';
+    protected $signature = 'zBGPView:6-update-prefix-whois-data';
 
     /**
      * The console command description.

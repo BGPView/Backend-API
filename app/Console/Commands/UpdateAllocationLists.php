@@ -12,7 +12,7 @@ class UpdateAllocationLists extends ReindexRIRWhois
      *
      * @var string
      */
-    protected $signature = 'zBGPView:reindex-rir-allocations';
+    protected $signature = 'zBGPView:1-reindex-rir-allocations';
     protected $indexName = 'rir_allocations';
     protected $indexVersion;
     protected $seenIpv4Allocation = [];

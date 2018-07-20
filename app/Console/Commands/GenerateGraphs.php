@@ -19,7 +19,7 @@ class GenerateGraphs extends Command
      *
      * @var string
      */
-    protected $signature = 'zBGPView:generate-asn-graphes';
+    protected $signature = 'zBGPView:7-generate-asn-graphes';
     protected $bench;
     protected $esClient;
     protected $ipUtils;

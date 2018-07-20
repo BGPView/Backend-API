@@ -15,7 +15,7 @@ class ReindexES extends Command
      *
      * @var string
      */
-    protected $signature   = 'zBGPView:reindex-es';
+    protected $signature   = 'zBGPView:8-reindex-es';
     protected $bench;
 
     /**

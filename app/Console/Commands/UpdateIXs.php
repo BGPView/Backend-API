@@ -25,7 +25,7 @@ class UpdateIXs extends Command
      *
      * @var string
      */
-    protected $signature = 'zBGPView:update-ix-info';
+    protected $signature = 'zBGPView:3-update-ix-info';
 
     /**
      * The console command description.
