@@ -14,7 +14,7 @@ function process_rib {
         filename=$1
         extension="${filename##*.}"
         $2 ./storage/temp_rib_$random_name.$extension $1;
-        ./scripts/bgpdump -m ./storage/temp_rib_$random_name.$extension >> ./storage/$random_name_bgp_out.txt
+        ./scripts/bgpdump -m ./storage/temp_rib_${random_name}.${extension} >> ./storage/${random_name}_bgp_out.txt
         rm -f ./storage/temp_rib_$random_name.$extension;
     fi
 }
