@@ -20,7 +20,7 @@
 	    "predis/predis": "~1.0",
         "pear/net_dns2": "^1.4",
 	    "elasticquent/elasticquent": "dev-master",
-        "jeremykendall/php-domain-parser": "~2.0"
+        "jeremykendall/php-domain-parser": "^5.3"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
