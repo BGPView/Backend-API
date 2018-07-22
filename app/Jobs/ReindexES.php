@@ -38,24 +38,23 @@ class ReindexES extends Job implements ShouldQueue
      */
     public function handle()
     {
+        $this->reindexClass('ipv4', IPv4PrefixWhois::class);
+        $this->reindexClass('ipv6', IPv6PrefixWhois::class);
+        $this->reindexClass('ix', IX::class, $withRelated = false);
+        $this->reindexClass('asn', ASN::class);
+
+    }
+
+    private function reindexClass($name, $class, $withRelated = true)
+    {
         // Setting a brand new index name
-        $entityIndexName = config('elasticquent.default_index');
+        $originalIndex = config('elasticquent.default_index');
+        $entityIndexName = config('elasticquent.default_index'). '_' . $name;
         $versionedIndex  = $entityIndexName . '_' . time();
         Config::set('elasticquent.default_index', $versionedIndex);
 
-        // create new index
-        ASN::createIndex();
+        $class::createIndex();
 
-        $this->reindexClass(IPv4PrefixWhois::class);
-        $this->reindexClass(IPv6PrefixWhois::class);
-        $this->reindexClass(IX::class, $withRelated = false);
-        $this->reindexClass(ASN::class);
-
-        $this->hotSwapIndices($versionedIndex, $entityIndexName);
-    }
-
-    private function reindexClass($class, $withRelated = true)
-    {
         $class::putMapping($ignoreConflicts = true);
 
         $this->cli->comment('=====================================');
@@ -74,6 +73,11 @@ class ReindexES extends Job implements ShouldQueue
                 $class::offset($i * $this->batchAmount)->limit($this->batchAmount)->get()->addToIndex();
             }
         }
+
+        $this->hotSwapIndices($versionedIndex, $entityIndexName);
+
+        Config::set('elasticquent.default_index', $originalIndex);
+
     }
 
     private function hotSwapIndices($versionedIndex, $entityIndexName)

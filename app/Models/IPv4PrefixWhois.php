@@ -64,6 +64,15 @@ class IPv4PrefixWhois extends Model {
     protected $hidden = ['id', 'rir_id', 'bgp_prefix_id', 'raw_whois', 'created_at', 'updated_at', 'ip_dec_start', 'ip_dec_end'];
 
 
+    public function getIndexName()
+    {
+        if (substr_count(config('elasticquent.default_index'), '_') > 1) {
+            return config('elasticquent.default_index');
+        }
+
+        return config('elasticquent.default_index'). '_ipv4';
+    }
+
     public function rir()
     {
         return $this->belongsTo('App\Models\Rir');

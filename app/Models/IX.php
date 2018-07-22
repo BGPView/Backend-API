@@ -62,6 +62,15 @@ class IX extends Model {
      */
     protected $hidden = ['id', 'peeringdb_id', 'created_at', 'updated_at'];
 
+    public function getIndexName()
+    {
+        if (substr_count(config('elasticquent.default_index'), '_') > 1) {
+            return config('elasticquent.default_index');
+        }
+
+        return config('elasticquent.default_index'). '_ix';
+    }
+
     public function members()
     {
         return $this->hasMany('App\Models\IXMember', 'ix_peeringdb_id', 'peeringdb_id');

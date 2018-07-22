@@ -71,6 +71,15 @@ class ASN extends Model
      */
     protected $hidden = ['id', 'rir_id', 'raw_whois', 'created_at', 'updated_at'];
 
+    public function getIndexName()
+    {
+        if (substr_count(config('elasticquent.default_index'), '_') > 1) {
+            return config('elasticquent.default_index');
+        }
+
+        return config('elasticquent.default_index'). '_asn';
+    }
+
     public function emails()
     {
         return $this->hasMany('App\Models\ASNEmail', 'asn_id', 'id');
