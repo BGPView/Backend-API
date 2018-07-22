@@ -84,4 +84,6 @@ echo "Combining all the output BGP files into one..."
 cat ./storage/*_bgp_out.txt > ./storage/bgp_lines.txt
 rm -f ./storage/*_bgp_out.txt
 
+./scripts/go-bgpparse -bgp_file=/var/www/api.bgpview.io/storage/bgp_lines.txt -db_name=XXXXXXXX -db_user=XXXXXX -db_pass=XXXXXXXXX -bulk_insert=20000 -bulk_insert_es=20000
+
 exit 0
