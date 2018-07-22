@@ -100,7 +100,7 @@ class ASN extends Model
         if (is_string($value) !== true) {
             return $value;
         }
-        
+
         return json_decode($value);
     }
 
@@ -299,6 +299,13 @@ class ASN extends Model
 
         $steams = [];
         while (true) {
+
+            //Get Initial set of results
+            if (count($docs['hits']['hits']) > 0) {
+                $results = $ipUtils->cleanEsResults($docs);
+                $steams  = array_merge($steams, $results);
+            }
+
             $response = $client->scroll(
                 array(
                     "scroll_id" => $scroll_id,
@@ -316,7 +323,6 @@ class ASN extends Model
                 break;
             }
         }
-
         $output['ipv4_' . $direction] = [];
         $output['ipv6_' . $direction] = [];
         foreach ($steams as $steam) {

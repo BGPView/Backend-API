@@ -89,6 +89,17 @@ class GenerateGraphs extends Command
         $scroll_id = $docs['_scroll_id'];
 
         while (true) {
+
+            // Get Initial set of results
+            if (count($docs['hits']['hits']) > 0) {
+                $results = $this->ipUtils->cleanEsResults($docs);
+                foreach ($results as $result) {
+                    if (isset($bgpAsns[$result->asn]) !== true) {
+                        $bgpAsns[$result->asn] = true;
+                    }
+                }
+            }
+
             $response = $this->esClient->scroll(
                 array(
                     "scroll_id" => $scroll_id,

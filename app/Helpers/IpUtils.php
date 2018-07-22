@@ -561,6 +561,12 @@ class IpUtils
 
         $entries = [];
         while (true) {
+            // Get initial results
+            if (count($docs['hits']['hits']) > 0) {
+                $results = $this->cleanEsResults($docs);
+                $entries = array_merge($entries, $results);
+            }
+
             $response = $client->scroll(
                 array(
                     "scroll_id" => $scroll_id,
@@ -807,6 +813,16 @@ class IpUtils
         $scroll_id = $docs['_scroll_id'];
 
         while (true) {
+            // Get initial set of results
+            if (count($docs['hits']['hits']) > 0) {
+                $results = $this->cleanEsResults($docs);
+                foreach ($results as $result) {
+                    if (isset($bgpAsns[$result->asn]) !== true) {
+                        $bgpAsns[$result->asn] = $result;
+                    }
+                }
+            }
+
             $response = $client->scroll(
                 array(
                     "scroll_id" => $scroll_id,
@@ -853,6 +869,12 @@ class IpUtils
         $scroll_id = $docs['_scroll_id'];
 
         while (true) {
+            // Get inital set of results
+            if (count($docs['hits']['hits']) > 0) {
+                $results       = $this->cleanEsResults($docs);
+                $allocatedAsns = array_merge($allocatedAsns, $results);
+            }
+
             $response = $client->scroll(
                 array(
                     "scroll_id" => $scroll_id,
@@ -914,6 +936,12 @@ class IpUtils
         $scroll_id = $docs['_scroll_id'];
 
         while (true) {
+            //Get initial set of results
+            if (count($docs['hits']['hits']) > 0) {
+                $results     = $this->cleanEsResults($docs);
+                $rirPrefixes = array_merge($rirPrefixes, $results);
+            }
+
             $response = $client->scroll(
                 array(
                     "scroll_id" => $scroll_id,
