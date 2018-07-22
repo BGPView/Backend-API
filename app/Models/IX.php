@@ -48,6 +48,10 @@ class IX extends Model {
             'analyzer' => 'string_lowercase',
             'fielddata' => true,
         ],
+        'ip' => [
+            'type' => 'keyword',
+            'index' => true,
+        ],
     ];
 
     /**

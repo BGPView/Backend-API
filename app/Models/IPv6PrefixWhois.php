@@ -38,6 +38,10 @@ class IPv6PrefixWhois extends Model {
      * @var array
      */
     protected $mappingProperties = [
+        'ip' => [
+            'type' => 'keyword',
+            'index' => true,
+        ],
         'name' => [
             'type' => 'text',
             'analyzer' => 'string_lowercase',
