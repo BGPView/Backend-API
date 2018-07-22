@@ -40,11 +40,13 @@ class IPv6PrefixWhois extends Model {
     protected $mappingProperties = [
         'name' => [
             'type' => 'text',
-            'analyzer' => 'string_lowercase'
+            'analyzer' => 'string_lowercase',
+            'fielddata' => true,
         ],
         'description' => [
             'type' => 'text',
-            'analyzer' => 'string_lowercase'
+            'analyzer' => 'string_lowercase',
+            'fielddata' => true,
         ],
     ];
 

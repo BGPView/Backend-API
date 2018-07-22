@@ -44,16 +44,19 @@ class ASN extends Model
         'name'        => [
             'type'     => 'text',
             'analyzer' => 'string_lowercase',
+            'fielddata' => true,
         ],
         'description' => [
             'type'     => 'text',
             'analyzer' => 'string_lowercase',
+            'fielddata' => true,
         ],
         'asn'         => [
             'type'   => 'text',
             'fields' => [
                 'sort' => ['type' => 'long'],
             ],
+            'fielddata' => true,
         ],
     ];
 
