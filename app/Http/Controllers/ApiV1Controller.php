@@ -15,8 +15,9 @@ use App\Services\Dns;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Pdp\Parser;
-use Pdp\PublicSuffixListManager;
+use Pdp\Cache as PdpCache;
+use Pdp\CurlHttpClient as PdpCurlHttpClient;
+use Pdp\Manager as PdpManager;
 
 class ApiV1Controller extends ApiBaseController
 {
@@ -586,11 +587,13 @@ class ApiV1Controller extends ApiBaseController
      */
     public function getLiveDns($hostname)
     {
-        $pslManager   = new PublicSuffixListManager();
-        $domainParser = new Parser($pslManager->getList());
+        $pdpManager   = new PdpManager(new PdpCache(), new PdpCurlHttpClient());
+        $pdpRules     = $pdpManager->getRules(); //$rules is a Pdp\Rules object
 
-        $hostname   = strtolower($hostname);
-        $baseDomain = $domainParser->getRegisterableDomain($hostname);
+        $hostname     = strtolower($hostname);
+        $domainParser = $pdpRules->resolve($hostname); //$domain is a Pdp\Domain object
+
+        $baseDomain = $domainParser->getRegistrableDomain();
         $ipUtils    = $this->ipUtils;
 
         $records = Cache::remember($hostname, 60 * 24, function () use ($ipUtils, $hostname) {
