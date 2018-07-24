@@ -533,7 +533,7 @@ class IpUtils
 
         $params = [
             'scroll'      => '30s',
-            'size'        => 1000000,
+            'size'        => 10000,
             'index'       => 'bgp_data',
             'type'        => 'full_table',
             'body'        => [
@@ -804,7 +804,7 @@ class IpUtils
         $bgpAsns = [];
         $params  = [
             'scroll'      => '30s',
-            'size'        => 1000000,
+            'size'        => 10000,
             'index'       => 'bgp_data',
             'type'        => 'full_table',
         ];
@@ -856,7 +856,7 @@ class IpUtils
         $allocatedAsns = [];
         $params        = [
             'scroll'      => '30s',
-            'size'        => 1000000,
+            'size'        => 10000,
             'index'       => 'rir_allocations_asns',
             'type'        => 'asns',
         ];
@@ -906,7 +906,7 @@ class IpUtils
         // Get all allocated IP prefixes
         $params = [
             'scroll'      => '30s',
-            'size'        => 1000000,
+            'size'        => 10000,
             'index'       => 'rir_allocations_prefixes',
             'type'        => 'prefixes',
             'body'        => [

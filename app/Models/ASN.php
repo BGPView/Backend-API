@@ -289,7 +289,7 @@ class ASN extends Model
 
         $params = [
             'scroll'      => '30s',
-            'size'        => 1000000,
+            'size'        => 10000,
             'index'       => 'bgp_data',
             'type'        => 'full_table',
             'body'        => [
