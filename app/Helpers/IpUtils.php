@@ -533,7 +533,7 @@ class IpUtils
 
         $params = [
             'scroll'      => '30s',
-            'size'        => 10000,
+            'size'        => 1000000,
             'index'       => 'bgp_data',
             'type'        => 'full_table',
             'body'        => [
@@ -804,7 +804,7 @@ class IpUtils
         $bgpAsns = [];
         $params  = [
             'scroll'      => '30s',
-            'size'        => 10000,
+            'size'        => 1000000,
             'index'       => 'bgp_data',
             'type'        => 'full_table',
         ];
@@ -856,7 +856,7 @@ class IpUtils
         $allocatedAsns = [];
         $params        = [
             'scroll'      => '30s',
-            'size'        => 10000,
+            'size'        => 1000000,
             'index'       => 'rir_allocations_asns',
             'type'        => 'asns',
         ];
@@ -882,6 +882,7 @@ class IpUtils
                 )
             );
 
+
             if (count($response['hits']['hits']) > 0) {
                 $results       = $this->cleanEsResults($response);
                 $allocatedAsns = array_merge($allocatedAsns, $results);
@@ -905,7 +906,7 @@ class IpUtils
         // Get all allocated IP prefixes
         $params = [
             'scroll'      => '30s',
-            'size'        => 10000,
+            'size'        => 1000000,
             'index'       => 'rir_allocations_prefixes',
             'type'        => 'prefixes',
             'body'        => [

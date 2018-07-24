@@ -80,7 +80,7 @@ class GenerateGraphs extends Command
         $bgpAsns = [];
         $params  = [
             'scroll'      => '30s',
-            'size'        => 10000,
+            'size'        => 1000000,
             'index'       => 'bgp_data',
             'type'        => 'full_table',
         ];
