@@ -165,8 +165,8 @@ class IPv6PrefixWhois extends Model {
     {
         $abuse_contacts = [];
         foreach ($this->emails as $email) {
-            if ($email->abuse_email) {
-                $abuse_contacts[] = isset($email->email_address) ? $email->email_address : $email['email_address'];
+            if (isset($email->abuse_email) || isset($email['abuse_email'])) {
+                $abuse_contacts[] = isset($email->abuse_email) ? $email->abuse_email : $email['abuse_email'];
             }
         }
         return $abuse_contacts;
