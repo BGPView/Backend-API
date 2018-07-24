@@ -174,8 +174,8 @@ class ASN extends Model
     {
         $abuse_contacts = [];
         foreach ($this->emails as $email) {
-            if (isset($email->abuse_email) || isset($email['abuse_email'])) {
-                $abuse_contacts[] = isset($email->abuse_email) ? $email->abuse_email : $email['abuse_email'];
+            if ((isset($email->abuse_email) && $email->abuse_email) || (isset($email['abuse_email']) && $email['abuse_email'])) {
+                $abuse_contacts[] = isset($email->email_address) ? $email->email_address : $email['email_address'];
             }
         }
         return $abuse_contacts;

@@ -526,7 +526,7 @@ class ApiV1Controller extends ApiBaseController
             $asnData['country_code']   = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
             $asnData['email_contacts'] = $asn->email_contacts;
             $asnData['abuse_contacts'] = $asn->abuse_contacts;
-            $asnData['rir_name']       = $asn->rir->name;
+            $asnData['rir_name']       = isset($asn->rir->name) ? $asn->rir->name : $asn->rir['name'];
 
             $data['asns'][] = $asnData;
         }
@@ -541,7 +541,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['description']    = $prefix->description;
             $prefixData['email_contacts'] = $prefix->email_contacts;
             $prefixData['abuse_contacts'] = $prefix->abuse_contacts;
-            $prefixData['rir_name']       = $prefix->rir->name;
+            $prefixData['rir_name']       = isset($asn->rir->name) ? $asn->rir->name : $asn->rir['name'];
             $prefixData['parent_prefix']  = $prefix->parent_ip . '/' . $prefix->parent_cidr;
             $prefixData['parent_ip']      = $prefix->parent_ip;
             $prefixData['parent_cidr']    = $prefix->parent_cidr;
@@ -559,7 +559,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['description']    = $prefix->description;
             $prefixData['email_contacts'] = $prefix->email_contacts;
             $prefixData['abuse_contacts'] = $prefix->abuse_contacts;
-            $prefixData['rir_name']       = $prefix->rir->name;
+            $prefixData['rir_name']       = isset($asn->rir->name) ? $asn->rir->name : $asn->rir['name'];
             $prefixData['parent_prefix']  = $prefix->parent_ip . '/' . $prefix->parent_cidr;
             $prefixData['parent_ip']      = $prefix->parent_ip;
             $prefixData['parent_cidr']    = $prefix->parent_cidr;
