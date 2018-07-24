@@ -157,7 +157,7 @@ class IPv4PrefixWhois extends Model {
     {
         $email_contacts = [];
         foreach ($this->emails as $email) {
-            $email_contacts[] = $email->email_address;
+            $email_contacts[] = isset($email->email_address) ? $email->email_address : $email['email_address'];
         }
         return $email_contacts;
     }
@@ -167,7 +167,7 @@ class IPv4PrefixWhois extends Model {
         $abuse_contacts = [];
         foreach ($this->emails as $email) {
             if ($email->abuse_email) {
-                $abuse_contacts[] = $email->email_address;
+                $abuse_contacts[] = isset($email->email_address) ? $email->email_address : $email['email_address'];
             }
         }
         return $abuse_contacts;
