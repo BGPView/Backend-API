@@ -513,6 +513,7 @@ class ApiV1Controller extends ApiBaseController
             ]],
         ];
 
+        echo json_encode($elasticQuery);die();
         $asns         = ASN::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 100, $offset = null, $asnSort);
         $ipv4Prefixes = IPv4PrefixWhois::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 200, $offset = null, $ipSort);
         $ipv6Prefixes = IPv6PrefixWhois::searchByQuery($elasticQuery, $aggregations = null, $sourceFields = null, $limit = 200, $offset = null, $ipSort);

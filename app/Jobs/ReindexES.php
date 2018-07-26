@@ -18,7 +18,7 @@ class ReindexES extends Job implements ShouldQueue
     use InteractsWithQueue, SerializesModels;
 
     protected $cli;
-    protected $batchAmount = 50000;
+    protected $batchAmount = 10000;
 
 
     /**
