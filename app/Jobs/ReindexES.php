@@ -38,10 +38,10 @@ class ReindexES extends Job implements ShouldQueue
      */
     public function handle()
     {
-        $this->reindexClass('ipv4', IPv4PrefixWhois::class);
-        $this->reindexClass('ipv6', IPv6PrefixWhois::class);
         $this->reindexClass('ix', IX::class, $withRelated = false);
         $this->reindexClass('asn', ASN::class);
+        $this->reindexClass('ipv6', IPv6PrefixWhois::class);
+        $this->reindexClass('ipv4', IPv4PrefixWhois::class);
 
     }
 
