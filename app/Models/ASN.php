@@ -186,9 +186,12 @@ class ASN extends Model
         $ipUtils               = new IpUtils();
         $peerSet['ipv4_peers'] = IPv4Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
         $peerSet['ipv6_peers'] = IPv6Peer::where('asn_1', $as_number)->orWhere('asn_2', $as_number)->get();
+        $filteredAsnList['ipv4_peers']  = [];
+        $filteredAsnList['ipv6_peers']  = [];
         $output['ipv4_peers']  = [];
         $output['ipv6_peers']  = [];
 
+        // Combine
         foreach ($peerSet as $ipVersion => $peers) {
             foreach ($peers as $peer) {
                 if ($peer->asn_1 == $as_number && $peer->asn_2 == $as_number) {
@@ -196,9 +199,21 @@ class ASN extends Model
                 }
 
                 $peerAsn = $peer->asn_1 == $as_number ? $peer->asn_2 : $peer->asn_1;
-                $asn     = self::where('asn', $peerAsn)->first();
 
-                if (is_null($asn) === true) {
+                $filteredAsnList[$ipVersion][$peerAsn] = true;
+            }
+        }
+
+        // Get all ASN Details
+        $asnList = array_unique(array_merge(array_keys($filteredAsnList['ipv4_peers']), array_keys($filteredAsnList['ipv6_peers'])));
+        $asnListDetails = self::whereIn('asn', $asnList)->get()->keyBy('asn');
+
+        foreach ($filteredAsnList as $ipVersion => $peers) {
+            foreach ($peers as $peerAsn => $placeholder) {
+
+                if (isset($asnListDetails[$peerAsn]) === true) {
+                    $asn = $asnListDetails[$peerAsn];
+                } else {
                     $assignment = $ipUtils->getIanaAssignmentEntry($peerAsn);
                 }
 
