@@ -88,9 +88,24 @@ class GenerateGraphs extends Command
         $docs      = $this->esClient->search($params);
         $scroll_id = $docs['_scroll_id'];
 
-        while (true) {
+        // Get Initial set of results
+        if (count($docs['hits']['hits']) > 0) {
+            $results = $this->ipUtils->cleanEsResults($docs);
+            foreach ($results as $result) {
+                if (isset($bgpAsns[$result->asn]) !== true) {
+                    $bgpAsns[$result->asn] = true;
+                }
+            }
+        }
 
-            // Get Initial set of results
+        while (true) {
+            $docs = $this->esClient->scroll(
+                array(
+                    "scroll_id" => $scroll_id,
+                    "scroll"    => "30s",
+                )
+            );
+
             if (count($docs['hits']['hits']) > 0) {
                 $results = $this->ipUtils->cleanEsResults($docs);
                 foreach ($results as $result) {
@@ -98,24 +113,8 @@ class GenerateGraphs extends Command
                         $bgpAsns[$result->asn] = true;
                     }
                 }
-            }
-
-            $response = $this->esClient->scroll(
-                array(
-                    "scroll_id" => $scroll_id,
-                    "scroll"    => "30s",
-                )
-            );
-
-            if (count($response['hits']['hits']) > 0) {
-                $results = $this->ipUtils->cleanEsResults($response);
-                foreach ($results as $result) {
-                    if (isset($bgpAsns[$result->asn]) !== true) {
-                        $bgpAsns[$result->asn] = true;
-                    }
-                }
                 // Get new scroll_id
-                $scroll_id = $response['_scroll_id'];
+                $scroll_id = $docs['_scroll_id'];
             } else {
                 // All done scrolling over data
                 break;
