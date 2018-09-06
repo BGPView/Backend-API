@@ -243,8 +243,8 @@ class ASN extends Model
 
         // Loop through all ASNs and sort them out into places
         $asnList = [];
-        $filteredList = ['ipv4_' . $direction] = [];
-        $filteredList = ['ipv6_' . $direction] = [];
+        $filteredList['ipv4_' . $direction] = [];
+        $filteredList['ipv6_' . $direction] = [];
         $output['ipv4_' . $direction] = [];
         $output['ipv6_' . $direction] = [];
 
