@@ -801,47 +801,30 @@ class IpUtils
         $client = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
 
         $bgpAsns = [];
-        $params  = [
-            'scroll'      => '30s',
-            'size'        => 10000,
+        $params = [
             'index'       => 'bgp_data',
             'type'        => 'full_table',
+            'body'        => [
+                'size'  => 0,
+                'aggs' => [
+                    'unique_asn' => [
+                        'terms' => [
+                            'field' => 'asn',
+                            'size' => 1000000000,
+                            'show_term_doc_count_error' => true,
+                        ],
+                    ],
+                ],
+            ],
         ];
 
-        $docs      = $client->search($params);
-        $scroll_id = $docs['_scroll_id'];
+        $docs = $client->search($params);
 
-        // Get initial set of results
-        if (count($docs['hits']['hits']) > 0) {
-            $results = $this->cleanEsResults($docs);
-            foreach ($results as $result) {
-                if (isset($bgpAsns[$result->asn]) !== true) {
-                    $bgpAsns[$result->asn] = $result;
-                }
-            }
-        }
+        foreach ($docs['aggregations']['unique_asn']['buckets'] as $agg) {
+            $asnObj      = new \stdClass();
+            $asnObj->asn = $agg['key'];
+            $bgpAsns[]   = $asnObj;
 
-        while (true) {
-            $docs = $client->scroll(
-                array(
-                    "scroll_id" => $scroll_id,
-                    "scroll"    => "30s",
-                )
-            );
-
-            if (count($docs['hits']['hits']) > 0) {
-                $results = $this->cleanEsResults($docs);
-                foreach ($results as $result) {
-                    if (isset($bgpAsns[$result->asn]) !== true) {
-                        $bgpAsns[$result->asn] = $result;
-                    }
-                }
-                // Get new scroll_id
-                $scroll_id = $docs['_scroll_id'];
-            } else {
-                // All done scrolling over data
-                break;
-            }
         }
 
         return collect($bgpAsns);
@@ -891,6 +874,10 @@ class IpUtils
                 // All done scrolling over data
                 break;
             }
+        }
+
+        foreach ($allocatedAsns as $allocatedAsn) {
+            $allocatedAsn->asn = (int) $allocatedAsn->asn;
         }
 
         return collect($allocatedAsns);
