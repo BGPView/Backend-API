@@ -250,7 +250,7 @@ class ASN extends Model
 
         foreach ($docs['aggregations']['unique_asn']['buckets'] as $agg) {
             $asnList[] = $agg['key'];
-            foreach ($agg['key']['unique_ip_version']['buckets'] as $subAgg) {
+            foreach ($agg['unique_ip_version']['buckets'] as $subAgg) {
                 $filteredList['ipv'.$subAgg['key'].'_' . $direction][] = $agg['key'];
             }
         }
