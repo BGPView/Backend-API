@@ -257,20 +257,21 @@ class ASN extends Model
 
         $asnListDetails = self::whereIn('asn', $asnList)->get()->keyBy('asn');
 
-        foreach ($filteredList as $ipVersion => $peerAsn) {
+        foreach ($filteredList as $ipVersion => $peerAsns) {
+            foreach ($peerAsns as $peerAsn) {
+                if (isset($asnListDetails[$peerAsn]) === true) {
+                    $asn = $asnListDetails[$peerAsn];
+                } else {
+                    $assignment = $ipUtils->getIanaAssignmentEntry($peerAsn);
+                }
 
-            if (isset($asnListDetails[$peerAsn]) === true) {
-                $asn = $asnListDetails[$peerAsn];
-            } else {
-                $assignment = $ipUtils->getIanaAssignmentEntry($peerAsn);
+                $peerAsnInfo['asn']          = $peerAsn;
+                $peerAsnInfo['name']         = is_null($asn) ? 'IANA-' . strtoupper($assignment->status) : $asn->name;
+                $peerAsnInfo['description']  = is_null($asn) ? $assignment->description : $asn->description;
+                $peerAsnInfo['country_code'] = is_null($asn) ? null : $asn->counrty_code;
+
+                $output[$ipVersion][] = $peerAsnInfo;
             }
-
-            $peerAsnInfo['asn']          = $peerAsn;
-            $peerAsnInfo['name']         = is_null($asn) ? 'IANA-' . strtoupper($assignment->status) : $asn->name;
-            $peerAsnInfo['description']  = is_null($asn) ? $assignment->description : $asn->description;
-            $peerAsnInfo['country_code'] = is_null($asn) ? null : $asn->counrty_code;
-
-            $output[$ipVersion][] = $peerAsnInfo;
         }
 
         // Get Graph images
