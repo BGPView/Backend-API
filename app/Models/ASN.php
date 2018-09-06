@@ -74,113 +74,6 @@ class ASN extends Model
      */
     protected $hidden = ['id', 'rir_id', 'raw_whois', 'created_at', 'updated_at'];
 
-    public function getIndexName()
-    {
-        if (substr_count(config('elasticquent.default_index'), '_') > 1) {
-            return config('elasticquent.default_index');
-        }
-
-        return config('elasticquent.default_index'). '_asn';
-    }
-
-    public function emails()
-    {
-        return $this->hasMany('App\Models\ASNEmail', 'asn_id', 'id');
-    }
-
-    public function rir()
-    {
-        return $this->belongsTo('App\Models\Rir');
-    }
-
-    public function ipv4_prefixes()
-    {
-        return $this->hasMany('App\Models\IPv4BgpPrefix', 'asn', 'asn');
-    }
-
-    public function ipv6_prefixes()
-    {
-        return $this->hasMany('App\Models\IPv6BgpPrefix', 'asn', 'asn');
-    }
-
-    public function getDescriptionFullAttribute($value)
-    {
-        if (is_null($value) === true) {
-            return [];
-        }
-
-        if (is_string($value) !== true) {
-            return $value;
-        }
-
-        return json_decode($value);
-    }
-
-    public function getDescriptionAttribute()
-    {
-        $descriptionLines = $this->description_full;
-        if (is_null($descriptionLines) !== true) {
-            foreach ($descriptionLines as $descriptionLine) {
-                if (preg_match("/[A-Za-z0-9]/i", $descriptionLine)) {
-                    return $descriptionLine;
-                }
-            }
-        }
-
-        return $this->name;
-    }
-
-    public function getOwnerAddressAttribute($value)
-    {
-        if (is_null($value) === true) {
-            return null;
-        }
-
-        $data         = json_decode($value);
-        $addressLines = [];
-
-        if (is_object($data) !== true && is_array($data) !== true) {
-            return $addressLines;
-        }
-
-        foreach ($data as $entry) {
-            // Remove/Clean all double commas
-            $entry        = preg_replace('/,+/', ',', $entry);
-            $addressArr   = explode(',', $entry);
-            $addressLines = array_merge($addressLines, $addressArr);
-        }
-
-        return array_map('trim', $addressLines);
-    }
-
-    public function getRawWhoisAttribute($value)
-    {
-        // Remove the "source" entry
-        $parts = explode("\n", $value);
-        unset($parts[0]);
-        return implode($parts, "\n");
-    }
-
-    public function getEmailContactsAttribute()
-    {
-        $email_contacts = [];
-        foreach ($this->emails as $email) {
-            $email_contacts[] = isset($email->email_address) ? $email->email_address : $email['email_address'];
-        }
-        return $email_contacts;
-    }
-
-    public function getAbuseContactsAttribute()
-    {
-        $abuse_contacts = [];
-        foreach ($this->emails as $email) {
-            if ((isset($email->abuse_email) && $email->abuse_email) || (isset($email['abuse_email']) && $email['abuse_email'])) {
-                $abuse_contacts[] = isset($email->email_address) ? $email->email_address : $email['email_address'];
-            }
-        }
-        return $abuse_contacts;
-    }
-
     public static function getPeers($as_number)
     {
         $ipUtils               = new IpUtils();
@@ -289,25 +182,31 @@ class ASN extends Model
         return $output;
     }
 
+    public static function getDownstreams($as_number, $asnMeta = true)
+    {
+        return self::getStreams($as_number, 'downstreams', $asnMeta);
+    }
+
     private static function getStreams($as_number, $direction = 'upstreams', $asnMeta)
     {
         if ($direction == 'upstreams') {
             $searchKey = 'asn';
             $oderKey   = 'upstream_asn';
+            $aggBy     = 'upstream_asn';
         } else {
             $searchKey = 'upstream_asn';
             $oderKey   = 'asn';
+            $aggBy     = 'asn';
         }
 
         $client  = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
         $ipUtils = new IpUtils();
 
         $params = [
-            'scroll'      => '30s',
-            'size'        => 10000,
             'index'       => 'bgp_data',
             'type'        => 'full_table',
             'body'        => [
+                'size'  => 0,
                 'sort'  => [
                     $oderKey => [
                         'order' => 'asc',
@@ -318,72 +217,61 @@ class ASN extends Model
                         $searchKey => $as_number,
                     ],
                 ],
+                'aggs' => [
+                    'unique_asn' => [
+                        'terms' => [
+                            'field' => $aggBy,
+                            'size' => 10000000,
+                            'show_term_doc_count_error' => true,
+                        ],
+                        'aggs' => [
+                            'unique_ip_version' => [
+                                'terms' => [
+                                    'size' => 10000000,
+                                    'field' => 'ip_version',
+                                    'show_term_doc_count_error' => true,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
         ];
 
+
         $docs      = $client->search($params);
-        $scroll_id = $docs['_scroll_id'];
 
-        $steams = [];
-        while (true) {
-
-            //Get Initial set of results
-            if (count($docs['hits']['hits']) > 0) {
-                $results = $ipUtils->cleanEsResults($docs);
-                $steams  = array_merge($steams, $results);
-            }
-
-            $response = $client->scroll(
-                array(
-                    "scroll_id" => $scroll_id,
-                    "scroll"    => "30s",
-                )
-            );
-
-            if (count($response['hits']['hits']) > 0) {
-                $results = $ipUtils->cleanEsResults($response);
-                $steams  = array_merge($steams, $results);
-                // Get new scroll_id
-                $scroll_id = $response['_scroll_id'];
-            } else {
-                // All done scrolling over data
-                break;
-            }
-        }
+        // Loop through all ASNs and sort them out into places
+        $asnList = [];
+        $filteredList = ['ipv4_' . $direction] = [];
+        $filteredList = ['ipv6_' . $direction] = [];
         $output['ipv4_' . $direction] = [];
         $output['ipv6_' . $direction] = [];
-        foreach ($steams as $steam) {
 
-            if (isset($output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey]) === true) {
-                if (in_array($steam->bgp_path, $output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey]['bgp_paths']) === false) {
-                    $output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey]['bgp_paths'][] = $steam->bgp_path;
-                }
-                continue;
+        foreach ($docs['aggregations']['unique_asn']['buckets'] as $agg) {
+            $asnList[] = $agg['key'];
+            foreach ($agg['key']['unique_ip_version']['buckets'] as $subAgg) {
+                $filteredList['ipv'.$subAgg['key'].'_' . $direction][] = $agg['key'];
             }
-
-            $asnOutput['asn'] = $steam->$oderKey;
-
-            if ($asnMeta === true) {
-                $asnData = self::where('asn', $steam->$oderKey)->first();
-
-                if (is_null($asnData) === true) {
-                    $assignment = $ipUtils->getIanaAssignmentEntry($steam->$oderKey);
-                }
-
-                $asnOutput['name']         = is_null($asnData) ? 'IANA-' . strtoupper($assignment->status) : $asnData->name;
-                $asnOutput['description']  = is_null($asnData) ? $assignment->description : $asnData->description;
-                $asnOutput['country_code'] = is_null($asnData) ? null : $asnData->counrty_code;
-            }
-
-            $asnOutput['bgp_paths'][] = $steam->bgp_path;
-
-            $output['ipv' . $steam->ip_version . '_' . $direction][$steam->$oderKey] = $asnOutput;
-            $asnOutput                                                               = null;
-            $upstreamAsn                                                             = null;
         }
 
-        $output['ipv4_' . $direction] = array_values($output['ipv4_' . $direction]);
-        $output['ipv6_' . $direction] = array_values($output['ipv6_' . $direction]);
+        $asnListDetails = self::whereIn('asn', $asnList)->get()->keyBy('asn');
+
+        foreach ($filteredList as $ipVersion => $peerAsn) {
+
+            if (isset($asnListDetails[$peerAsn]) === true) {
+                $asn = $asnListDetails[$peerAsn];
+            } else {
+                $assignment = $ipUtils->getIanaAssignmentEntry($peerAsn);
+            }
+
+            $peerAsnInfo['asn']          = $peerAsn;
+            $peerAsnInfo['name']         = is_null($asn) ? 'IANA-' . strtoupper($assignment->status) : $asn->name;
+            $peerAsnInfo['description']  = is_null($asn) ? $assignment->description : $asn->description;
+            $peerAsnInfo['country_code'] = is_null($asn) ? null : $asn->counrty_code;
+
+            $output[$ipVersion][] = $peerAsnInfo;
+        }
 
         // Get Graph images
         if ($direction === 'upstreams') {
@@ -413,14 +301,116 @@ class ASN extends Model
         return $output;
     }
 
-    public static function getDownstreams($as_number, $asnMeta = true)
-    {
-        return self::getStreams($as_number, 'downstreams', $asnMeta);
-    }
-
     public static function getUpstreams($as_number, $asnMeta = true)
     {
         return self::getStreams($as_number, 'upstreams', $asnMeta);
+    }
+
+    public function getIndexName()
+    {
+        if (substr_count(config('elasticquent.default_index'), '_') > 1) {
+            return config('elasticquent.default_index');
+        }
+
+        return config('elasticquent.default_index'). '_asn';
+    }
+
+    public function emails()
+    {
+        return $this->hasMany('App\Models\ASNEmail', 'asn_id', 'id');
+    }
+
+    public function rir()
+    {
+        return $this->belongsTo('App\Models\Rir');
+    }
+
+    public function ipv4_prefixes()
+    {
+        return $this->hasMany('App\Models\IPv4BgpPrefix', 'asn', 'asn');
+    }
+
+    public function ipv6_prefixes()
+    {
+        return $this->hasMany('App\Models\IPv6BgpPrefix', 'asn', 'asn');
+    }
+
+    public function getDescriptionFullAttribute($value)
+    {
+        if (is_null($value) === true) {
+            return [];
+        }
+
+        if (is_string($value) !== true) {
+            return $value;
+        }
+
+        return json_decode($value);
+    }
+
+    public function getDescriptionAttribute()
+    {
+        $descriptionLines = $this->description_full;
+        if (is_null($descriptionLines) !== true) {
+            foreach ($descriptionLines as $descriptionLine) {
+                if (preg_match("/[A-Za-z0-9]/i", $descriptionLine)) {
+                    return $descriptionLine;
+                }
+            }
+        }
+
+        return $this->name;
+    }
+
+    public function getOwnerAddressAttribute($value)
+    {
+        if (is_null($value) === true) {
+            return null;
+        }
+
+        $data         = json_decode($value);
+        $addressLines = [];
+
+        if (is_object($data) !== true && is_array($data) !== true) {
+            return $addressLines;
+        }
+
+        foreach ($data as $entry) {
+            // Remove/Clean all double commas
+            $entry        = preg_replace('/,+/', ',', $entry);
+            $addressArr   = explode(',', $entry);
+            $addressLines = array_merge($addressLines, $addressArr);
+        }
+
+        return array_map('trim', $addressLines);
+    }
+
+    public function getRawWhoisAttribute($value)
+    {
+        // Remove the "source" entry
+        $parts = explode("\n", $value);
+        unset($parts[0]);
+        return implode($parts, "\n");
+    }
+
+    public function getEmailContactsAttribute()
+    {
+        $email_contacts = [];
+        foreach ($this->emails as $email) {
+            $email_contacts[] = isset($email->email_address) ? $email->email_address : $email['email_address'];
+        }
+        return $email_contacts;
+    }
+
+    public function getAbuseContactsAttribute()
+    {
+        $abuse_contacts = [];
+        foreach ($this->emails as $email) {
+            if ((isset($email->abuse_email) && $email->abuse_email) || (isset($email['abuse_email']) && $email['abuse_email'])) {
+                $abuse_contacts[] = isset($email->email_address) ? $email->email_address : $email['email_address'];
+            }
+        }
+        return $abuse_contacts;
     }
 
 }
