@@ -221,13 +221,13 @@ class ASN extends Model
                     'unique_asn' => [
                         'terms' => [
                             'field' => $aggBy,
-                            'size' => 10000000,
+                            'size' => 1000000000,
                             'show_term_doc_count_error' => true,
                         ],
                         'aggs' => [
                             'unique_ip_version' => [
                                 'terms' => [
-                                    'size' => 10000000,
+                                    'size' => 1000000000,
                                     'field' => 'ip_version',
                                     'show_term_doc_count_error' => true,
                                 ],

@@ -69,59 +69,18 @@ class GenerateGraphs extends Command
     private function generateGraphs($asns)
     {
         $this->info('Generating graph images per ASN');
-        foreach ($asns as $asn) {
-            $this->dispatch(new GenerateAsnGraphs($asn));
+        foreach ($asns as $asnObj) {
+            $this->dispatch(new GenerateAsnGraphs($asnObj->asn));
         }
     }
 
     private function getAsns()
     {
         $this->info('Getting all ASNs from ES');
-        $bgpAsns = [];
-        $params  = [
-            'scroll'      => '30s',
-            'size'        => 10000,
-            'index'       => 'bgp_data',
-            'type'        => 'full_table',
-        ];
 
-        $docs      = $this->esClient->search($params);
-        $scroll_id = $docs['_scroll_id'];
-
-        // Get Initial set of results
-        if (count($docs['hits']['hits']) > 0) {
-            $results = $this->ipUtils->cleanEsResults($docs);
-            foreach ($results as $result) {
-                if (isset($bgpAsns[$result->asn]) !== true) {
-                    $bgpAsns[$result->asn] = true;
-                }
-            }
-        }
-
-        while (true) {
-            $docs = $this->esClient->scroll(
-                array(
-                    "scroll_id" => $scroll_id,
-                    "scroll"    => "30s",
-                )
-            );
-
-            if (count($docs['hits']['hits']) > 0) {
-                $results = $this->ipUtils->cleanEsResults($docs);
-                foreach ($results as $result) {
-                    if (isset($bgpAsns[$result->asn]) !== true) {
-                        $bgpAsns[$result->asn] = true;
-                    }
-                }
-                // Get new scroll_id
-                $scroll_id = $docs['_scroll_id'];
-            } else {
-                // All done scrolling over data
-                break;
-            }
-        }
+        $bgpAsns = $this->ipUtils->getBgpAsns();
 
         $this->info('Found ' . number_format(count($bgpAsns)) . ' unique ASNs in BGP table');
-        return array_keys($bgpAsns);
+        return $bgpAsns;
     }
 }
