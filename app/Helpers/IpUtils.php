@@ -565,6 +565,7 @@ class IpUtils
             $results = $this->cleanEsResults($docs);
             $entries = array_merge($entries, $results);
         }
+
         while (true) {
             $docs = $client->scroll(
                 array(

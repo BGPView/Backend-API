@@ -5,6 +5,8 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -34,6 +36,11 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $e)
     {
+        Log::info($e->getMessage(), [
+            'url' => Request::url(),
+            'input' => Request::all()
+        ]);
+
         return parent::report($e);
     }
 
