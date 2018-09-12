@@ -354,6 +354,14 @@ class ApiV1Controller extends ApiBaseController
      */
     public function ip($ip)
     {
+        // check this is an IP address.
+        $ipVersion = $this->ipUtils->getInputType($ip);
+
+        if ($ipVersion !== 4 && $ipVersion !== 6) {
+            $data = $this->makeStatus('Malformed input', false);
+            return $this->respond($data);
+        }
+
         // Check if the IP is in bogon range
         if ($bogon = $this->ipUtils->isBogonAddress($ip)) {
             $bogonParts = explode('/', $bogon);
