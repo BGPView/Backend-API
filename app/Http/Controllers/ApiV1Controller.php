@@ -212,7 +212,7 @@ class ApiV1Controller extends ApiBaseController
             return $this->respond($data);
         }
 
-        if (is_integer($cidr) !== true) {
+        if (ctype_digit($cidr) !== true && is_int($cidr) !== true) {
             $data = $this->makeStatus('Malformed input', false);
             return $this->respond($data);
         }
