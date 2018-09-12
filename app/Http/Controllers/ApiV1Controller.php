@@ -35,6 +35,11 @@ class ApiV1Controller extends ApiBaseController
         // lets only use the AS number.
         $as_number = $this->ipUtils->normalizeInput($as_number);
 
+        if (!$as_number) {
+            $data = $this->makeStatus('Malformed input', false);
+            return $this->respond($data);
+        }
+
         $asnData        = ASN::with('emails')->where('asn', $as_number)->first();
         $allocation     = $this->ipUtils->getAllocationEntry($as_number);
         $ianaAssignment = $this->ipUtils->getIanaAssignmentEntry($as_number);
@@ -111,6 +116,12 @@ class ApiV1Controller extends ApiBaseController
     public function asnPeers($as_number)
     {
         $as_number = $this->ipUtils->normalizeInput($as_number);
+
+        if (!$as_number) {
+            $data = $this->makeStatus('Malformed input', false);
+            return $this->respond($data);
+        }
+
         $peers     = ASN::getPeers($as_number);
 
         return $this->sendData($peers);
@@ -122,6 +133,12 @@ class ApiV1Controller extends ApiBaseController
     public function asnIxs($as_number)
     {
         $as_number = $this->ipUtils->normalizeInput($as_number);
+
+        if (!$as_number) {
+            $data = $this->makeStatus('Malformed input', false);
+            return $this->respond($data);
+        }
+
         $ixs       = IXMember::getMembers($as_number);
 
         return $this->sendData($ixs);
@@ -133,6 +150,12 @@ class ApiV1Controller extends ApiBaseController
     public function asnPrefixes($as_number)
     {
         $as_number = $this->ipUtils->normalizeInput($as_number);
+
+        if (!$as_number) {
+            $data = $this->makeStatus('Malformed input', false);
+            return $this->respond($data);
+        }
+
         $prefixes  = ASN::getPrefixes($as_number);
 
         return $this->sendData($prefixes);
@@ -144,6 +167,12 @@ class ApiV1Controller extends ApiBaseController
     public function asnUpstreams($as_number)
     {
         $as_number = $this->ipUtils->normalizeInput($as_number);
+
+        if (!$as_number) {
+            $data = $this->makeStatus('Malformed input', false);
+            return $this->respond($data);
+        }
+
         $upstreams = ASN::getUpstreams($as_number);
 
         return $this->sendData($upstreams);
@@ -155,6 +184,12 @@ class ApiV1Controller extends ApiBaseController
     public function asnDownstreams($as_number)
     {
         $as_number   = $this->ipUtils->normalizeInput($as_number);
+
+        if (!$as_number) {
+            $data = $this->makeStatus('Malformed input', false);
+            return $this->respond($data);
+        }
+
         $downstreams = ASN::getDownstreams($as_number);
 
         return $this->sendData($downstreams);
@@ -173,6 +208,11 @@ class ApiV1Controller extends ApiBaseController
         } else if ($ipVersion === 6) {
             $prefixWhoisClass = IPv6PrefixWhois::class;
         } else {
+            $data = $this->makeStatus('Malformed input', false);
+            return $this->respond($data);
+        }
+
+        if (is_integer($cidr) !== true) {
             $data = $this->makeStatus('Malformed input', false);
             return $this->respond($data);
         }
