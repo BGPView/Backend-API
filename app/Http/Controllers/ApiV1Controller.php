@@ -589,7 +589,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['description']    = $prefix->description;
             $prefixData['email_contacts'] = $prefix->email_contacts;
             $prefixData['abuse_contacts'] = $prefix->abuse_contacts;
-            $prefixData['rir_name']       = isset($asn->rir->name) ? $asn->rir->name : $asn->rir['name'];
+            $prefixData['rir_name']       = isset($prefix->rir->name) ? $prefix->rir->name : $prefix->rir['name'];
             $prefixData['parent_prefix']  = $prefix->parent_ip . '/' . $prefix->parent_cidr;
             $prefixData['parent_ip']      = $prefix->parent_ip;
             $prefixData['parent_cidr']    = $prefix->parent_cidr;
@@ -607,7 +607,7 @@ class ApiV1Controller extends ApiBaseController
             $prefixData['description']    = $prefix->description;
             $prefixData['email_contacts'] = $prefix->email_contacts;
             $prefixData['abuse_contacts'] = $prefix->abuse_contacts;
-            $prefixData['rir_name']       = isset($asn->rir->name) ? $asn->rir->name : $asn->rir['name'];
+            $prefixData['rir_name']       = isset($prefix->rir->name) ? $prefix->rir->name : $prefix->rir['name'];
             $prefixData['parent_prefix']  = $prefix->parent_ip . '/' . $prefix->parent_cidr;
             $prefixData['parent_ip']      = $prefix->parent_ip;
             $prefixData['parent_cidr']    = $prefix->parent_cidr;
