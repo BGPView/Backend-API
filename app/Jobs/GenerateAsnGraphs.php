@@ -2,7 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Helpers\IpUtils;
 use App\Models\ASN;
+use Elasticsearch\ClientBuilder;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -34,7 +36,7 @@ class GenerateAsnGraphs extends Job implements ShouldQueue
      */
     public function handle()
     {
-        $upstreams = ASN::getUpstreams($this->input_asn, $asnMeta = false);
+        $upstreams = $this->getUpstreams($this->input_asn);
 
         if (count($upstreams['ipv4_upstreams']) > 0) {
             $this->processAsnGraph($this->input_asn, 'IPv4', $upstreams['ipv4_upstreams']);
@@ -47,6 +49,79 @@ class GenerateAsnGraphs extends Job implements ShouldQueue
         if (count($combined) > 0) {
             $this->processAsnGraph($this->input_asn, 'Combined', $combined);
         }
+    }
+
+    private function getUpstreams($as_number)
+    {
+        $client  = ClientBuilder::create()->setHosts(config('elasticquent.config.hosts'))->build();
+        $ipUtils = new IpUtils();
+
+        $params = [
+            'scroll'      => '30s',
+            'size'        => 10000,
+            'index'       => 'bgp_data',
+            'type'        => 'full_table',
+            'body'        => [
+                'sort'  => [
+                    'upstream_asn' => [
+                        'order' => 'asc',
+                    ],
+                ],
+                'query' => [
+                    'match' => [
+                        'asn' => $as_number,
+                    ],
+                ],
+            ],
+        ];
+        $docs      = $client->search($params);
+        $steams    = [];
+        $scroll_id = $docs['_scroll_id'];
+
+
+        //Get Initial set of results
+        if (count($docs['hits']['hits']) > 0) {
+            $steams = $ipUtils->cleanEsResults($docs);
+        }
+
+        while (true) {
+            $response = $client->scroll(
+                array(
+                    "scroll_id" => $scroll_id,
+                    "scroll"    => "30s",
+                )
+            );
+            if (count($response['hits']['hits']) > 0) {
+                $results = $ipUtils->cleanEsResults($response);
+                $steams  = array_merge($steams, $results);
+                // Get new scroll_id
+                $scroll_id = $response['_scroll_id'];
+            } else {
+                // All done scrolling over data
+                break;
+            }
+        }
+
+        $output['ipv4_upstreams'] = [];
+        $output['ipv6_upstreams'] = [];
+        foreach ($steams as $steam) {
+            if (isset($output['ipv' . $steam->ip_version . '_upstreams'][$steam->upstream_asn]) === true) {
+                if (in_array($steam->bgp_path, $output['ipv' . $steam->ip_version . '_upstreams'][$steam->upstream_asn]['bgp_paths']) === false) {
+                    $output['ipv' . $steam->ip_version . '_upstreams'][$steam->upstream_asn]['bgp_paths'][] = $steam->bgp_path;
+                }
+                continue;
+            }
+            $asnOutput['asn'] = $steam->upstream_asn;
+
+            $asnOutput['bgp_paths'][] = $steam->bgp_path;
+            $output['ipv' . $steam->ip_version . '_upstreams'][$steam->upstream_asn] = $asnOutput;
+            $asnOutput                                                               = null;
+            $upstreamAsn                                                             = null;
+        }
+        $output['ipv4_upstreams'] = array_values($output['ipv4_upstreams']);
+        $output['ipv6_upstreams'] = array_values($output['ipv6_upstreams']);
+
+        return $output;
     }
 
     private function processAsnGraph($inputAsn, $ipVersion, $upstreams)

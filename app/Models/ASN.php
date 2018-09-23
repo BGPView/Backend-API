@@ -255,47 +255,50 @@ class ASN extends Model
             }
         }
 
-        $asnListDetails = self::whereIn('asn', $asnList)->get()->keyBy('asn');
+        // Get the meta data only if needed
+        if ($asnMeta === true) {
+            $asnListDetails = self::whereIn('asn', $asnList)->get()->keyBy('asn');
 
-        foreach ($filteredList as $ipVersion => $peerAsns) {
-            foreach ($peerAsns as $peerAsn) {
-                if (isset($asnListDetails[$peerAsn]) === true) {
-                    $asn = $asnListDetails[$peerAsn];
+            foreach ($filteredList as $ipVersion => $peerAsns) {
+                foreach ($peerAsns as $peerAsn) {
+                    if (isset($asnListDetails[$peerAsn]) === true) {
+                        $asn = $asnListDetails[$peerAsn];
+                    } else {
+                        $assignment = $ipUtils->getIanaAssignmentEntry($peerAsn);
+                    }
+
+                    $peerAsnInfo['asn'] = $peerAsn;
+                    $peerAsnInfo['name'] = is_null($asn) ? 'IANA-' . strtoupper($assignment->status) : $asn->name;
+                    $peerAsnInfo['description'] = is_null($asn) ? $assignment->description : $asn->description;
+                    $peerAsnInfo['country_code'] = is_null($asn) ? null : $asn->counrty_code;
+
+                    $output[$ipVersion][] = $peerAsnInfo;
+                }
+            }
+
+            // Get Graph images
+            if ($direction === 'upstreams') {
+                $imagePathv4 = '/assets/graphs/' . 'AS' . $as_number . '_IPv4.svg';
+                $imagePathv6 = '/assets/graphs/' . 'AS' . $as_number . '_IPv6.svg';
+                $imageCombinedPath = '/assets/graphs/' . 'AS' . $as_number . '_Combined.svg';
+
+                if (file_exists(public_path() . $imagePathv4) === true) {
+                    $output['ipv4_graph'] = config('app.url') . $imagePathv4;
                 } else {
-                    $assignment = $ipUtils->getIanaAssignmentEntry($peerAsn);
+                    $output['ipv4_graph'] = null;
                 }
 
-                $peerAsnInfo['asn']          = $peerAsn;
-                $peerAsnInfo['name']         = is_null($asn) ? 'IANA-' . strtoupper($assignment->status) : $asn->name;
-                $peerAsnInfo['description']  = is_null($asn) ? $assignment->description : $asn->description;
-                $peerAsnInfo['country_code'] = is_null($asn) ? null : $asn->counrty_code;
+                if (file_exists(public_path() . $imagePathv6) === true) {
+                    $output['ipv6_graph'] = config('app.url') . $imagePathv6;
+                } else {
+                    $output['ipv6_graph'] = null;
+                }
 
-                $output[$ipVersion][] = $peerAsnInfo;
-            }
-        }
-
-        // Get Graph images
-        if ($direction === 'upstreams') {
-            $imagePathv4       = '/assets/graphs/' . 'AS' . $as_number . '_IPv4.svg';
-            $imagePathv6       = '/assets/graphs/' . 'AS' . $as_number . '_IPv6.svg';
-            $imageCombinedPath = '/assets/graphs/' . 'AS' . $as_number . '_Combined.svg';
-
-            if (file_exists(public_path() . $imagePathv4) === true) {
-                $output['ipv4_graph'] = config('app.url') . $imagePathv4;
-            } else {
-                $output['ipv4_graph'] = null;
-            }
-
-            if (file_exists(public_path() . $imagePathv6) === true) {
-                $output['ipv6_graph'] = config('app.url') . $imagePathv6;
-            } else {
-                $output['ipv6_graph'] = null;
-            }
-
-            if (file_exists(public_path() . $imageCombinedPath) === true) {
-                $output['combined_graph'] = config('app.url') . $imageCombinedPath;
-            } else {
-                $output['combined_graph'] = null;
+                if (file_exists(public_path() . $imageCombinedPath) === true) {
+                    $output['combined_graph'] = config('app.url') . $imageCombinedPath;
+                } else {
+                    $output['combined_graph'] = null;
+                }
             }
         }
 
