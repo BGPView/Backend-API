@@ -444,15 +444,14 @@ class IpUtils
             }
 
             if (count($allocations) > 1) {
-                if ($cidr === null) {
-                    return null;
-                }
 
-                // Since we have multiple allocation matchs for the one prefix
-                // We will need to try find the matching input cidr else go to the default alloc
-                foreach ($allocations as $allocation) {
-                    if ($allocation->cidr == $cidr) {
-                        return $allocation;
+                if ($cidr !== null) {
+                    // Since we have multiple allocation matchs for the one prefix
+                    // We will need to try find the matching input cidr else go to the default alloc
+                    foreach ($allocations as $allocation) {
+                        if ($allocation->cidr == $cidr) {
+                            return $allocation;
+                        }
                     }
                 }
 
