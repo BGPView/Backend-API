@@ -939,18 +939,18 @@ class ApiV1Controller extends ApiBaseController
         $data = [];
 
         foreach (IPv4BgpPrefix::all() as $prefix) {
-            $data[$prefix->asn]['ipv4_prefixes'][] = $prefix->ip.'/'.$prefix->cidr;
+            $data['AS'.$prefix->asn]['ipv4_prefixes'][] = $prefix->ip.'/'.$prefix->cidr;
 
-            if (isset($data[$prefix->asn]['ipv6_prefixes']) !== true) {
-                $data[$prefix->asn]['ipv6_prefixes'] = [];
+            if (isset($data['AS'.$prefix->asn]['ipv6_prefixes']) !== true) {
+                $data['AS'.$prefix->asn]['ipv6_prefixes'] = [];
             }
         }
 
         foreach (IPv6BgpPrefix::all() as $prefix) {
-            $data[$prefix->asn]['ipv6_prefixes'][] = $prefix->ip.'/'.$prefix->cidr;
+            $data['AS'.$prefix->asn]['ipv6_prefixes'][] = $prefix->ip.'/'.$prefix->cidr;
 
-            if (isset($data[$prefix->asn]['ipv4_prefixes']) !== true) {
-                $data[$prefix->asn]['ipv4_prefixes'] = [];
+            if (isset($data['AS'.$prefix->asn]['ipv4_prefixes']) !== true) {
+                $data['AS'.$prefix->asn]['ipv4_prefixes'] = [];
             }
         }
 
