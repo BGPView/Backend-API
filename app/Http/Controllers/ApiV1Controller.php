@@ -933,4 +933,27 @@ class ApiV1Controller extends ApiBaseController
 
         return $this->sendData($data);
     }
+
+    public function getAsnPrefixes()
+    {
+        $data = [];
+
+        foreach (IPv4BgpPrefix::all() as $prefix) {
+            $data[$prefix->asn]['ipv4_prefixes'][] = $prefix->ip.'/'.$prefix->cidr;
+
+            if (isset($data[$prefix->asn]['ipv6_prefixes']) !== true) {
+                $data[$prefix->asn]['ipv6_prefixes'] = [];
+            }
+        }
+
+        foreach (IPv6BgpPrefix::all() as $prefix) {
+            $data[$prefix->asn]['ipv6_prefixes'][] = $prefix->ip.'/'.$prefix->cidr;
+
+            if (isset($data[$prefix->asn]['ipv4_prefixes']) !== true) {
+                $data[$prefix->asn]['ipv4_prefixes'] = [];
+            }
+        }
+
+        return $data;
+    }
 }

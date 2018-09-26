@@ -50,3 +50,4 @@ Route::get('/dns/live/{hostname}', ['uses' => 'ApiV1Controller@getLiveDns']);
 Route::get('/sitemap', ['uses' => 'ApiV1Controller@sitemapUrls']);
 Route::get('/as-summery', ['uses' => 'ApiV1Controller@asnSummery']);
 Route::get('/contacts/{resource}/{cidr?}', ['uses' => 'ApiV1Controller@getContacts']);
+Route::get('/asn-prefixes', ['uses' => 'ApiV1Controller@getAsnPrefixes']);
