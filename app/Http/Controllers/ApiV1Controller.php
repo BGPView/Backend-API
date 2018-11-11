@@ -317,6 +317,7 @@ class ApiV1Controller extends ApiBaseController
             $relatedPrefixData['prefix'] = $relatedPrefix->ip . '/' . $relatedPrefix->cidr;
             $relatedPrefixData['ip']     = $relatedPrefix->ip;
             $relatedPrefixData['cidr']   = $relatedPrefix->cidr;
+            $relatedPrefixData['asn']    = $relatedPrefix->asn;
 
             $relatedPrefixData['name']         = $relatedPrefixWhois ? $relatedPrefixWhois->name : null;
             $relatedPrefixData['description']  = $relatedPrefixWhois ? $relatedPrefixWhois->description : null;
