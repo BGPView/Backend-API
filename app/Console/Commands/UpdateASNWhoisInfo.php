@@ -131,7 +131,7 @@ class UpdateASNWhoisInfo extends Command
             }
         }
 
-        $seenAsns = DB::table('asns')->pluck('asn');
+        $seenAsns = DB::table('asns')->pluck('asn')->toArray();
         $seenAsns = array_flip($seenAsns);
 
         foreach ($asns as $as_number => $rir_id) {
