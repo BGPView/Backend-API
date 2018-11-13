@@ -8,6 +8,7 @@ use App\Services\Whois;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use League\CLImate\CLImate;
 
 class UpdatePrefixes extends Job implements ShouldQueue
 {
@@ -15,6 +16,8 @@ class UpdatePrefixes extends Job implements ShouldQueue
 
     protected $ipPrefix;
     protected $ipVersion;
+    protected $cli;
+
 
     /**
      * Create a new job instance.
@@ -25,6 +28,7 @@ class UpdatePrefixes extends Job implements ShouldQueue
     {
         $this->ipVersion    = $ipVersion;
         $this->ipPrefix     = $ipPrefix;
+        $this->cli           = new CLImate();
     }
 
     /**
@@ -34,7 +38,7 @@ class UpdatePrefixes extends Job implements ShouldQueue
      */
     public function handle()
     {
-        $oldPrefix     = $this->ipPrefix;
+        $oldPrefix    = $this->ipPrefix;
         $ipVersion    = $this->ipVersion;
 
         $ipWhois = new Whois($oldPrefix->ip, $oldPrefix->cidr);
@@ -42,7 +46,7 @@ class UpdatePrefixes extends Job implements ShouldQueue
 
         // If null, lets skip
         if (is_null($parsedWhois) === true) {
-            $this->cli->br()->error('Seems that whois server returned no results for prefix');
+            $this->cli->br()->error('Seems that whois server returned no results for prefix: '.$oldPrefix->ip.'/'.$oldPrefix->cidr);
             return;
         }
 
