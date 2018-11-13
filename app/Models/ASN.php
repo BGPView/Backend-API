@@ -270,8 +270,8 @@ class ASN extends Model
                         $peerAsnInfo['country_code'] = $asn->counrty_code;
                     } else {
                         $assignment = $ipUtils->getIanaAssignmentEntry($peerAsn);
-                        $peerAsnInfo['name'] = 'IANA-' . strtoupper($assignment->status)
-                        $peerAsnInfo['description'] = $assignment->description
+                        $peerAsnInfo['name'] = 'IANA-' . strtoupper($assignment->status);
+                        $peerAsnInfo['description'] = $assignment->description;
                         $peerAsnInfo['country_code'] = null;
                     }
 
