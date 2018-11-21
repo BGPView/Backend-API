@@ -28,6 +28,7 @@ Route::get('/', function () {
 
 Route::get('/asn/{as_number}', ['as' => 'asn', 'uses' => 'ApiV1Controller@asn']);
 Route::get('/asn/{as_number}/prefixes', ['as' => 'asn.prefixes', 'uses' => 'ApiV1Controller@asnPrefixes']);
+Route::get('/asn/{as_number}/domains', ['as' => 'asn.domains', 'uses' => 'ApiV1Controller@asnDomains']);
 Route::get('/asn/{as_number}/peers', ['as' => 'asn.peers', 'uses' => 'ApiV1Controller@asnPeers']);
 Route::get('/asn/{as_number}/ixs', ['as' => 'asn.ixs', 'uses' => 'ApiV1Controller@asnIxs']);
 Route::get('/asn/{as_number}/upstreams', ['as' => 'asn.upstreams', 'uses' => 'ApiV1Controller@asnUpstreams']);
