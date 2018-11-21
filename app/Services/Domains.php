@@ -22,8 +22,8 @@ class Domains
         ];
         $this->clickhouse = new ClickHouseClient($config);
         $this->clickhouse->database('default');
-        $this->clickhouse->setTimeout(5);
-        $this->clickhouse->setConnectTimeOut(10);
+        $this->clickhouse->setTimeout(20);
+        $this->clickhouse->setConnectTimeOut(30);
 
 
         $ipUtils = new IpUtils();
