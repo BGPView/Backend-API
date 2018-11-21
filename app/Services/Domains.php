@@ -54,7 +54,13 @@ class Domains
         $query = preg_replace('/\W\w+\s*(\W*)$/', '$1', $query);
 
         $statement = $this->clickhouse->select('SELECT name, ip_address FROM dns WHERE '.$query);
-        return $statement->rows();
+        $domains = [];
+
+        foreach ($statement->rows() as $row){
+            $domains[$row['ip_address']] = $row['name'];
+        }
+
+        return $domains;
     }
 
 }

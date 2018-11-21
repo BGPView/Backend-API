@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\IpUtils;
+use App\Services\Domains;
 use Elasticquent\ElasticquentTrait;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Database\Eloquent\Model;
@@ -120,6 +121,15 @@ class ASN extends Model
         }
 
         return $output;
+    }
+    public static function getDomains($as_number, $prefixes = null)
+    {
+        if ($prefixes === null) {
+            $prefixes = self::getPrefixes($as_number);
+        }
+
+        $domains = new Domains($prefixes);
+        return $domains->get();
     }
 
     public static function getPrefixes($as_number)

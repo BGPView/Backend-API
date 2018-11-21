@@ -105,6 +105,10 @@ class ApiV1Controller extends ApiBaseController
         if ($request->has('with_raw_whois') === true) {
             $output['raw_whois'] = isset($asnData->raw_whois) ? $asnData->raw_whois : null;
         }
+        if ($request->has('with_domains') === true) {
+            $prefixes = isset($output['prefixes']) ? $output['prefixes'] : ASN::getPrefixes($as_number);
+            $output['domains'] = ASN::getDomains($as_number, $prefixes);
+        }
 
         $output['date_updated'] = isset($asnData->updated_at) ? (string) $asnData->updated_at : null;
         return $this->sendData($output);
@@ -159,6 +163,23 @@ class ApiV1Controller extends ApiBaseController
         $prefixes  = ASN::getPrefixes($as_number);
 
         return $this->sendData($prefixes);
+    }
+
+    /*
+     * URI: /asn/{as_number}/domains
+     */
+    public function asnDomains($as_number)
+    {
+        $as_number = $this->ipUtils->normalizeInput($as_number);
+
+        if (!$as_number) {
+            $data = $this->makeStatus('Malformed input', false);
+            return $this->respond($data);
+        }
+
+        $domains  = ASN::getDomains($as_number);
+
+        return $this->sendData($domains);
     }
 
     /*
