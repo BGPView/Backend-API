@@ -3,13 +3,14 @@
 namespace App\Services;
 
 use App\Helpers\IpUtils;
+use ClickHouseDB\Client as ClickHouseClient;
 
 class Domains
 {
 
 
     protected $ranges = [];
-    protected $clickhosue;
+    protected $clickhouse;
 
     public function __construct($prefixes)
     {
@@ -19,25 +20,25 @@ class Domains
             'username' => 'default',
             'password' => ''
         ];
-        $this->clickhosue = new ClickHouseDB\Client($config);
-        $this->clickhosue->database('default');
-        $this->clickhosue->setTimeout(5);
-        $this->clickhosue->setConnectTimeOut(10);
+        $this->clickhouse = new ClickHouseClient($config);
+        $this->clickhouse->database('default');
+        $this->clickhouse->setTimeout(5);
+        $this->clickhouse->setConnectTimeOut(10);
 
 
         $ipUtils = new IpUtils();
 
-        foreach ($prefixes->ipv4_prefixes as $prefix) {
+        foreach ($prefixes['ipv4_prefixes'] as $prefix) {
             $this->ranges[] = [
-                $startIpDec = $ipUtils->ip2dec($prefix->ip),
-                $startIpDec + $ipUtils->IPv4cidrIpCount()[$prefix->cidr] - 1,
+                $startIpDec = $ipUtils->ip2dec($prefix['ip']),
+                $startIpDec + $ipUtils->IPv4cidrIpCount()[$prefix['cidr']] - 1,
             ];
         }
 
-        foreach ($prefixes->ipv6_prefixes as $prefix) {
+        foreach ($prefixes['ipv6_prefixes'] as $prefix) {
             $this->ranges[] = [
-                $startIpDec = $ipUtils->ip2dec($prefix->ip),
-                $startIpDec + $ipUtils->IPv6cidrIpCount()[$prefix->cidr] - 1,
+                $startIpDec = $ipUtils->ip2dec($prefix['ip']),
+                $startIpDec + $ipUtils->IPv6cidrIpCount()[$prefix['cidr']] - 1,
             ];
         }
 
