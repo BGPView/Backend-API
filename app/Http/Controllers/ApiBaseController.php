@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -24,6 +25,11 @@ class ApiBaseController extends Controller
         $this->dns = $dns;
         $this->ipUtils = $ipUtils;
         $this->_startTime = microtime(true) * 1000;
+
+        $url = \Illuminate\Support\Facades\Request::fullUrl();
+        if ($data = Cache::get($url)) {
+            return $this->respond($data);
+        }
     }
 
     //returns load time in MiliSeconds
@@ -52,6 +58,11 @@ class ApiBaseController extends Controller
     {
         $data = $this->makeStatus();
         $data['data'] = $data_array;
+
+        // Set the data to cache
+        $url = \Illuminate\Support\Facades\Request::fullUrl();
+        Cache::remember($url, 15, $data);
+
         return $this->respond($data);
     }
 
