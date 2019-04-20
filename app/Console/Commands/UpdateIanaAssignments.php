@@ -175,7 +175,7 @@ class UpdateIanaAssignments extends Command
         $csv = Array();
         $rowcount = 0;
         $context = stream_context_create(['http' => ['user_agent' => 'BgpView.io/UA-0.1']]);
-        if (($handle = fopen($url, "r")) !== FALSE) {
+        if (($handle = fopen($url, "r", false, $context)) !== FALSE) {
             $max_line_length = 10000;
             $header = fgetcsv($handle, $max_line_length);
             $header_colcount = count($header);
