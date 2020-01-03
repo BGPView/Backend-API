@@ -309,7 +309,7 @@ class ApiV1Controller extends ApiBaseController
         $output['description_full']  = $prefixWhois ? $prefixWhois->description_full : [];
         $output['email_contacts']    = $prefixWhois ? $prefixWhois->email_contacts : [];
         $output['abuse_contacts']    = $prefixWhois ? $prefixWhois->abuse_contacts : [];
-        $output['owner_address']     = $prefixWhois ? $prefixWhois->owner_address : [];
+        $output['owner_address']     = $prefixWhois ? !empty($prefixWhois->owner_address) ? $prefixWhois->owner_address : [] : [];
 
         $output['country_codes']['whois_country_code']          = $prefixWhois ? $prefixWhois->counrty_code : null;
         $output['country_codes']['rir_allocation_country_code'] = $allocation ? $allocation->country_code : null;
