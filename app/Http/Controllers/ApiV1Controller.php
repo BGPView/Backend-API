@@ -60,7 +60,7 @@ class ApiV1Controller extends ApiBaseController
         $output['looking_glass']      = isset($asnData->looking_glass) ? $asnData->looking_glass : null;
         $output['traffic_estimation'] = isset($asnData->traffic_estimation) ? $asnData->traffic_estimation : null;
         $output['traffic_ratio']      = isset($asnData->traffic_ratio) ? $asnData->traffic_ratio : null;
-        $output['owner_address']      = isset($asnData->owner_address) ? $asnData->owner_address : [];
+        $output['owner_address']      = isset($asnData->owner_address) && !empty($asnData->owner_address) ? $asnData->owner_address : [];
 
         $output['rir_allocation']['rir_name']          = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
         $output['rir_allocation']['country_code']      = isset($allocation->country_code) ? $allocation->country_code : null;
@@ -306,10 +306,10 @@ class ApiV1Controller extends ApiBaseController
 
         $output['name']              = $prefixWhois ? $prefixWhois->name : null;
         $output['description_short'] = $prefixWhois ? $prefixWhois->description : null;
-        $output['description_full']  = $prefixWhois ? $prefixWhois->description_full : null;
-        $output['email_contacts']    = $prefixWhois ? $prefixWhois->email_contacts : null;
-        $output['abuse_contacts']    = $prefixWhois ? $prefixWhois->abuse_contacts : null;
-        $output['owner_address']     = $prefixWhois ? $prefixWhois->owner_address : null;
+        $output['description_full']  = $prefixWhois ? $prefixWhois->description_full : [];
+        $output['email_contacts']    = $prefixWhois ? $prefixWhois->email_contacts : [];
+        $output['abuse_contacts']    = $prefixWhois ? $prefixWhois->abuse_contacts : [];
+        $output['owner_address']     = $prefixWhois ? $prefixWhois->owner_address : [];
 
         $output['country_codes']['whois_country_code']          = $prefixWhois ? $prefixWhois->counrty_code : null;
         $output['country_codes']['rir_allocation_country_code'] = $allocation ? $allocation->country_code : null;
@@ -666,7 +666,7 @@ class ApiV1Controller extends ApiBaseController
         $baseDomain = $domainParser->getRegistrableDomain();
         $ipUtils    = $this->ipUtils;
 
-        $records = Cache::remember($hostname, 60 * 24, function () use ($ipUtils, $hostname) {
+        $records = Cache::remember($hostname, 60 * 60 * 24, function () use ($ipUtils, $hostname) {
             $dns     = new Dns(['8.8.8.8', '8.8.4.4', 2]);
             $records = $dns->getDomainRecords($hostname, $testNameserver = false);
             ksort($records);

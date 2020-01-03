@@ -61,7 +61,7 @@ class ApiBaseController extends Controller
 
         // Set the data to cache
         $url = \Illuminate\Support\Facades\Request::fullUrl();
-        Cache::put($url, $data, 15);
+        Cache::put($url, $data, 15 * 60);
 
         return $this->respond($data);
     }
