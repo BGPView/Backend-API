@@ -666,7 +666,7 @@ class ApiV1Controller extends ApiBaseController
         $baseDomain = $domainParser->getRegistrableDomain();
         $ipUtils    = $this->ipUtils;
 
-        $records = Cache::remember($hostname, 60 * 24, function () use ($ipUtils, $hostname) {
+        $records = Cache::remember($hostname, 60 * 60 * 24, function () use ($ipUtils, $hostname) {
             $dns     = new Dns(['8.8.8.8', '8.8.4.4', 2]);
             $records = $dns->getDomainRecords($hostname, $testNameserver = false);
             ksort($records);
