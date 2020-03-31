@@ -443,11 +443,20 @@ class ApiV1Controller extends ApiBaseController
         $output['rir_allocation']['date_allocated']    = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
         $output['rir_allocation']['allocation_status'] = isset($allocation->status) ? $allocation->status : null;
 
-        $ianaAssignment                                 = $this->ipUtils->getIanaAssignmentEntry($ip);
-        $output['iana_assignment']['assignment_status'] = $ianaAssignment->status;
-        $output['iana_assignment']['description']       = $ianaAssignment->description;
-        $output['iana_assignment']['whois_server']      = $ianaAssignment->whois_server;
-        $output['iana_assignment']['date_assigned']     = $ianaAssignment->date_assigned;
+        $ianaAssignment = $this->ipUtils->getIanaAssignmentEntry($ip);
+
+        if (! $ianaAssignment) {
+            $output['iana_assignment']['assignment_status'] = null;
+            $output['iana_assignment']['description']       = null;
+            $output['iana_assignment']['whois_server']      = null;
+            $output['iana_assignment']['date_assigned']     = null;
+
+        } else {
+            $output['iana_assignment']['assignment_status'] = $ianaAssignment->status;
+            $output['iana_assignment']['description']       = $ianaAssignment->description;
+            $output['iana_assignment']['whois_server']      = $ianaAssignment->whois_server;
+            $output['iana_assignment']['date_assigned']     = $ianaAssignment->date_assigned;
+        }
 
         $output['maxmind']['country_code'] = $geoip ? $geoip->country->isoCode : null;
         $output['maxmind']['city']         = $geoip ? $geoip->city->name : null;
