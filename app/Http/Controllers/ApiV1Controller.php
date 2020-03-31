@@ -684,7 +684,7 @@ class ApiV1Controller extends ApiBaseController
                 $records['A'] = array_unique($records['A']);
                 foreach ($records['A'] as $key => $address) {
                     $geoip = $ipUtils->geoip($address);
-                    if ($geoip->country->isoCode) {
+                    if (!is_null($geoip) && $geoip->country->isoCode) {
                         $country_code = $geoip->country->isoCode;
                         $country_name = $geoip->country->name;
                         $city_name    = $geoip->city->name;
