@@ -323,10 +323,10 @@ class ApiV1Controller extends ApiBaseController
         $output['rir_allocation']['date_allocated']    = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
         $output['rir_allocation']['allocation_status'] = isset($allocation->status) ? $allocation->status : null;
 
-        $output['iana_assignment']['assignment_status'] = $ianaAssignment->status;
-        $output['iana_assignment']['description']       = $ianaAssignment->description;
-        $output['iana_assignment']['whois_server']      = $ianaAssignment->whois_server;
-        $output['iana_assignment']['date_assigned']     = $ianaAssignment->date_assigned;
+        $output['iana_assignment']['assignment_status'] = $ianaAssignment->status ?? null;
+        $output['iana_assignment']['description']       = $ianaAssignment->description ?? null;
+        $output['iana_assignment']['whois_server']      = $ianaAssignment->whois_server ?? null;
+        $output['iana_assignment']['date_assigned']     = $ianaAssignment->date_assigned ?? null;
 
         $output['maxmind']['country_code'] = $geoip ? $geoip->country->isoCode : null;
         $output['maxmind']['city']         = $geoip ? $geoip->city->name : null;
@@ -420,8 +420,8 @@ class ApiV1Controller extends ApiBaseController
             $prefixOutput['ip']                  = $prefix->ip;
             $prefixOutput['cidr']                = $prefix->cidr;
             $prefixOutput['asn']['asn']          = $prefix->asn;
-            $prefixOutput['asn']['name']         = isset($asn->name) ? $asn->name : 'IANA-' . strtoupper($ianaAssignment->status);
-            $prefixOutput['asn']['description']  = isset($asn->description) ? $asn->description : 'IANA-' . strtoupper($ianaAssignment->status);
+            $prefixOutput['asn']['name']         = isset($asn->name) ? $asn->name : 'IANA-' . strtoupper($ianaAssignment->status ?? null);
+            $prefixOutput['asn']['description']  = isset($asn->description) ? $asn->description : 'IANA-' . strtoupper($ianaAssignment->status ?? null);
             $prefixOutput['asn']['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
             $prefixOutput['name']                = isset($prefixWhois->name) ? $prefixWhois->name : null;
             $prefixOutput['description']         = isset($prefixWhois->description) ? $prefixWhois->description : null;
