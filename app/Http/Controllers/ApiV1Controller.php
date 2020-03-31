@@ -65,18 +65,18 @@ class ApiV1Controller extends ApiBaseController
         $output['rir_allocation']['rir_name']          = empty($allocation->rir_name) !== true ? $allocation->rir_name : null;
         $output['rir_allocation']['country_code']      = isset($allocation->country_code) ? $allocation->country_code : null;
         $output['rir_allocation']['date_allocated']    = isset($allocation->date_allocated) ? $allocation->date_allocated . ' 00:00:00' : null;
-        $output['rir_allocation']['allocation_status'] = isset($allocation->status) ? $allocation->status : $ianaAssignment->status;
+        $output['rir_allocation']['allocation_status'] = isset($allocation->status) ? $allocation->status : $ianaAssignment->status ?? null;
 
-        $output['iana_assignment']['assignment_status'] = $ianaAssignment->status;
-        $output['iana_assignment']['description']       = $ianaAssignment->description;
-        $output['iana_assignment']['whois_server']      = $ianaAssignment->whois_server;
-        $output['iana_assignment']['date_assigned']     = $ianaAssignment->date_assigned;
+        $output['iana_assignment']['assignment_status'] = $ianaAssignment->status ?? null;
+        $output['iana_assignment']['description']       = $ianaAssignment->description ?? null;
+        $output['iana_assignment']['whois_server']      = $ianaAssignment->whois_server ?? null;
+        $output['iana_assignment']['date_assigned']     = $ianaAssignment->date_assigned ?? null;
 
         // override the ASN data with assignment data if there is no ASNData
         if (is_null($asnData) === true) {
-            $output['name']              = 'IANA-' . strtoupper($ianaAssignment->status);
-            $output['description_short'] = $ianaAssignment->description;
-            $output['description_full']  = $ianaAssignment->description;
+            $output['name']              = 'IANA-' . strtoupper($ianaAssignment->status ?? null);
+            $output['description_short'] = $ianaAssignment->description ?? null;
+            $output['description_full']  = $ianaAssignment->description ?? null;
             $output['email_contacts']    = ['iana@iana.org'];
             $output['abuse_contacts']    = ['abuse@iana.org'];
             $output['owner_address']     = [
