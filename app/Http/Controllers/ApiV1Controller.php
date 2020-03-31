@@ -284,8 +284,8 @@ class ApiV1Controller extends ApiBaseController
             $ianaAssignment = $this->ipUtils->getIanaAssignmentEntry($baseAsn);
 
             $asnData['asn']              = $baseAsn;
-            $asnData['name']             = isset($asn->name) ? $asn->name : 'IANA-' . strtoupper($ianaAssignment->status);
-            $asnData['description']      = isset($asn->description) ? $asn->description : $ianaAssignment->description;
+            $asnData['name']             = isset($asn->name) ? $asn->name : 'IANA-' . strtoupper($ianaAssignment->status ?? null);
+            $asnData['description']      = isset($asn->description) ? $asn->description : $ianaAssignment->description ?? null;
             $asnData['country_code']     = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
             $asnData['prefix_upstreams'] = [];
 
@@ -294,8 +294,8 @@ class ApiV1Controller extends ApiBaseController
                 $ianaAssignment = $this->ipUtils->getIanaAssignmentEntry($upstreamAsn);
 
                 $upstreamAsnData['asn']          = $upstreamAsn;
-                $upstreamAsnData['name']         = isset($asn->name) ? $asn->name : 'IANA-' . strtoupper($ianaAssignment->status);
-                $upstreamAsnData['description']  = isset($asn->description) ? $asn->description : $ianaAssignment->description;
+                $upstreamAsnData['name']         = isset($asn->name) ? $asn->name : 'IANA-' . strtoupper($ianaAssignment->status ?? null);
+                $upstreamAsnData['description']  = isset($asn->description) ? $asn->description : $ianaAssignment->description ?? null;
                 $upstreamAsnData['country_code'] = empty($asn->counrty_code) !== true ? $asn->counrty_code : null;
 
                 $asnData['prefix_upstreams'][] = $upstreamAsnData;
