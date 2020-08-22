@@ -36,7 +36,7 @@ class IXMember extends Model {
         foreach (self::where('asn', $asn)->get() as $ixMember) {
             $ixInfo = $ixMember->ix;
 
-            if (is_null($ixInfo) === true) {
+            if (empty($ixInfo) === true) {
                 continue;
             }
 

@@ -112,9 +112,9 @@ class ASN extends Model
                 }
 
                 $peerAsnInfo['asn']          = $peerAsn;
-                $peerAsnInfo['name']         = is_null($asn) ? 'IANA-' . strtoupper($assignment->status) : $asn->name;
-                $peerAsnInfo['description']  = is_null($asn) ? $assignment->description : $asn->description;
-                $peerAsnInfo['country_code'] = is_null($asn) ? null : $asn->counrty_code;
+                $peerAsnInfo['name']         = empty($asn) ? 'IANA-' . strtoupper($assignment->status) : $asn->name;
+                $peerAsnInfo['description']  = empty($asn) ? $assignment->description : $asn->description;
+                $peerAsnInfo['country_code'] = empty($asn) ? null : $asn->counrty_code;
 
                 $output[$ipVersion][] = $peerAsnInfo;
             }
@@ -354,7 +354,7 @@ class ASN extends Model
 
     public function getDescriptionFullAttribute($value)
     {
-        if (is_null($value) === true) {
+        if (empty($value) === true) {
             return [];
         }
 
@@ -368,7 +368,7 @@ class ASN extends Model
     public function getDescriptionAttribute()
     {
         $descriptionLines = $this->description_full;
-        if (is_null($descriptionLines) !== true) {
+        if (empty($descriptionLines) !== true) {
             foreach ($descriptionLines as $descriptionLine) {
                 if (preg_match("/[A-Za-z0-9]/i", $descriptionLine)) {
                     return $descriptionLine;
@@ -381,7 +381,7 @@ class ASN extends Model
 
     public function getOwnerAddressAttribute($value)
     {
-        if (is_null($value) === true) {
+        if (empty($value) === true) {
             return null;
         }
 

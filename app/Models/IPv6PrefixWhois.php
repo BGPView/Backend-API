@@ -96,7 +96,7 @@ class IPv6PrefixWhois extends Model {
     public function getDescriptionAttribute()
     {
         $descriptionLines = $this->description_full;
-        if (is_null($descriptionLines) !== true) {
+        if (empty($descriptionLines) !== true) {
             foreach ($descriptionLines as $descriptionLine) {
                 if (preg_match("/[A-Za-z0-9]/i", $descriptionLine)) {
                     return $descriptionLine;
@@ -109,7 +109,7 @@ class IPv6PrefixWhois extends Model {
 
     public function getDescriptionFullAttribute($value)
     {
-        if (is_null($value) === true) {
+        if (empty($value) === true) {
             return [];
         }
 
