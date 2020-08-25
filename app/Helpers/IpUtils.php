@@ -889,6 +889,31 @@ class IpUtils
 
         $rirPrefixes = [];
         // Get all allocated IP prefixes
+
+        $baseParams = [
+            'should' => [
+                [
+                    'match' => [
+                        'status' => 'allocated',
+                    ],
+                ],
+                [
+                    'match' => [
+                        'status' => 'assigned',
+                    ],
+                ],
+            ],
+        ];
+
+        if (is_null($ipVersion) !== true) {
+            $baseParams = [
+                'must' => [
+                    ['bool' => $baseParams],
+                    ['match' => ['ip_version' => $ipVersion]]
+                ]
+            ];
+        }
+
         $params = [
             'scroll'      => '30s',
             'size'        => 10000,
@@ -896,27 +921,10 @@ class IpUtils
             'type'        => 'prefixes',
             'body'        => [
                 'query' => [
-                    'bool' => [
-                        'should' => [
-                            [
-                                'match' => [
-                                    'status' => 'allocated',
-                                ],
-                            ],
-                            [
-                                'match' => [
-                                    'status' => 'assigned',
-                                ],
-                            ],
-                        ],
-                    ],
+                    'bool' => $baseParams,
                 ],
             ],
         ];
-
-        if (is_null($ipVersion) !== true) {
-            $params['body']['query']['bool']['must'][] = ['match' => ['ip_version' => $ipVersion]];
-        }
 
         $docs      = $client->search($params);
         $scroll_id = $docs['_scroll_id'];
